@@ -1,0 +1,1917 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <title>Здравей, Rust</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="Въведение">
+    <link rel="stylesheet" href="resources/codeblock/codeblock.css">
+<link rel="stylesheet" href="resources/frontend/controls.css">
+<link rel="stylesheet" href="resources/global/global.css">
+<link rel="stylesheet" href="resources/global/metadata.css">
+<link rel="stylesheet" href="resources/highlight/github.css">
+<link rel="stylesheet" href="resources/katex/katex.min.css">
+<link rel="stylesheet" href="resources/rustc/rustc.css">
+<link rel="stylesheet" href="resources/splitview/splitview.css">
+<link rel="stylesheet" href="resources/wrapping-pages/wrapping-pages.css">
+<script type="text/javascript" src="resources/codeblock/codeblock.js"></script>
+<script type="text/javascript" src="resources/frontend/controls.js"></script>
+</head>
+<body>
+    <main>
+        <div class="slide">
+<h1 id="здравей-rust">Здравей, Rust</h1>
+<h3 id="въведение">Въведение</h3>
+<h3 id="7-октомври-2020">7 октомври 2020</h3>
+</div><div class="slide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Питайте въпроси в чата, ще правим паузи за отговори</li>
+<li>Записваме видео</li>
+</ul>
+</div><div class="slide">
+<h1 id="hello-world">Hello, world!</h1>
+<p>Защото винаги от там се почва:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="2bcfab9a7f762485670e1130c70348ed82db0677">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"Hello, world!"</span>);
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="2bcfab9a7f762485670e1130c70348ed82db0677">fn main() {
+    println!("Hello, world!");
+}</pre>
+</div><div class="slide">
+<h1 id="компилация">Компилация</h1>
+<p>Можем да използваме компилатора на Rust - <code>rustc</code></p>
+</div><div class="slide subslide">
+<h1 id="компилация">Компилация</h1>
+<p>Можем да използваме компилатора на Rust - <code>rustc</code></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">$ rustc hello.rs
+$ ./hello
+Hello, world!</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="компилация">Компилация</h1>
+<p>Но, разбира се, има по-лесен начин</p>
+</div><div class="slide subslide">
+<h1 id="компилация">Компилация</h1>
+<p>Но, разбира се, има по-лесен начин</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">$ cargo new hello
+$ cargo run
+Hello, world!</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="cargo">Cargo</h1>
+</div><div class="slide subslide">
+<h1 id="cargo">Cargo</h1>
+<ul>
+<li>Package manager</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="cargo">Cargo</h1>
+<ul>
+<li>Package manager</li>
+<li>Task runner</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="cargo">Cargo</h1>
+<ul>
+<li>Package manager</li>
+<li>Task runner</li>
+<li>Подобно на <code>mix</code> в elixir, <code>bundler</code> в ruby, <code>npm</code> в node.js</li>
+</ul>
+</div><div class="slide">
+<h1 id="инсталация">Инсталация</h1>
+</div><div class="slide subslide">
+<h1 id="инсталация">Инсталация</h1>
+<ul>
+<li><a href="https://2017.fmi.rust-lang.bg/topics/1" target="_blank">https://2017.fmi.rust-lang.bg/topics/1</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="инсталация">Инсталация</h1>
+<ul>
+<li><a href="https://2017.fmi.rust-lang.bg/topics/1" target="_blank">https://2017.fmi.rust-lang.bg/topics/1</a></li>
+<li>Rustup (<a href="https://rustup.rs/" target="_blank">https://rustup.rs/</a>)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="инсталация">Инсталация</h1>
+<ul>
+<li><a href="https://2017.fmi.rust-lang.bg/topics/1" target="_blank">https://2017.fmi.rust-lang.bg/topics/1</a></li>
+<li>Rustup (<a href="https://rustup.rs/" target="_blank">https://rustup.rs/</a>)</li>
+<li><code>$ rustup install stable</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="инсталация">Инсталация</h1>
+<ul>
+<li><a href="https://2017.fmi.rust-lang.bg/topics/1" target="_blank">https://2017.fmi.rust-lang.bg/topics/1</a></li>
+<li>Rustup (<a href="https://rustup.rs/" target="_blank">https://rustup.rs/</a>)</li>
+<li><code>$ rustup install stable</code></li>
+<li><code>$ rustup doc</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="the-rust-book">The Rust Book</h1>
+<p><a href="https://doc.rust-lang.org/stable/book/" target="_blank">https://doc.rust-lang.org/stable/book/</a></p>
+</div><div class="slide">
+<h1 id="rust-playpen">Rust playpen</h1>
+<p><a href="https://play.rust-lang.org/" target="_blank">https://play.rust-lang.org/</a></p>
+</div><div class="slide">
+<h1 id="променливи">Променливи</h1>
+<p>Променливи се декларират с <code>let</code></p>
+<p><code>let NAME = VALUE;</code><br />
+<code>let NAME: TYPE = VALUE;</code></p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="57b926f161d5cd166c8a3fde8c5e447be9c2c7ec">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">let</span> y: <span class="hljs-built_in">i32</span> = <span class="hljs-number">3</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="57b926f161d5cd166c8a3fde8c5e447be9c2c7ec">#[allow(unused_variables)]
+fn main() {
+let x = 5;
+let y: i32 = 3;
+}</pre>
+</div><div class="slide">
+<h1 id="променливи">Променливи</h1>
+<p>Всяка променлива има тип, но можем да не пишем типа, ако е ясен от контекста</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="4a8ae215f13c172eb43917df619fd7317e093d28">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x: <span class="hljs-built_in">i32</span> = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">let</span> y = x;      <span class="hljs-comment">// типа на `y` е `i32`, защото `x` e `i32`</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="4a8ae215f13c172eb43917df619fd7317e093d28">#[allow(unused_variables)]
+fn main() {
+let x: i32 = 5;
+let y = x;      // типа на `y` е `i32`, защото `x` e `i32`
+}</pre>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="300790de9bd6a65bf2d1b48de321a4c51945f983">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x = <span class="hljs-number">5</span>;      <span class="hljs-comment">// типа на `x` е `i32`, защото `y` e `i32`</span>
+<span class="hljs-keyword">let</span> y: <span class="hljs-built_in">i32</span> = x;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="300790de9bd6a65bf2d1b48de321a4c51945f983">#[allow(unused_variables)]
+fn main() {
+let x = 5;      // типа на `x` е `i32`, защото `y` e `i32`
+let y: i32 = x;
+}</pre>
+</div><div class="slide">
+<h1 id="променливи">Променливи</h1>
+<h3 id="shadowing">shadowing</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="7c324f82e27786efef661b11041246096a974295">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x = <span class="hljs-number">10</span>;
+<span class="hljs-keyword">let</span> x = x + <span class="hljs-number">10</span>;
+<span class="hljs-keyword">let</span> x = x * <span class="hljs-number">3</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="7c324f82e27786efef661b11041246096a974295">#[allow(unused_variables)]
+fn main() {
+let x = 10;
+let x = x + 10;
+let x = x * 3;
+}</pre>
+</div><div class="slide">
+<h1 id="променливи">Променливи</h1>
+<h3 id="shadowing">shadowing</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="6af505ffe4d5a7f6fb5c65e997e1afec311ad6c6">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x1 = <span class="hljs-number">10</span>;
+<span class="hljs-keyword">let</span> x2 = x1 + <span class="hljs-number">10</span>;
+<span class="hljs-keyword">let</span> x3 = x2 * <span class="hljs-number">3</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="6af505ffe4d5a7f6fb5c65e997e1afec311ad6c6">#[allow(unused_variables)]
+fn main() {
+let x1 = 10;
+let x2 = x1 + 10;
+let x3 = x2 * 3;
+}</pre>
+</div><div class="slide">
+<h1 id="променливи">Променливи</h1>
+<h3 id="mutability">mutability</h3>
+<p>Променливите са immutable по подразбиране</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x = <span class="hljs-number">5</span>;
+x += <span class="hljs-number">1</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="променливи">Променливи</h1>
+<h3 id="mutability">mutability</h3>
+<p>Променливите са immutable по подразбиране</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="7db00a1a92dd466b5d0d2e943c3247d86695e529">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x = <span class="hljs-number">5</span>;
+x += <span class="hljs-number">1</span>;</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0384]</span><span style="font-weight:bold">: cannot assign twice to immutable variable `x`</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_7db00a1a92dd466b5d0d2e943c3247d86695e529.rs:6:1
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">5</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>let x = 5;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    <span style="font-weight:bold;color:rgb(85,85,255)">-</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    <span style="font-weight:bold;color:rgb(85,85,255)">first assignment to `x`</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    <span style="font-weight:bold;color:rgb(85,85,255)">help: consider making this binding mutable: `mut x`</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">6</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>x += 1;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(255,85,85)">^^^^^^</span> <span style="font-weight:bold;color:rgb(255,85,85)">cannot assign twice to immutable variable</span></div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="7db00a1a92dd466b5d0d2e943c3247d86695e529">#[allow(unused_variables)]
+#[allow(unused_assignments)]
+fn main() {
+let x = 5;
+x += 1;
+}</pre>
+</div><div class="slide">
+<h1 id="променливи">Променливи</h1>
+<h3 id="mutability">mutability</h3>
+<p>За да се направи mutable се използва ключовата дума <code>mut</code></p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="9349476856f1fed2f1f0969ee849c9c3fbd4dd78">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> x = <span class="hljs-number">5</span>;
+x += <span class="hljs-number">1</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="9349476856f1fed2f1f0969ee849c9c3fbd4dd78">#[allow(unused_variables)]
+#[allow(unused_assignments)]
+fn main() {
+let mut x = 5;
+x += 1;
+}</pre>
+</div><div class="slide">
+<h1 id="променливи">Променливи</h1>
+<h3 id="mutability">mutability</h3>
+<p>Това е различно от shadowing!</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="689820eb7a5b1c155c16399c85be7a8f45c62735">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">let</span> x = x + <span class="hljs-number">1</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="689820eb7a5b1c155c16399c85be7a8f45c62735">#[allow(unused_variables)]
+#[allow(unused_assignments)]
+fn main() {
+let x = 5;
+let x = x + 1;
+}</pre>
+</div><div class="slide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="целочислени-типове">Целочислени типове</h3>
+<ul>
+<li><code>i8</code>, <code>i16</code>, <code>i32</code>, <code>i64</code>, <code>i128</code>, <code>isize</code></li>
+<li><code>u8</code>, <code>u16</code>, <code>u32</code>, <code>u64</code>, <code>u128</code>, <code>usize</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="целочислени-типове">Целочислени типове</h3>
+<ul>
+<li><code>i8</code>, <code>i16</code>, <code>i32</code>, <code>i64</code>, <code>i128</code>, <code>isize</code></li>
+<li><code>u8</code>, <code>u16</code>, <code>u32</code>, <code>u64</code>, <code>u128</code>, <code>usize</code></li>
+<li><code>iN</code> - цяло (signed) число с размер N бита</li>
+<li><code>uN</code> - неотрицателно (unsigned) число с размер N бита</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="целочислени-типове">Целочислени типове</h3>
+<ul>
+<li><code>i8</code>, <code>i16</code>, <code>i32</code>, <code>i64</code>, <code>i128</code>, <code>isize</code></li>
+<li><code>u8</code>, <code>u16</code>, <code>u32</code>, <code>u64</code>, <code>u128</code>, <code>usize</code></li>
+<li><code>iN</code> - цяло (signed) число с размер N бита</li>
+<li><code>uN</code> - неотрицателно (unsigned) число с размер N бита</li>
+<li><code>isize</code> и <code>usize</code> имат размер колкото машинната дума - 32 бита на 32 битов ОС и 64 бита на 64 битов ОС</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="целочислени-типове">Целочислени типове</h3>
+<ul>
+<li><code>i8</code>, <code>i16</code>, <code>i32</code>, <code>i64</code>, <code>i128</code>, <code>isize</code></li>
+<li><code>u8</code>, <code>u16</code>, <code>u32</code>, <code>u64</code>, <code>u128</code>, <code>usize</code></li>
+<li><code>iN</code> - цяло (signed) число с размер N бита</li>
+<li><code>uN</code> - неотрицателно (unsigned) число с размер N бита</li>
+<li><code>isize</code> и <code>usize</code> имат размер колкото машинната дума - 32 бита на 32 битов ОС и 64 бита на 64 битов ОС</li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="09963727423c8be6a584a024aa3ef3c13c0cc05c">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x: <span class="hljs-built_in">u32</span> = <span class="hljs-number">1337</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="09963727423c8be6a584a024aa3ef3c13c0cc05c">#![allow(unused_variables)]
+fn main() {
+let x: u32 = 1337;
+}</pre>
+</div><div class="slide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="целочислени-типове-литерали">Целочислени типове (литерали)</h3>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="целочислени-типове-литерали">Целочислени типове (литерали)</h3>
+<ul>
+<li>Цяло число: <code>42</code></li>
+<li>Специфичен тип: <code>42u32</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="целочислени-типове-литерали">Целочислени типове (литерали)</h3>
+<ul>
+<li>Цяло число: <code>42</code></li>
+<li>Специфичен тип: <code>42u32</code></li>
+<li>Големи числа: <code>133_587</code></li>
+<li><code>1_000_000</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="целочислени-типове-литерали">Целочислени типове (литерали)</h3>
+<ul>
+<li>Цяло число: <code>42</code></li>
+<li>Специфичен тип: <code>42u32</code></li>
+<li>Големи числа: <code>133_587</code></li>
+<li><code>1_000_000</code></li>
+<li><code>42_u32</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="целочислени-типове-литерали">Целочислени типове (литерали)</h3>
+<ul>
+<li>Цяло число: <code>42</code></li>
+<li>Специфичен тип: <code>42u32</code></li>
+<li>Големи числа: <code>133_587</code></li>
+<li><code>1_000_000</code></li>
+<li><code>42_u32</code></li>
+<li><code>1_0_0_0</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="целочислени-типове-литерали">Целочислени типове (литерали)</h3>
+<ul>
+<li>Цяло число: <code>42</code></li>
+<li>Специфичен тип: <code>42u32</code></li>
+<li>Големи числа: <code>133_587</code></li>
+<li><code>1_000_000</code></li>
+<li><code>42_u32</code></li>
+<li><code>1_0_0_0</code></li>
+<li><code>1_____________________________________________________4</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="целочислени-типове-литерали">Целочислени типове (литерали)</h3>
+<ul>
+<li>Цяло число: <code>42</code></li>
+<li>Специфичен тип: <code>42u32</code></li>
+<li>Големи числа: <code>133_587</code></li>
+<li><code>1_000_000</code></li>
+<li><code>42_u32</code></li>
+<li><code>1_0_0_0</code></li>
+<li><code>1_____________________________________________________4</code></li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="2f1342009aa2184a294264c3173203b92ee4ceb6">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x: <span class="hljs-built_in">u32</span> = <span class="hljs-number">1337</span>;
+<span class="hljs-keyword">let</span> x = <span class="hljs-number">1337_u32</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="2f1342009aa2184a294264c3173203b92ee4ceb6">#![allow(unused_variables)]
+fn main() {
+let x: u32 = 1337;
+let x = 1337_u32;
+}</pre>
+</div><div class="slide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="целочислени-типове-в-различни-бройни-системи">Целочислени типове (в различни бройни системи)</h3>
+<ul>
+<li>Hex: <code>0xDEADBEEF</code></li>
+<li>Octal: <code>0o77</code></li>
+<li>Binary: <code>0b1010011010</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="числа-с-плаваща-запетая">Числа с плаваща запетая</h3>
+<ul>
+<li><code>f32</code></li>
+<li><code>f64</code></li>
+<li>съответно 32 битов и 64 битов float</li>
+<li><code>3.14</code></li>
+<li><code>1.3_f64</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="числа-с-плаваща-запетая">Числа с плаваща запетая</h3>
+<ul>
+<li><code>f32</code></li>
+<li><code>f64</code></li>
+<li>съответно 32 битов и 64 битов float</li>
+<li><code>3.14</code></li>
+<li><code>1.3_f64</code></li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="57d724700cf8b32c6d2eb7fba8efa33da8da85d4">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x: <span class="hljs-built_in">f64</span> = <span class="hljs-number">3.14</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="57d724700cf8b32c6d2eb7fba8efa33da8da85d4">#![allow(unused_variables)]
+fn main() {
+let x: f64 = 3.14;
+}</pre>
+</div><div class="slide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="булеви-стойности">Булеви стойности</h3>
+<ul>
+<li><code>bool</code></li>
+<li>стойности <code>true</code> и <code>false</code></li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="c3203878215b3f53f92b7caadb4faac50aa0ed7a">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x: <span class="hljs-built_in">bool</span> = <span class="hljs-literal">true</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="c3203878215b3f53f92b7caadb4faac50aa0ed7a">#![allow(unused_variables)]
+fn main() {
+let x: bool = true;
+}</pre>
+</div><div class="slide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="unit">unit</h3>
+<ul>
+<li>тип <code>()</code></li>
+<li>стойност <code>()</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="unit">unit</h3>
+<ul>
+<li>тип <code>()</code></li>
+<li>стойност <code>()</code></li>
+<li>тип с една единствена стойност</li>
+<li>големина 0 байта, не носи информация</li>
+<li>използва се за функции които не връщат стойност</li>
+<li>и на други места</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="unit">unit</h3>
+<ul>
+<li>тип <code>()</code></li>
+<li>стойност <code>()</code></li>
+<li>тип с една единствена стойност</li>
+<li>големина 0 байта, не носи информация</li>
+<li>използва се за функции които не връщат стойност</li>
+<li>и на други места</li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="5f41aa6a707aa937004800c3f844486698c823cc">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x: () = ();</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="5f41aa6a707aa937004800c3f844486698c823cc">#![allow(unused_variables)]
+fn main() {
+let x: () = ();
+}</pre>
+</div><div class="slide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="низове">Низове</h3>
+<ul>
+<li><code>str</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="низове">Низове</h3>
+<ul>
+<li><code>str</code></li>
+<li>utf8 низ</li>
+<li>ще му обърнем повече внимание в бъдеща лекция.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="низове">Низове</h3>
+<ul>
+<li><code>str</code></li>
+<li>utf8 низ</li>
+<li>ще му обърнем повече внимание в бъдеща лекция.</li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="88b712c13e40166ed99d407b276c4eadcc57bb93">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> s = <span class="hljs-string">"Нещо друго"</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="88b712c13e40166ed99d407b276c4eadcc57bb93">#![allow(unused_variables)]
+fn main() {
+let s = "Нещо друго";
+}</pre>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="низове">Низове</h3>
+<ul>
+<li><code>str</code></li>
+<li>utf8 низ</li>
+<li>ще му обърнем повече внимание в бъдеща лекция.</li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="88b712c13e40166ed99d407b276c4eadcc57bb93">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> s = <span class="hljs-string">"Нещо друго"</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="88b712c13e40166ed99d407b276c4eadcc57bb93">#![allow(unused_variables)]
+fn main() {
+let s = "Нещо друго";
+}</pre>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="60a3acb1591485197cee78a07109454c9beb0f7c">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> s: &amp;<span class="hljs-built_in">str</span> = <span class="hljs-string">"Нещо друго"</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="60a3acb1591485197cee78a07109454c9beb0f7c">#![allow(unused_variables)]
+fn main() {
+let s: &str = "Нещо друго";
+}</pre>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="низове">Низове</h3>
+<ul>
+<li><code>str</code></li>
+<li>utf8 низ</li>
+<li>ще му обърнем повече внимание в бъдеща лекция.</li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="88b712c13e40166ed99d407b276c4eadcc57bb93">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> s = <span class="hljs-string">"Нещо друго"</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="88b712c13e40166ed99d407b276c4eadcc57bb93">#![allow(unused_variables)]
+fn main() {
+let s = "Нещо друго";
+}</pre>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="60a3acb1591485197cee78a07109454c9beb0f7c">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> s: &amp;<span class="hljs-built_in">str</span> = <span class="hljs-string">"Нещо друго"</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="60a3acb1591485197cee78a07109454c9beb0f7c">#![allow(unused_variables)]
+fn main() {
+let s: &str = "Нещо друго";
+}</pre>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="ca77e0ac12ee8b3a75ad7157d0c5c3ac8415c8eb">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> s: &amp;<span class="hljs-symbol">'static</span> <span class="hljs-built_in">str</span> = <span class="hljs-string">"Нещо друго"</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="ca77e0ac12ee8b3a75ad7157d0c5c3ac8415c8eb">#![allow(unused_variables)]
+fn main() {
+let s: &'static str = "Нещо друго";
+}</pre>
+</div><div class="slide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="символи">Символи</h3>
+<ul>
+<li><code>char</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="символи">Символи</h3>
+<ul>
+<li><code>char</code></li>
+<li>unicode code point</li>
+<li>различно е от <code>u8</code></li>
+<li>ще му обърнем внимание заедно с низовете</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="символи">Символи</h3>
+<ul>
+<li><code>char</code></li>
+<li>unicode code point</li>
+<li>различно е от <code>u8</code></li>
+<li>ще му обърнем внимание заедно с низовете</li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="5a24adc357f75174237a098636a82cf74f31a491">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> heart1: <span class="hljs-built_in">char</span> = <span class="hljs-string">'❤'</span>;
+<span class="hljs-keyword">let</span> heart2: <span class="hljs-built_in">char</span> = '\u{<span class="hljs-number">2764</span>}';
+<span class="hljs-keyword">let</span> heart3: &amp;<span class="hljs-built_in">str</span> = <span class="hljs-string">"❤"</span>;
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{:?}"</span>, heart1);
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{:?}"</span>, heart2);
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{:?}"</span>, heart3);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">'❤'
+'❤'
+"❤"</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="5a24adc357f75174237a098636a82cf74f31a491">fn main() {
+let heart1: char = '❤';
+let heart2: char = '\u{2764}';
+let heart3: &str = "❤";
+
+println!("{:?}", heart1);
+println!("{:?}", heart2);
+println!("{:?}", heart3);
+}</pre>
+</div><div class="slide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="масиви">Масиви</h3>
+<ul>
+<li><code>[T; n]</code></li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="b1cdfd5e8fdf962d30df71d1292278d113d90ac7">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> arr: [<span class="hljs-built_in">i32</span>; <span class="hljs-number">3</span>] = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>];
+
+<span class="hljs-keyword">let</span> nested: [[<span class="hljs-built_in">i32</span>; <span class="hljs-number">3</span>]; <span class="hljs-number">2</span>] = [
+    [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
+    [<span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>],
+];</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="b1cdfd5e8fdf962d30df71d1292278d113d90ac7">#![allow(unused_variables)]
+fn main() {
+let arr: [i32; 3] = [1, 2, 3];
+
+let nested: [[i32; 3]; 2] = [
+    [1, 2, 3],
+    [4, 5, 6],
+];
+}</pre>
+</div><div class="slide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="кортежи-tuples">Кортежи (tuples)</h3>
+<ul>
+<li><code>(A, B, C, ...)</code></li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="e4f6164d294dad12910fa4189ea39e0873f4794e">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> tuple: (<span class="hljs-built_in">i32</span>, <span class="hljs-built_in">u32</span>, <span class="hljs-built_in">bool</span>) = (<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-literal">false</span>);
+<span class="hljs-keyword">let</span> unit: () = ();
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}"</span>, tuple.<span class="hljs-number">0</span>);
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}"</span>, tuple.<span class="hljs-number">1</span>);
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}"</span>, tuple.<span class="hljs-number">2</span>);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">1
+2
+false</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="e4f6164d294dad12910fa4189ea39e0873f4794e">#![allow(unused_variables)]
+fn main() {
+let tuple: (i32, u32, bool) = (1, 2, false);
+let unit: () = ();
+
+println!("{}", tuple.0);
+println!("{}", tuple.1);
+println!("{}", tuple.2);
+}</pre>
+</div><div class="slide">
+<h1 id="основни-типове">Основни типове</h1>
+<h3 id="сравнение-със-c">Сравнение със C</h3>
+<table>
+    <thead>
+        <tr><th  rowspan="2" style="">Length</th><th colspan="2"  style="">Rust</th><th colspan="2"  style="">C/C++</th></tr><tr><th   style="">Signed</th><th   style="">Unsigned</th><th   style="">Signed</th><th   style="">Unsigned</th></tr>
+    </thead>
+    <tbody>
+        <tr><td   style="">8-bit</td><td   style="">i8</td><td   style="">u8</td><td   >char</td><td   >unsigned char</td></tr><tr><td   style="">16-bit</td><td   style="">i16</td><td   style="">u16</td><td   >short</td><td   >unsigned short</td></tr><tr><td   style="">32-bit</td><td   style="">i32</td><td   style="">u32</td><td   >int</td><td   >unsigned int</td></tr><tr><td   style="">64-bit</td><td   style="">i64</td><td   style="">u64</td><td   >long long</td><td   >unsigned long long</td></tr><tr><td   style="">word</td><td   style="">isize</td><td   style="">usize</td><td   >long</td><td   >unsigned long / size_t</td></tr>
+    </tbody>
+</table>
+<div class="split-view" markdown="1"><div class="lhs" markdown="1"><table>
+<thead>
+<tr>
+<th id="length" style="text-align:center;">Length</th>
+<th id="rust" style="text-align:center;">Rust</th>
+<th id="c/c++" style="text-align:center;">C/C++</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">32-bit</td>
+<td style="text-align:center;">f32</td>
+<td style="text-align:center;">float</td>
+</tr>
+<tr>
+<td style="text-align:center;">64-bit</td>
+<td style="text-align:center;">f64</td>
+<td style="text-align:center;">double</td>
+</tr>
+</tbody>
+</table></div>
+<div class="rhs" markdown="1"><table>
+<thead>
+<tr>
+<th id="length" style="text-align:center;">Length</th>
+<th id="rust" style="text-align:center;">Rust</th>
+<th id="c++" style="text-align:center;">C++</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">8-bit</td>
+<td style="text-align:center;">bool</td>
+<td style="text-align:center;">bool</td>
+</tr>
+<tr>
+<td style="text-align:center;">-</td>
+<td style="text-align:center;">()</td>
+<td style="text-align:center;">void</td>
+</tr>
+</tbody>
+</table></div></div>
+</div><div class="slide">
+<h1 id="специфики">Специфики</h1>
+<p>Няма автоматично конвертиране между различни числови типове</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8b638dfa209c175f12a85c93aaa5a902798b2434">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x: <span class="hljs-built_in">i32</span> = <span class="hljs-number">1</span>;
+<span class="hljs-keyword">let</span> y: <span class="hljs-built_in">u64</span> = x;</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0308]</span><span style="font-weight:bold">: mismatched types</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_8b638dfa209c175f12a85c93aaa5a902798b2434.rs:5:14
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">5</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>let y: u64 = x;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>       <span style="font-weight:bold;color:rgb(85,85,255)">---</span>   <span style="font-weight:bold;color:rgb(255,85,85)">^</span> <span style="font-weight:bold;color:rgb(255,85,85)">expected `u64`, found `i32`</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>       <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>       <span style="font-weight:bold;color:rgb(85,85,255)">expected due to this</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,255,255)">help</span>: you can convert an `i32` to a `u64` and panic if the converted value doesn't fit
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">5</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>let y: u64 = x.try_into().unwrap();
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>             <span style="font-weight:bold;color:rgb(85,255,255)">^^^^^^^^^^^^^^^^^^^^^</span></div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="8b638dfa209c175f12a85c93aaa5a902798b2434">#![allow(unused_variables)]
+fn main() {
+let x: i32 = 1;
+let y: u64 = x;
+}</pre>
+</div><div class="slide">
+<h1 id="специфики">Специфики</h1>
+<p>Аритметични операции не могат да се прилагат върху различни типове</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8e5225b507b03e7c9f6c018e0cefb8bd8bc78341">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x = <span class="hljs-number">4_u32</span> - <span class="hljs-number">1_u8</span>;</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0308]</span><span style="font-weight:bold">: mismatched types</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_8e5225b507b03e7c9f6c018e0cefb8bd8bc78341.rs:4:17
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">4</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>let x = 4_u32 - 1_u8;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                <span style="font-weight:bold;color:rgb(255,85,85)">^^^^</span> <span style="font-weight:bold;color:rgb(255,85,85)">expected `u32`, found `u8`</span>
+
+<span style="font-weight:bold;color:rgb(255,85,85)">error[E0277]</span><span style="font-weight:bold">: cannot subtract `u8` from `u32`</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_8e5225b507b03e7c9f6c018e0cefb8bd8bc78341.rs:4:15
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">4</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>let x = 4_u32 - 1_u8;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>              <span style="font-weight:bold;color:rgb(255,85,85)">^</span> <span style="font-weight:bold;color:rgb(255,85,85)">no implementation for `u32 - u8`</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">help</span>: the trait `Sub&lt;u8&gt;` is not implemented for `u32`</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="8e5225b507b03e7c9f6c018e0cefb8bd8bc78341">#![allow(unused_variables)]
+fn main() {
+let x = 4_u32 - 1_u8;
+}</pre>
+</div><div class="slide">
+<h1 id="специфики">Специфики</h1>
+<p>Аритметични операции не могат да се прилагат върху различни типове</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="f1878bdeb672a355ef5d23dbdfc01d0241278399">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> y = <span class="hljs-number">1.2_f64</span> / <span class="hljs-number">0.8_f32</span>;</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0308]</span><span style="font-weight:bold">: mismatched types</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_f1878bdeb672a355ef5d23dbdfc01d0241278399.rs:4:19
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">4</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>let y = 1.2_f64 / 0.8_f32;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                  <span style="font-weight:bold;color:rgb(255,85,85)">^^^^^^^</span> <span style="font-weight:bold;color:rgb(255,85,85)">expected `f64`, found `f32`</span>
+
+<span style="font-weight:bold;color:rgb(255,85,85)">error[E0277]</span><span style="font-weight:bold">: cannot divide `f64` by `f32`</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_f1878bdeb672a355ef5d23dbdfc01d0241278399.rs:4:17
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">4</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>let y = 1.2_f64 / 0.8_f32;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                <span style="font-weight:bold;color:rgb(255,85,85)">^</span> <span style="font-weight:bold;color:rgb(255,85,85)">no implementation for `f64 / f32`</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">help</span>: the trait `Div&lt;f32&gt;` is not implemented for `f64`</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="f1878bdeb672a355ef5d23dbdfc01d0241278399">#![allow(unused_variables)]
+fn main() {
+let y = 1.2_f64 / 0.8_f32;
+}</pre>
+</div><div class="slide">
+<h1 id="специфики">Специфики</h1>
+<p>За конвертиране между типове се използва ключовата дума <code>as</code></p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="ae3b68466aa8defb8b97bb3bd8735c96848cd61f">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> one = <span class="hljs-literal">true</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">u8</span>;
+<span class="hljs-keyword">let</span> two_hundred = -<span class="hljs-number">56_i8</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">u8</span>;
+<span class="hljs-keyword">let</span> three = <span class="hljs-number">3.14</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">u32</span>;
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"one: {}\ntwo_hundred: {}\nthree: {}"</span>, one, two_hundred, three);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">one: 1
+two_hundred: 200
+three: 3</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="ae3b68466aa8defb8b97bb3bd8735c96848cd61f">#[allow(unused_variables)]
+fn main() {
+let one = true as u8;
+let two_hundred = -56_i8 as u8;
+let three = 3.14 as u32;
+
+println!("one: {}\ntwo_hundred: {}\nthree: {}", one, two_hundred, three);
+}</pre>
+</div><div class="slide">
+<h1 id="специфики">Специфики</h1>
+<p>В режим debug, аритметични операции хвърлят грешка при препълванe (integer overflow / underflow)</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="c02999f2504c2ca084dca6d96adc70ddb7bf1bae">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x = <span class="hljs-number">255_u8</span>;
+<span class="hljs-keyword">let</span> y = x + <span class="hljs-number">1</span>;                <span class="hljs-comment">// 💥</span>
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}"</span>, y);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">: this arithmetic operation will overflow</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_c02999f2504c2ca084dca6d96adc70ddb7bf1bae.rs:4:9
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">4</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>let y = x + 1;                // 💥
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>        <span style="font-weight:bold;color:rgb(255,85,85)">^^^^^</span> <span style="font-weight:bold;color:rgb(255,85,85)">attempt to compute `u8::MAX + 1_u8`, which would overflow</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: `#[deny(arithmetic_overflow)]` on by default</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="c02999f2504c2ca084dca6d96adc70ddb7bf1bae">#[allow(unused_variables)]
+fn main() {
+let x = 255_u8;
+let y = x + 1;                // 💥
+println!("{}", y);
+}</pre>
+</div><div class="slide">
+<h1 id="специфики">Специфики</h1>
+<p>Няма оператори <code>++</code> и <code>--</code></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">x += <span class="hljs-number">1</span>;
+x -= <span class="hljs-number">1</span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="коментари">Коментари</h1>
+<p>Едноредов коментар</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">// So we’re doing something complicated here, long enough that we need</span>
+<span class="hljs-comment">// multiple lines of comments to do it! Whew! Hopefully, this comment will</span>
+<span class="hljs-comment">// explain what’s going on.</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Rust поддържа и блокови коментари</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">/*
+So we’re doing something complicated here, long enough that we need
+multiple lines of comments to do it! Whew! Hopefully, this comment will
+explain what’s going on.
+*/</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="control-flow">Control flow</h1>
+<h3 id="if-клаузи">if-клаузи</h3>
+<p>Синтаксис на if-клауза</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="ff11ea8c19346648b7865951ed99332e1e636960">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">if</span> bool_expression {
+    <span class="hljs-comment">// ...</span>
+} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> another_bool_expression {
+    <span class="hljs-comment">// ...</span>
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">if</span> <span class="hljs-number">2</span> &gt; <span class="hljs-number">1</span> {
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"okay"</span>);
+} <span class="hljs-keyword">else</span> {
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"wait what"</span>);
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="ff11ea8c19346648b7865951ed99332e1e636960">fn main() {
+let bool_expression = true;
+let another_bool_expression = false;
+if bool_expression {
+    // ...
+} else if another_bool_expression {
+    // ...
+} else {
+    // ...
+}
+
+if 2 > 1 {
+    println!("okay");
+} else {
+    println!("wait what");
+}
+}</pre>
+<p>Забележете, че няма скоби около условието и скобите за блок <code>{ }</code> са задължителни.</p>
+</div><div class="slide">
+<h1 id="control-flow">Control flow</h1>
+<h3 id="цикли">Цикли</h3>
+<p><code>for</code> цикъла работи с итератори, за които ще говорим в бъдеща лекция</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="141e31e073d75437970eda96860f0d59072529cc">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">for</span> var <span class="hljs-keyword">in</span> iterable {
+    <span class="hljs-comment">// ...</span>
+}
+
+<span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>] {
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"N: {}"</span>, n);
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="141e31e073d75437970eda96860f0d59072529cc">#![allow(unused_variables)]
+fn main() {
+let iterable: &[()] = &[];
+for var in iterable {
+    // ...
+}
+
+for n in [1, 2, 3] {
+    println!("N: {}", n);
+}
+}</pre>
+<p>Отново няма скоби след <code>for</code> и скобите за блок <code>{ }</code> са задължителни.</p>
+</div><div class="slide">
+<h1 id="control-flow">Control flow</h1>
+<h3 id="цикли">Цикли</h3>
+<p>Също така има и <code>while</code> и <code>loop</code> цикли.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="fe5ad32f2361f8426d2fac7dab1bdd6a058caf5a">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">while</span> bool_expression {
+    <span class="hljs-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="fe5ad32f2361f8426d2fac7dab1bdd6a058caf5a">fn main() {
+let bool_expression = false;
+while bool_expression {
+    // ...
+}
+}</pre>
+<p><code>loop</code> e същото като <code>while true</code>, но по-четимо.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="df347bea1315a560439aa20d0e0d11fcb3e6f0c0">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">loop</span> {
+    <span class="hljs-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="df347bea1315a560439aa20d0e0d11fcb3e6f0c0">fn main() {
+loop {
+    // ...
+}
+}</pre>
+</div><div class="slide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<h3 id="израз-expression">Израз (expression)</h3>
+</div><div class="slide subslide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<h3 id="израз-expression">Израз (expression)</h3>
+<ul>
+<li>нещо което може да се оцени</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<h3 id="израз-expression">Израз (expression)</h3>
+<ul>
+<li>нещо което може да се оцени</li>
+<li><code>1</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<h3 id="израз-expression">Израз (expression)</h3>
+<ul>
+<li>нещо което може да се оцени</li>
+<li><code>1</code></li>
+<li><code>(2 + 3) * 4</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<h3 id="израз-expression">Израз (expression)</h3>
+<ul>
+<li>нещо което може да се оцени</li>
+<li><code>1</code></li>
+<li><code>(2 + 3) * 4</code></li>
+<li><code>add(5, 6)</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<h3 id="израз-expression">Израз (expression)</h3>
+<ul>
+<li>нещо което може да се оцени</li>
+<li><code>1</code></li>
+<li><code>(2 + 3) * 4</code></li>
+<li><code>add(5, 6)</code></li>
+<li>(<code>add(5, 6);</code> също е израз, със стойност <code>()</code> -- повече за това по-нататък)</li>
+</ul>
+</div><div class="slide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<h3 id="твърдение-statement">Твърдение (statement)</h3>
+</div><div class="slide subslide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<h3 id="твърдение-statement">Твърдение (statement)</h3>
+<ul>
+<li>казва какво да се направи</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<h3 id="твърдение-statement">Твърдение (statement)</h3>
+<ul>
+<li>казва какво да се направи</li>
+<li><code>let x = 10;</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<h3 id="твърдение-statement">Твърдение (statement)</h3>
+<ul>
+<li>казва какво да се направи</li>
+<li><code>let x = 10;</code></li>
+<li><code>return 25;</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<h3 id="твърдение-statement">Твърдение (statement)</h3>
+<ul>
+<li>казва какво да се направи</li>
+<li><code>let x = 10;</code></li>
+<li><code>return 25;</code></li>
+<li><code>fn add(a: i32, b: i32) { a + b }</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<h3 id="твърдение-statement">Твърдение (statement)</h3>
+<ul>
+<li>казва какво да се направи</li>
+<li><code>let x = 10;</code></li>
+<li><code>return 25;</code></li>
+<li><code>fn add(a: i32, b: i32) { a + b }</code></li>
+<li><code>израз;</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<h3 id="твърдение-statement">Твърдение (statement)</h3>
+<p>Пример: можем да присвояваме стойността на израз на променлива с <code>let</code>, но не и стойността на твърдение (защото няма стойност)</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="97ba87efcfac218791b39b5b3ee18a18037e022c">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x = (<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">add</span></span>(a: <span class="hljs-built_in">i32</span>, b: <span class="hljs-built_in">i32</span>) { a + b });</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">: expected expression, found keyword `fn`</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_97ba87efcfac218791b39b5b3ee18a18037e022c.rs:4:10
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">4</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>let x = (fn add(a: i32, b: i32) { a + b });
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>         <span style="font-weight:bold;color:rgb(255,85,85)">^^</span> <span style="font-weight:bold;color:rgb(255,85,85)">expected expression</span></div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="97ba87efcfac218791b39b5b3ee18a18037e022c">#![allow(unused_variables)]
+#![allow(unused_parens)]
+fn main() {
+let x = (fn add(a: i32, b: i32) { a + b });
+}</pre>
+</div><div class="slide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<p>Много от конструкциите на езика са изрази.</p>
+<p>Блоковете са израз - стойността им е стойността на последния израз в блока</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="e94b72e475c8a80297b7cfd5123387843dd0ef87">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> x = {
+        <span class="hljs-keyword">let</span> a = <span class="hljs-number">1</span>;
+        <span class="hljs-keyword">let</span> b = <span class="hljs-number">2</span>;
+        a + b
+    };
+
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"x = {}"</span>, x);
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">x = 3</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="e94b72e475c8a80297b7cfd5123387843dd0ef87">fn main() {
+    let x = {
+        let a = 1;
+        let b = 2;
+        a + b
+    };
+
+    println!("x = {}", x);
+}</pre>
+</div><div class="slide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<p>if-else конструкцията е израз</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="dcd9b480ff81a479982ceda0d97cac10f9e718be">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> bigger = <span class="hljs-keyword">if</span> a &gt; b {
+    a
+} <span class="hljs-keyword">else</span> {
+    b
+};</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="dcd9b480ff81a479982ceda0d97cac10f9e718be">#[allow(unused_variables)]
+fn main() {
+let a = 1; let b = 2;
+let bigger = if a > b {
+    a
+} else {
+    b
+};
+}</pre>
+<p>По тази причина няма тернарен оператор</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="5e443d8b980bfd4820e5849b74c788f69638caa8">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> bigger = <span class="hljs-keyword">if</span> a &gt; b { a } <span class="hljs-keyword">else</span> { b };</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="5e443d8b980bfd4820e5849b74c788f69638caa8">#[allow(unused_variables)]
+fn main() {
+let a = 1; let b = 2;
+let bigger = if a > b { a } else { b };
+}</pre>
+</div><div class="slide">
+<h1 id="statements--expressions">Statements &amp; Expressions</h1>
+<p><code>loop</code> е израз</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="792165af7318a204806dea172d3d4b77c83b3296">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x = <span class="hljs-keyword">loop</span> {
+    <span class="hljs-keyword">break</span> <span class="hljs-number">5</span>;
+};</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="792165af7318a204806dea172d3d4b77c83b3296">#[allow(unused_variables)]
+fn main() {
+let x = loop {
+    break 5;
+};
+}</pre>
+</div><div class="slide">
+<h1 id="функции">Функции</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="136ebf0aab0e3779fced3f2d7f632b1022850958">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"Hello, world!"</span>);
+    another_function();
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">another_function</span></span>() {
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"Another function."</span>);
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">Hello, world!
+Another function.</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="136ebf0aab0e3779fced3f2d7f632b1022850958">fn main() {
+    println!("Hello, world!");
+    another_function();
+}
+
+fn another_function() {
+    println!("Another function.");
+}</pre>
+</div><div class="slide">
+<h1 id="функции">Функции</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="57bc3daca05956e9fa41a937e3995ad3ce3385e4">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">add</span></span>(a: <span class="hljs-built_in">u32</span>, b: <span class="hljs-built_in">u32</span>) -&gt; <span class="hljs-built_in">u32</span> {
+    <span class="hljs-comment">// note no semicolon</span>
+    a + b
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="57bc3daca05956e9fa41a937e3995ad3ce3385e4">fn main() {}
+#[allow(dead_code)]
+fn add(a: u32, b: u32) -> u32 {
+    // note no semicolon
+    a + b
+}</pre>
+</div><div class="slide subslide">
+<h1 id="функции">Функции</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="57bc3daca05956e9fa41a937e3995ad3ce3385e4">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">add</span></span>(a: <span class="hljs-built_in">u32</span>, b: <span class="hljs-built_in">u32</span>) -&gt; <span class="hljs-built_in">u32</span> {
+    <span class="hljs-comment">// note no semicolon</span>
+    a + b
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="57bc3daca05956e9fa41a937e3995ad3ce3385e4">fn main() {}
+#[allow(dead_code)]
+fn add(a: u32, b: u32) -> u32 {
+    // note no semicolon
+    a + b
+}</pre>
+<ul>
+<li>Задаването на типове на параметрите и резултата е задължително</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="функции">Функции</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="57bc3daca05956e9fa41a937e3995ad3ce3385e4">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">add</span></span>(a: <span class="hljs-built_in">u32</span>, b: <span class="hljs-built_in">u32</span>) -&gt; <span class="hljs-built_in">u32</span> {
+    <span class="hljs-comment">// note no semicolon</span>
+    a + b
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="57bc3daca05956e9fa41a937e3995ad3ce3385e4">fn main() {}
+#[allow(dead_code)]
+fn add(a: u32, b: u32) -> u32 {
+    // note no semicolon
+    a + b
+}</pre>
+<ul>
+<li>Задаването на типове на параметрите и резултата е задължително</li>
+<li>Върнатата стойност е стойността на последния израз в тялото на функцията</li>
+</ul>
+</div><div class="slide">
+<h1 id="функции">Функции</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="a5cbdeb05dec59228f1662ae7ecdcd2429054df6">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">print_a</span></span>(a: <span class="hljs-built_in">u32</span>) {
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}"</span>, a);
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">print_b</span></span>(b: <span class="hljs-built_in">u32</span>) -&gt; () {
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}"</span>, b);
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="a5cbdeb05dec59228f1662ae7ecdcd2429054df6">fn main() {}
+#[allow(dead_code)]
+fn print_a(a: u32) {
+    println!("{}", a);
+}
+
+#[allow(dead_code)]
+fn print_b(b: u32) -> () {
+    println!("{}", b);
+}</pre>
+<ul>
+<li>Не е нужно да пишем <code>-&gt; ()</code> за функции който не връщат резулат</li>
+</ul>
+</div><div class="slide">
+<h1 id="функции">Функции</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="5913269c56223145245ab688f2111b78461dd08a">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">good_a</span></span>(a: <span class="hljs-built_in">u32</span>, a_is_bad: <span class="hljs-built_in">bool</span>) -&gt; <span class="hljs-built_in">u32</span> {
+    <span class="hljs-keyword">if</span> a_is_bad {
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    }
+
+    a
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="5913269c56223145245ab688f2111b78461dd08a">fn main() {}
+#[allow(dead_code)]
+fn good_a(a: u32, a_is_bad: bool) -> u32 {
+    if a_is_bad {
+        return 0;
+    }
+
+    a
+}</pre>
+<ul>
+<li>Ако искаме да излезем от функцията преди последния ред, може да използваме <code>return</code></li>
+<li>Използване на <code>return</code> на последния ред от тялото се счита за лоша практика</li>
+</ul>
+</div><div class="slide">
+<h1 id="анонимни-функции-closures">Анонимни функции (closures)</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="4ab48f63c56f9dc778485d7453663ab211464be5">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">add1</span></span>(a: <span class="hljs-built_in">u32</span>, b: <span class="hljs-built_in">u32</span>) -&gt; <span class="hljs-built_in">u32</span> {
+    a + b
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> add2 = |a, b| { a + b };
+
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"add1: {}\nadd2: {}"</span>, add1(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>), add2(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>));
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">add1: 3
+add2: 3</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="4ab48f63c56f9dc778485d7453663ab211464be5">fn add1(a: u32, b: u32) -> u32 {
+    a + b
+}
+
+fn main() {
+    let add2 = |a, b| { a + b };
+
+    println!("add1: {}\nadd2: {}", add1(1, 2), add2(1, 2));
+}</pre>
+<ul>
+<li>Ще говорим доста повече за тях по-нататък</li>
+</ul>
+</div><div class="slide">
+<h1 id="macros">Macros</h1>
+<ul>
+<li>служат за генериране на код</li>
+<li>различават се от функциите по <code>!</code> след името</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="macros">Macros</h1>
+<ul>
+<li>служат за генериране на код</li>
+<li>различават се от функциите по <code>!</code> след името</li>
+<li><code>println!</code></li>
+<li><code>print!</code></li>
+<li><code>dbg!</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="println-macro">println! macro</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="2b1f585ef448272f3fc5b091e1389f7d54dcf44a">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">let</span> y = <span class="hljs-string">"десет"</span>;
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"x = {} and y = {}"</span>, x, y);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">x = 5 and y = десет</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="2b1f585ef448272f3fc5b091e1389f7d54dcf44a">fn main() {
+let x = 5;
+let y = "десет";
+println!("x = {} and y = {}", x, y);
+}</pre>
+</div><div class="slide subslide">
+<h1 id="println-macro">println! macro</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="2b1f585ef448272f3fc5b091e1389f7d54dcf44a">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">let</span> y = <span class="hljs-string">"десет"</span>;
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"x = {} and y = {}"</span>, x, y);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">x = 5 and y = десет</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="2b1f585ef448272f3fc5b091e1389f7d54dcf44a">fn main() {
+let x = 5;
+let y = "десет";
+println!("x = {} and y = {}", x, y);
+}</pre>
+<ul>
+<li>Принтиране на конзолата</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="println-macro">println! macro</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="2b1f585ef448272f3fc5b091e1389f7d54dcf44a">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">let</span> y = <span class="hljs-string">"десет"</span>;
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"x = {} and y = {}"</span>, x, y);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">x = 5 and y = десет</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="2b1f585ef448272f3fc5b091e1389f7d54dcf44a">fn main() {
+let x = 5;
+let y = "десет";
+println!("x = {} and y = {}", x, y);
+}</pre>
+<ul>
+<li>Принтиране на конзолата</li>
+<li><code>{}</code> placeholders</li>
+</ul>
+</div><div class="slide">
+<h1 id="println-macro">println! macro</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="bfbbae225781e851129da7958007b1327c6e5872">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">let</span> y = <span class="hljs-string">"десет"</span>;
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"x = {:?} and y = {:?}"</span>, x, y);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">x = 5 and y = "десет"</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="bfbbae225781e851129da7958007b1327c6e5872">fn main() {
+let x = 5;
+let y = "десет";
+println!("x = {:?} and y = {:?}", x, y);
+}</pre>
+<ul>
+<li>Принтиране на конзолата</li>
+<li><code>{:?}</code> placeholders</li>
+</ul>
+</div><div class="slide">
+<h1 id="dbg-macro">dbg! macro</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="72fe3d84fb206495b3ff0c4f73c4dc2f69e38ea2">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> x = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">let</span> y = <span class="hljs-string">"десет"</span>;
+
+dbg!(x);
+dbg!(y);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">[src/bin/main_72fe3d84fb206495b3ff0c4f73c4dc2f69e38ea2.rs:5] x = 5
+[src/bin/main_72fe3d84fb206495b3ff0c4f73c4dc2f69e38ea2.rs:6] y = "десет"</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="72fe3d84fb206495b3ff0c4f73c4dc2f69e38ea2">fn main() {
+let x = 5;
+let y = "десет";
+
+dbg!(x);
+dbg!(y);
+}</pre>
+</div><div class="slide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Инсталирайте си Rust: <a href="https://2017.fmi.rust-lang.bg/topics/1" target="_blank">https://2017.fmi.rust-lang.bg/topics/1</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Инсталирайте си Rust: <a href="https://2017.fmi.rust-lang.bg/topics/1" target="_blank">https://2017.fmi.rust-lang.bg/topics/1</a></li>
+<li>Елате в Discord канала: <a href="https://discord.gg/r9Wcazk" target="_blank">https://discord.gg/r9Wcazk</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Инсталирайте си Rust: <a href="https://2017.fmi.rust-lang.bg/topics/1" target="_blank">https://2017.fmi.rust-lang.bg/topics/1</a></li>
+<li>Елате в Discord канала: <a href="https://discord.gg/r9Wcazk" target="_blank">https://discord.gg/r9Wcazk</a></li>
+<li>Първо предизвикателство (не много предизвикателно): <a href="https://fmi.rust-lang.bg/challenges/1" target="_blank">https://fmi.rust-lang.bg/challenges/1</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="въпроси">Въпроси</h1>
+</div>
+    </main>
+</body>
+</html>
