@@ -1,0 +1,48 @@
+#!/bin/bash
+
+_usage_msg="usage: $0 <html_path> <output_file>"
+
+if [ "$#" -ne 2 ]; then
+	echo "error: invalid num of args"
+	echo "${_usage_msg}"
+	exit 1
+fi
+
+if [[ "$1" != *.html ]]; then # || ! [ -f "$1" ]; then
+	echo "error: invalid html file"
+	echo "${_usage_msg}"
+	exit 2
+fi
+
+_ext='https://'
+_path="fmi.rust-lang.bg/lectures/$1"
+_args='?animations=false'
+_page=1
+_outfile="$( if [[ "$2" == *".pdf" ]]; then echo "$2"; else echo "$2".pdf; fi)"
+
+prev_sum=''
+
+mkdir pics 2>/dev/null
+
+echo "${_ext}${_path}${_args}#${_page}"
+echo "in progress..."
+while true; do
+	capture-website "${_ext}${_path}${_args}#${_page}" --output=pics/${_page}.png
+
+	curr_sum="$(md5sum pics/${_page}.png | awk '{print $1}')"
+	echo "$curr_sum $_page"
+	if [ "${curr_sum}" == "${prev_sum}" ]; then
+		rm pics/${_page}.png
+		break
+	fi
+	prev_sum="${curr_sum}"
+	_page=$(( _page + 1 ))
+done
+
+echo "converting to pdf..."
+convert -density 80 $(find pics/ -mindepth 1 -print | sort -t '/' -k 2n) ${_outfile}
+
+echo "cleaning up..."
+rm -rf ./pics
+
+exit 0
