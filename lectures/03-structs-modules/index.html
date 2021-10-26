@@ -1,0 +1,3583 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <title>Структури, модули, външни пакети</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="rust,fmi">
+    <link rel="stylesheet" href="resources\codeblock\codeblock.css">
+<link rel="stylesheet" href="resources\frontend\controls.css">
+<link rel="stylesheet" href="resources\global\global.css">
+<link rel="stylesheet" href="resources\global\metadata.css">
+<link rel="stylesheet" href="resources\highlight\github.css">
+<link rel="stylesheet" href="resources\katex\katex.min.css">
+<link rel="stylesheet" href="resources\rustc\rustc.css">
+<link rel="stylesheet" href="resources\splitview\splitview.css">
+<link rel="stylesheet" href="resources\wrapping-pages\wrapping-pages.css">
+<script type="text/javascript" src="resources\codeblock\codeblock.js"></script>
+<script type="text/javascript" src="resources\frontend\controls.js"></script>
+</head>
+<body>
+    <main>
+        <div class="slide">
+<h1 id="структури-модули-външни-пакети">Структури, модули, външни пакети</h1>
+<h3 id="14-октомври-2021">14 октомври 2021</h3>
+</div><div class="slide">
+<h1 id="преговор">Преговор</h1>
+</div><div class="slide subslide">
+<h1 id="преговор">Преговор</h1>
+<ul>
+<li>Присвояване и местене; Clone и Copy</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="преговор">Преговор</h1>
+<ul>
+<li>Присвояване и местене; Clone и Copy</li>
+<li>Собственост (ownership) и заемане (borrowing)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="преговор">Преговор</h1>
+<ul>
+<li>Присвояване и местене; Clone и Copy</li>
+<li>Собственост (ownership) и заемане (borrowing)</li>
+<li>Референции</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="преговор">Преговор</h1>
+<ul>
+<li>Присвояване и местене; Clone и Copy</li>
+<li>Собственост (ownership) и заемане (borrowing)</li>
+<li>Референции<ul>
+<li>референцията винаги сочи към валидна стойност</li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="преговор">Преговор</h1>
+<ul>
+<li>Присвояване и местене; Clone и Copy</li>
+<li>Собственост (ownership) и заемане (borrowing)</li>
+<li>Референции<ul>
+<li>референцията винаги сочи към валидна стойност</li>
+<li>или произволен брой <code>&amp;T</code>, или точно една <code>&amp;mut T</code></li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="преговор">Преговор</h1>
+<ul>
+<li>Присвояване и местене; Clone и Copy</li>
+<li>Собственост (ownership) и заемане (borrowing)</li>
+<li>Референции<ul>
+<li>референцията винаги сочи към валидна стойност</li>
+<li>или произволен брой <code>&amp;T</code>, или точно една <code>&amp;mut T</code></li></ul></li>
+<li>Низове (<code>String</code>) и резени от низове (<code>&amp;str</code>)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="преговор">Преговор</h1>
+<ul>
+<li>Присвояване и местене; Clone и Copy</li>
+<li>Собственост (ownership) и заемане (borrowing)</li>
+<li>Референции<ul>
+<li>референцията винаги сочи към валидна стойност</li>
+<li>или произволен брой <code>&amp;T</code>, или точно една <code>&amp;mut T</code></li></ul></li>
+<li>Низове (<code>String</code>) и резени от низове (<code>&amp;str</code>)</li>
+<li>Вектори (<code>Vec&lt;T&gt;</code>) и резени от масиви (<code>&amp;[T]</code>)</li>
+</ul>
+</div><div class="slide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Предизвикателство 1 свърши</li>
+</ul>
+</div><div class="slide">
+<h1 id="структури">Структури</h1>
+<p><img src="resources\structures.png"></p>
+</div><div class="slide">
+<h1 id="структури">Структури</h1>
+<h3 id="синтаксис">Синтаксис</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="564b8e34220d6d8e5ab12001699bdc2702a1bcd9">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> {
+    username: <span class="hljs-built_in">String</span>,
+    email: <span class="hljs-built_in">String</span>,
+    sign_in_count: <span class="hljs-built_in">u64</span>,
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="564b8e34220d6d8e5ab12001699bdc2702a1bcd9">struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64,
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="структури">Структури</h1>
+<h3 id="създаване-на-инстанция">Създаване на инстанция</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8e90117f6bcae9be991f8b0fb94e5eb304b98076">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> {
+    username: <span class="hljs-built_in">String</span>,
+    email: <span class="hljs-built_in">String</span>,
+    sign_in_count: <span class="hljs-built_in">u64</span>
+}
+
+<span class="hljs-keyword">let</span> user = User {
+    username: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>),
+    email: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>),
+    sign_in_count: <span class="hljs-number">10</span>,
+};</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="8e90117f6bcae9be991f8b0fb94e5eb304b98076">fn main() {
+struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64
+}
+
+let user = User {
+    username: String::from("Иванчо"),
+    email: String::from("ivan40@abv.bg"),
+    sign_in_count: 10,
+};
+}</pre>
+</div><div class="slide">
+<h1 id="структури">Структури</h1>
+<h3 id="достъп-до-полета">Достъп до полета</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="d7b2453ddf564a672c3aea0592f81a0bcb44c0ec">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> {
+    username: <span class="hljs-built_in">String</span>,
+    email: <span class="hljs-built_in">String</span>,
+    sign_in_count: <span class="hljs-built_in">u64</span>
+}
+
+<span class="hljs-keyword">let</span> user = User {
+    username: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>),
+    email: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>),
+    sign_in_count: <span class="hljs-number">10</span>,
+};
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}, {}"</span>, user.username, user.email);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">Иванчо, ivan40@abv.bg</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="d7b2453ddf564a672c3aea0592f81a0bcb44c0ec">fn main() {
+struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64
+}
+
+let user = User {
+    username: String::from("Иванчо"),
+    email: String::from("ivan40@abv.bg"),
+    sign_in_count: 10,
+};
+
+println!("{}, {}", user.username, user.email);
+}</pre>
+</div><div class="slide">
+<h1 id="структури">Структури</h1>
+<h3 id="достъп-до-полета">Достъп до полета</h3>
+<p>Полетата се достъпват по същия начин и през референция.<br />
+Автоматично се правят необходимия брой дереференцирания.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="88d6a5008826180a4d09d744d906f3856cf97090">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> {
+    username: <span class="hljs-built_in">String</span>,
+    email: <span class="hljs-built_in">String</span>,
+    sign_in_count: <span class="hljs-built_in">u64</span>
+}
+
+<span class="hljs-keyword">let</span> user = User {
+    username: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>),
+    email: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>),
+    sign_in_count: <span class="hljs-number">10</span>,
+};
+
+<span class="hljs-keyword">let</span> user_ref = &amp;user;
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}, {}"</span>, user_ref.username, user_ref.email);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">Иванчо, ivan40@abv.bg</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="88d6a5008826180a4d09d744d906f3856cf97090">fn main() {
+struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64
+}
+
+let user = User {
+    username: String::from("Иванчо"),
+    email: String::from("ivan40@abv.bg"),
+    sign_in_count: 10,
+};
+
+let user_ref = &user;
+
+println!("{}, {}", user_ref.username, user_ref.email);
+}</pre>
+</div><div class="slide">
+<h1 id="структури">Структури</h1>
+<h3 id="промяна-на-полетата">Промяна на полетата</h3>
+<p>Можем да променяме стойността на полетата, ако инстанцията е дефинирана като <code>mut</code>.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="1a20a1a21c4836b8746270b56e5fb882440e9076">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> {
+    username: <span class="hljs-built_in">String</span>,
+    email: <span class="hljs-built_in">String</span>,
+    sign_in_count: <span class="hljs-built_in">u64</span>
+}
+
+<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> user = User {
+    username: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>),
+    email: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>),
+    sign_in_count: <span class="hljs-number">10</span>,
+};
+
+user.email = <span class="hljs-string">"ivan40.ivanov@abv.bg"</span>.to_string();
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}, {}"</span>, user.username, user.email);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">Иванчо, ivan40.ivanov@abv.bg</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="1a20a1a21c4836b8746270b56e5fb882440e9076">fn main() {
+struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64
+}
+
+let mut user = User {
+    username: String::from("Иванчо"),
+    email: String::from("ivan40@abv.bg"),
+    sign_in_count: 10,
+};
+
+user.email = "ivan40.ivanov@abv.bg".to_string();
+
+println!("{}, {}", user.username, user.email);
+}</pre>
+</div><div class="slide">
+<h1 id="структури">Структури</h1>
+<h3 id="преместване-на-структури">Преместване на структури</h3>
+<p>По подразбиране структурите се преместват (защото не имплементират <code>Copy</code>).</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="b3c03fba678cada8014f8bd9534eee85648a700d">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> {
+    username: <span class="hljs-built_in">String</span>,
+    email: <span class="hljs-built_in">String</span>,
+    sign_in_count: <span class="hljs-built_in">u64</span>
+}
+
+<span class="hljs-keyword">let</span> user1 = User {
+    username: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>),
+    email: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>),
+    sign_in_count: <span class="hljs-number">10</span>,
+};
+
+<span class="hljs-keyword">let</span> user2 = user1;
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"user1 = {}, {}"</span>, user1.username, user1.email);
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"user2 = {}, {}"</span>, user2.username, user2.email);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(187,0,0)">error[E0382]</span><span style="font-weight:bold;color:rgb(0,0,0)">: borrow of moved value: `user1`</span>
+  <span style="font-weight:bold;color:rgb(0,187,187)">--&gt; </span>src\bin\main_b3c03fba678cada8014f8bd9534eee85648a700d.rs:16:44
+   <span style="font-weight:bold;color:rgb(0,187,187)">|</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">8</span>  <span style="font-weight:bold;color:rgb(0,187,187)">| </span>let user1 = User {
+   <span style="font-weight:bold;color:rgb(0,187,187)">| </span>    <span style="font-weight:bold;color:rgb(0,187,187)">-----</span> <span style="font-weight:bold;color:rgb(0,187,187)">move occurs because `user1` has type `User`, which does not implement the `Copy` trait</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">...</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">14</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span>let user2 = user1;
+   <span style="font-weight:bold;color:rgb(0,187,187)">| </span>            <span style="font-weight:bold;color:rgb(0,187,187)">-----</span> <span style="font-weight:bold;color:rgb(0,187,187)">value moved here</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">15</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span>
+<span style="font-weight:bold;color:rgb(0,187,187)">16</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span>println!("user1 = {}, {}", user1.username, user1.email);
+   <span style="font-weight:bold;color:rgb(0,187,187)">| </span>                                           <span style="font-weight:bold;color:rgb(187,0,0)">^^^^^^^^^^^</span> <span style="font-weight:bold;color:rgb(187,0,0)">value borrowed here after move</span>
+
+<span style="font-weight:bold;color:rgb(0,0,0)">For more information about this error, try `rustc --explain E0382`.</span>
+<span style="font-weight:bold;color:rgb(187,0,0)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="b3c03fba678cada8014f8bd9534eee85648a700d">fn main() {
+struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64
+}
+
+let user1 = User {
+    username: String::from("Иванчо"),
+    email: String::from("ivan40@abv.bg"),
+    sign_in_count: 10,
+};
+
+let user2 = user1;
+
+println!("user1 = {}, {}", user1.username, user1.email);
+println!("user2 = {}, {}", user2.username, user2.email);
+}</pre>
+</div><div class="slide">
+<h1 id="структури">Структури</h1>
+<h3 id="клониране-на-структури">Клониране на структури</h3>
+<p>За да можем да създаваме копия на нашата структура, тя трябва да имплементира trait-а <code>Clone</code>.<br />
+Чрез атрибута <code>#[derive(Clone)]</code> компилатора автоматично ще ни създаде имплементация на <code>Clone</code>.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="9d25d778945d6ebe0c9be335e3c110372d50aa41">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-meta">#[derive(Clone)]</span>
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> {
+    username: <span class="hljs-built_in">String</span>,
+    email: <span class="hljs-built_in">String</span>,
+    sign_in_count: <span class="hljs-built_in">u64</span>
+}
+
+<span class="hljs-keyword">let</span> user1 = User {
+    username: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>),
+    email: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>),
+    sign_in_count: <span class="hljs-number">10</span>,
+};
+
+<span class="hljs-keyword">let</span> user2 = user1.clone();
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"user1 = {}, {}"</span>, user1.username, user1.email);
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"user2 = {}, {}"</span>, user2.username, user2.email);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">user1 = Иванчо, ivan40@abv.bg
+user2 = Иванчо, ivan40@abv.bg</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="9d25d778945d6ebe0c9be335e3c110372d50aa41">fn main() {
+#[derive(Clone)]
+struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64
+}
+
+let user1 = User {
+    username: String::from("Иванчо"),
+    email: String::from("ivan40@abv.bg"),
+    sign_in_count: 10,
+};
+
+let user2 = user1.clone();
+
+println!("user1 = {}, {}", user1.username, user1.email);
+println!("user2 = {}, {}", user2.username, user2.email);
+}</pre>
+</div><div class="slide">
+<h1 id="структури">Структури</h1>
+<h3 id="принтиране-на-структури">Принтиране на структури</h3>
+<p>Аналогично можем да използваме атрибута <code>#[derive(Debug)]</code> за да получим имплементация на trait-а <code>Debug</code>.<br />
+Това ни позволява да принтираме нашата структура с <code>println!</code> инползвайки placeholder <code>{:?}</code>.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="277f8d0c6988973507dc32ddf32d5ae3a12453d1">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-meta">#[derive(Clone, Debug)]</span>
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> {
+    username: <span class="hljs-built_in">String</span>,
+    email: <span class="hljs-built_in">String</span>,
+    sign_in_count: <span class="hljs-built_in">u64</span>
+}
+
+<span class="hljs-keyword">let</span> user1 = User {
+    username: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>),
+    email: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>),
+    sign_in_count: <span class="hljs-number">10</span>,
+};
+
+<span class="hljs-keyword">let</span> user2 = user1.clone();
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"user1 = {:?}"</span>, user1);
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"user2 = {:?}"</span>, user2);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">user1 = User { username: "Иванчо", email: "ivan40@abv.bg", sign_in_count: 10 }
+user2 = User { username: "Иванчо", email: "ivan40@abv.bg", sign_in_count: 10 }</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="277f8d0c6988973507dc32ddf32d5ae3a12453d1">fn main() {
+#[derive(Clone, Debug)]
+struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64
+}
+
+let user1 = User {
+    username: String::from("Иванчо"),
+    email: String::from("ivan40@abv.bg"),
+    sign_in_count: 10,
+};
+
+let user2 = user1.clone();
+
+println!("user1 = {:?}", user1);
+println!("user2 = {:?}", user2);
+}</pre>
+</div><div class="slide">
+<h1 id="структури">Структури</h1>
+<h3 id="struct-update-синтаксис">Struct update синтаксис</h3>
+<p>Можем да дадем стойност само на част от полетата и останалите да попълним от друга инстанция</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="e0ea8094bc2c9a4de9fd2d0389d26427c235e6bb">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> user = User {
+    username: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>),
+    email: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>),
+    sign_in_count: <span class="hljs-number">10</span>,
+};
+
+<span class="hljs-keyword">let</span> hacker = User {
+    email: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"hackerman@l33t.hax"</span>),
+    ..user
+};
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}, {}"</span>, hacker.username, hacker.email);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">Иванчо, hackerman@l33t.hax</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="e0ea8094bc2c9a4de9fd2d0389d26427c235e6bb">struct User { username: String, email: String, sign_in_count: u64 }
+fn main() {
+let user = User {
+    username: String::from("Иванчо"),
+    email: String::from("ivan40@abv.bg"),
+    sign_in_count: 10,
+};
+
+let hacker = User {
+    email: String::from("hackerman@l33t.hax"),
+    ..user
+};
+
+println!("{}, {}", hacker.username, hacker.email);
+}</pre>
+</div><div class="slide">
+<h1 id="структури">Структури</h1>
+<h3 id="struct-update-синтаксис">Struct update синтаксис</h3>
+<p>Това ще премести полетата от оригиналната инстанция</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="209502704f19bd1ac614f06e4f28a71d4c84dc9b">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> user = User {
+    username: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>),
+    email: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>),
+    sign_in_count: <span class="hljs-number">10</span>,
+};
+
+<span class="hljs-keyword">let</span> hacker = User {
+    email: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"hackerman@l33t.hax"</span>),
+    ..user
+};
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}, {}"</span>, hacker.username, hacker.email);
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}, {}"</span>, user.username, user.email);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(187,0,0)">error[E0382]</span><span style="font-weight:bold;color:rgb(0,0,0)">: borrow of moved value: `user.username`</span>
+  <span style="font-weight:bold;color:rgb(0,187,187)">--&gt; </span>src\bin\main_209502704f19bd1ac614f06e4f28a71d4c84dc9b.rs:15:20
+   <span style="font-weight:bold;color:rgb(0,187,187)">|</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">9</span>  <span style="font-weight:bold;color:rgb(0,187,187)">| </span>  let hacker = User {
+   <span style="font-weight:bold;color:rgb(0,187,187)">| </span> <span style="font-weight:bold;color:rgb(0,187,187)">______________-</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">10</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span><span style="font-weight:bold;color:rgb(0,187,187)">|</span>     email: String::from("hackerman@l33t.hax"),
+<span style="font-weight:bold;color:rgb(0,187,187)">11</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span><span style="font-weight:bold;color:rgb(0,187,187)">|</span>     ..user
+<span style="font-weight:bold;color:rgb(0,187,187)">12</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span><span style="font-weight:bold;color:rgb(0,187,187)">|</span> };
+   <span style="font-weight:bold;color:rgb(0,187,187)">| </span><span style="font-weight:bold;color:rgb(0,187,187)">|_-</span> <span style="font-weight:bold;color:rgb(0,187,187)">value moved here</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">...</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">15</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span>  println!("{}, {}", user.username, user.email);
+   <span style="font-weight:bold;color:rgb(0,187,187)">| </span>                     <span style="font-weight:bold;color:rgb(187,0,0)">^^^^^^^^^^^^^</span> <span style="font-weight:bold;color:rgb(187,0,0)">value borrowed here after move</span>
+   <span style="font-weight:bold;color:rgb(0,187,187)">|</span>
+   <span style="font-weight:bold;color:rgb(0,187,187)">= </span><span style="font-weight:bold;color:rgb(0,0,0)">note</span>: move occurs because `user.username` has type `String`, which does not implement the `Copy` trait
+
+<span style="font-weight:bold;color:rgb(0,0,0)">For more information about this error, try `rustc --explain E0382`.</span>
+<span style="font-weight:bold;color:rgb(187,0,0)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="209502704f19bd1ac614f06e4f28a71d4c84dc9b">struct User { username: String, email: String, sign_in_count: u64 }
+fn main() {
+let user = User {
+    username: String::from("Иванчо"),
+    email: String::from("ivan40@abv.bg"),
+    sign_in_count: 10,
+};
+
+let hacker = User {
+    email: String::from("hackerman@l33t.hax"),
+    ..user
+};
+
+println!("{}, {}", hacker.username, hacker.email);
+println!("{}, {}", user.username, user.email);
+}</pre>
+</div><div class="slide">
+<h1 id="структури">Структури</h1>
+<h3 id="кратък-синтаксис-за-създаване-на-структури">Кратък синтаксис за създаване на структури</h3>
+<p>Често се случва стойността на поле да се задава чрез променлива със същото име.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="3432b233a654740c7b633fae3f4c1b4a14e0f892">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Rectangle</span></span> {
+    width: <span class="hljs-built_in">f64</span>,
+    height: <span class="hljs-built_in">f64</span>,
+}
+
+<span class="hljs-keyword">let</span> width = <span class="hljs-number">2.0</span>;
+<span class="hljs-keyword">let</span> height = <span class="hljs-number">3.0</span>;
+
+<span class="hljs-keyword">let</span> rect = Rectangle {
+    width: width,
+    height: height,
+};</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="3432b233a654740c7b633fae3f4c1b4a14e0f892">fn main() {
+struct Rectangle {
+    width: f64,
+    height: f64,
+}
+
+let width = 2.0;
+let height = 3.0;
+
+let rect = Rectangle {
+    width: width,
+    height: height,
+};
+}</pre>
+</div><div class="slide">
+<h1 id="структури">Структури</h1>
+<h3 id="кратък-синтаксис-за-създаване-на-структури">Кратък синтаксис за създаване на структури</h3>
+<p>Често се случва стойността на поле да се задава чрез променлива със същото име. Има кратък синтаксис за това.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="c9affe5d4817f8a0d448b261c659569ee6c0bd53">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Rectangle</span></span> {
+    width: <span class="hljs-built_in">f64</span>,
+    height: <span class="hljs-built_in">f64</span>,
+}
+
+<span class="hljs-keyword">let</span> width = <span class="hljs-number">2.0</span>;
+<span class="hljs-keyword">let</span> height = <span class="hljs-number">3.0</span>;
+
+<span class="hljs-keyword">let</span> rect = Rectangle {
+    width,   <span class="hljs-comment">// &lt;-</span>
+    height,  <span class="hljs-comment">// &lt;-</span>
+};</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="c9affe5d4817f8a0d448b261c659569ee6c0bd53">fn main() {
+struct Rectangle {
+    width: f64,
+    height: f64,
+}
+
+let width = 2.0;
+let height = 3.0;
+
+let rect = Rectangle {
+    width,   // <-
+    height,  // <-
+};
+}</pre>
+</div><div class="slide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="асоциирани-функции">Асоциирани функции</h3>
+</div><div class="slide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="асоциирани-функции">Асоциирани функции</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="a10d3a69e0c5b7fc5ed34afd77e73f94a2628344">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> { ... }
+
+<span class="hljs-keyword">impl</span> User {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(username: <span class="hljs-built_in">String</span>, email: <span class="hljs-built_in">String</span>) -&gt; User {
+        User {
+            username: username,
+            email: email,
+            sign_in_count: <span class="hljs-number">0</span>,
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="a10d3a69e0c5b7fc5ed34afd77e73f94a2628344">fn main() {}
+struct User { username: String, email: String, sign_in_count: u64 }
+/*
+struct User { ... }
+*/
+
+impl User {
+    fn new(username: String, email: String) -> User {
+        User {
+            username: username,
+            email: email,
+            sign_in_count: 0,
+        }
+    }
+}</pre>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="асоциирани-функции">Асоциирани функции</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="a10d3a69e0c5b7fc5ed34afd77e73f94a2628344">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> { ... }
+
+<span class="hljs-keyword">impl</span> User {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(username: <span class="hljs-built_in">String</span>, email: <span class="hljs-built_in">String</span>) -&gt; User {
+        User {
+            username: username,
+            email: email,
+            sign_in_count: <span class="hljs-number">0</span>,
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="a10d3a69e0c5b7fc5ed34afd77e73f94a2628344">fn main() {}
+struct User { username: String, email: String, sign_in_count: u64 }
+/*
+struct User { ... }
+*/
+
+impl User {
+    fn new(username: String, email: String) -> User {
+        User {
+            username: username,
+            email: email,
+            sign_in_count: 0,
+        }
+    }
+}</pre>
+<ul>
+<li><code>struct</code> блока съдържа само полетата на структурата</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="асоциирани-функции">Асоциирани функции</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="a10d3a69e0c5b7fc5ed34afd77e73f94a2628344">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> { ... }
+
+<span class="hljs-keyword">impl</span> User {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(username: <span class="hljs-built_in">String</span>, email: <span class="hljs-built_in">String</span>) -&gt; User {
+        User {
+            username: username,
+            email: email,
+            sign_in_count: <span class="hljs-number">0</span>,
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="a10d3a69e0c5b7fc5ed34afd77e73f94a2628344">fn main() {}
+struct User { username: String, email: String, sign_in_count: u64 }
+/*
+struct User { ... }
+*/
+
+impl User {
+    fn new(username: String, email: String) -> User {
+        User {
+            username: username,
+            email: email,
+            sign_in_count: 0,
+        }
+    }
+}</pre>
+<ul>
+<li><code>struct</code> блока съдържа само полетата на структурата</li>
+<li>методи и функции се добавят в отделен <code>impl</code> блок</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="асоциирани-функции">Асоциирани функции</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="a10d3a69e0c5b7fc5ed34afd77e73f94a2628344">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> { ... }
+
+<span class="hljs-keyword">impl</span> User {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(username: <span class="hljs-built_in">String</span>, email: <span class="hljs-built_in">String</span>) -&gt; User {
+        User {
+            username: username,
+            email: email,
+            sign_in_count: <span class="hljs-number">0</span>,
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="a10d3a69e0c5b7fc5ed34afd77e73f94a2628344">fn main() {}
+struct User { username: String, email: String, sign_in_count: u64 }
+/*
+struct User { ... }
+*/
+
+impl User {
+    fn new(username: String, email: String) -> User {
+        User {
+            username: username,
+            email: email,
+            sign_in_count: 0,
+        }
+    }
+}</pre>
+<ul>
+<li><code>struct</code> блока съдържа само полетата на структурата</li>
+<li>методи и функции се добавят в отделен <code>impl</code> блок</li>
+<li>разделение между данни и логика</li>
+</ul>
+</div><div class="slide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="асоциирани-функции">Асоциирани функции</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="72430d6a9eca0e3706b433c4d6587fb91e20e4bf">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> { ... }
+
+<span class="hljs-keyword">impl</span> User {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(username: <span class="hljs-built_in">String</span>, email: <span class="hljs-built_in">String</span>) -&gt; User {
+        User {
+            username: username,
+            email: email,
+            sign_in_count: <span class="hljs-number">0</span>,
+        }
+    }
+}
+
+<span class="hljs-keyword">let</span> user = User::new(<span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>), <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>));</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="72430d6a9eca0e3706b433c4d6587fb91e20e4bf">struct User { username: String, email: String, sign_in_count: u64 }
+/*
+struct User { ... }
+*/
+
+impl User {
+    fn new(username: String, email: String) -> User {
+        User {
+            username: username,
+            email: email,
+            sign_in_count: 0,
+        }
+    }
+}
+
+fn main() {
+let user = User::new(String::from("Иванчо"), String::from("ivan40@abv.bg"));
+}</pre>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="асоциирани-функции">Асоциирани функции</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="72430d6a9eca0e3706b433c4d6587fb91e20e4bf">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> { ... }
+
+<span class="hljs-keyword">impl</span> User {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(username: <span class="hljs-built_in">String</span>, email: <span class="hljs-built_in">String</span>) -&gt; User {
+        User {
+            username: username,
+            email: email,
+            sign_in_count: <span class="hljs-number">0</span>,
+        }
+    }
+}
+
+<span class="hljs-keyword">let</span> user = User::new(<span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>), <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>));</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="72430d6a9eca0e3706b433c4d6587fb91e20e4bf">struct User { username: String, email: String, sign_in_count: u64 }
+/*
+struct User { ... }
+*/
+
+impl User {
+    fn new(username: String, email: String) -> User {
+        User {
+            username: username,
+            email: email,
+            sign_in_count: 0,
+        }
+    }
+}
+
+fn main() {
+let user = User::new(String::from("Иванчо"), String::from("ivan40@abv.bg"));
+}</pre>
+<ul>
+<li>функцията <code>new</code> се нарича асоциирана функция - семантично еднаква със статичен метод от други езици</li>
+<li>когато викаме асоциирани функции като <code>new</code>, трябва да ги префиксираме с името на структурата (<code>User</code>) и оператора <code>::</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="конструктори-и-деструктори">Конструктори и деструктори</h3>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="конструктори-и-деструктори">Конструктори и деструктори</h3>
+<ul>
+<li>в Rust няма конструктори</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="конструктори-и-деструктори">Конструктори и деструктори</h3>
+<ul>
+<li>в Rust няма конструктори</li>
+<li>конвенция е да има асоциирана функция, която създава обект от типа</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="конструктори-и-деструктори">Конструктори и деструктори</h3>
+<ul>
+<li>в Rust няма конструктори</li>
+<li>конвенция е да има асоциирана функция, която създава обект от типа</li>
+<li>обикновенно името е<ul>
+<li><code>new</code></li>
+<li><code>from_*</code></li>
+<li><code>with_*</code></li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="конструктори-и-деструктори">Конструктори и деструктори</h3>
+<ul>
+<li>в Rust няма конструктори</li>
+<li>конвенция е да има асоциирана функция, която създава обект от типа</li>
+<li>обикновенно името е<ul>
+<li><code>new</code></li>
+<li><code>from_*</code></li>
+<li><code>with_*</code></li></ul></li>
+<li>но има и изключения<ul>
+<li><code>File::open</code></li></ul></li>
+</ul>
+</div><div class="slide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="конструктори-и-деструктори">Конструктори и деструктори</h3>
+<ul>
+<li>в Rust има деструктори</li>
+<li>дефинират се чрез trait-а <code>Drop</code></li>
+<li>за тях ще говорим по-късно</li>
+</ul>
+</div><div class="slide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="типа-self">Типа Self</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="faf5d8fa21bfa0d6f3e17595930959b7e6e85a03">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Rectangle</span></span> { width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span> }
+
+<span class="hljs-keyword">impl</span> Rectangle {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span>) -&gt; <span class="hljs-keyword">Self</span> {
+        <span class="hljs-keyword">Self</span> { width, height }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="faf5d8fa21bfa0d6f3e17595930959b7e6e85a03">struct Rectangle { width: f64, height: f64 }
+
+impl Rectangle {
+    fn new(width: f64, height: f64) -> Self {
+        Self { width, height }
+    }
+}
+fn main() {}</pre>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="типа-self">Типа Self</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="faf5d8fa21bfa0d6f3e17595930959b7e6e85a03">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Rectangle</span></span> { width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span> }
+
+<span class="hljs-keyword">impl</span> Rectangle {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span>) -&gt; <span class="hljs-keyword">Self</span> {
+        <span class="hljs-keyword">Self</span> { width, height }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="faf5d8fa21bfa0d6f3e17595930959b7e6e85a03">struct Rectangle { width: f64, height: f64 }
+
+impl Rectangle {
+    fn new(width: f64, height: f64) -> Self {
+        Self { width, height }
+    }
+}
+fn main() {}</pre>
+<ul>
+<li>достъпен само в <code>impl</code> блок</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="типа-self">Типа Self</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="faf5d8fa21bfa0d6f3e17595930959b7e6e85a03">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Rectangle</span></span> { width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span> }
+
+<span class="hljs-keyword">impl</span> Rectangle {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span>) -&gt; <span class="hljs-keyword">Self</span> {
+        <span class="hljs-keyword">Self</span> { width, height }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="faf5d8fa21bfa0d6f3e17595930959b7e6e85a03">struct Rectangle { width: f64, height: f64 }
+
+impl Rectangle {
+    fn new(width: f64, height: f64) -> Self {
+        Self { width, height }
+    }
+}
+fn main() {}</pre>
+<ul>
+<li>достъпен само в <code>impl</code> блок</li>
+<li>alias на типа, за който имплементираме</li>
+</ul>
+</div><div class="slide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="методи">Методи</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="277f0faf9b0a2bfd45382510eea52d0b65a64efd">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Rectangle</span></span> { width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span> }
+
+<span class="hljs-keyword">impl</span> Rectangle {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">area</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">f64</span> {
+        <span class="hljs-keyword">self</span>.width * <span class="hljs-keyword">self</span>.height
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="277f0faf9b0a2bfd45382510eea52d0b65a64efd">struct Rectangle { width: f64, height: f64 }
+
+impl Rectangle {
+    fn area(&self) -> f64 {
+        self.width * self.height
+    }
+}
+fn main() {}</pre>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="методи">Методи</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="277f0faf9b0a2bfd45382510eea52d0b65a64efd">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Rectangle</span></span> { width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span> }
+
+<span class="hljs-keyword">impl</span> Rectangle {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">area</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">f64</span> {
+        <span class="hljs-keyword">self</span>.width * <span class="hljs-keyword">self</span>.height
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="277f0faf9b0a2bfd45382510eea52d0b65a64efd">struct Rectangle { width: f64, height: f64 }
+
+impl Rectangle {
+    fn area(&self) -> f64 {
+        self.width * self.height
+    }
+}
+fn main() {}</pre>
+<ul>
+<li>функция, която приема като първи аргумент <code>self</code>, <code>&amp;self</code>, <code>&amp;mut self</code> (method receiver)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="методи">Методи</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="277f0faf9b0a2bfd45382510eea52d0b65a64efd">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Rectangle</span></span> { width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span> }
+
+<span class="hljs-keyword">impl</span> Rectangle {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">area</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">f64</span> {
+        <span class="hljs-keyword">self</span>.width * <span class="hljs-keyword">self</span>.height
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="277f0faf9b0a2bfd45382510eea52d0b65a64efd">struct Rectangle { width: f64, height: f64 }
+
+impl Rectangle {
+    fn area(&self) -> f64 {
+        self.width * self.height
+    }
+}
+fn main() {}</pre>
+<ul>
+<li>функция, която приема като първи аргумент <code>self</code>, <code>&amp;self</code>, <code>&amp;mut self</code> (method receiver)</li>
+<li><code>self</code> е еквивалентно на <code>self: Self</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="методи">Методи</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="277f0faf9b0a2bfd45382510eea52d0b65a64efd">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Rectangle</span></span> { width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span> }
+
+<span class="hljs-keyword">impl</span> Rectangle {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">area</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">f64</span> {
+        <span class="hljs-keyword">self</span>.width * <span class="hljs-keyword">self</span>.height
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="277f0faf9b0a2bfd45382510eea52d0b65a64efd">struct Rectangle { width: f64, height: f64 }
+
+impl Rectangle {
+    fn area(&self) -> f64 {
+        self.width * self.height
+    }
+}
+fn main() {}</pre>
+<ul>
+<li>функция, която приема като първи аргумент <code>self</code>, <code>&amp;self</code>, <code>&amp;mut self</code> (method receiver)</li>
+<li><code>self</code> е еквивалентно на <code>self: Self</code></li>
+<li><code>&amp;self</code> е еквивалентно на <code>self: &amp;Self</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="методи">Методи</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="277f0faf9b0a2bfd45382510eea52d0b65a64efd">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Rectangle</span></span> { width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span> }
+
+<span class="hljs-keyword">impl</span> Rectangle {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">area</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">f64</span> {
+        <span class="hljs-keyword">self</span>.width * <span class="hljs-keyword">self</span>.height
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="277f0faf9b0a2bfd45382510eea52d0b65a64efd">struct Rectangle { width: f64, height: f64 }
+
+impl Rectangle {
+    fn area(&self) -> f64 {
+        self.width * self.height
+    }
+}
+fn main() {}</pre>
+<ul>
+<li>функция, която приема като първи аргумент <code>self</code>, <code>&amp;self</code>, <code>&amp;mut self</code> (method receiver)</li>
+<li><code>self</code> е еквивалентно на <code>self: Self</code></li>
+<li><code>&amp;self</code> е еквивалентно на <code>self: &amp;Self</code></li>
+<li><code>&amp;mut self</code> е еквивалентно на <code>self: &amp;mut Self</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="методи">Методи</h3>
+<p>Могат да се извикват със синтаксиса за методи</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="17e39bb681bcf37ec1cdb3a8cb404d952add3d1b">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Rectangle</span></span> { width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span> }
+
+<span class="hljs-keyword">impl</span> Rectangle {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">area</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">f64</span> {
+        <span class="hljs-keyword">self</span>.width * <span class="hljs-keyword">self</span>.height
+    }
+}
+
+<span class="hljs-keyword">let</span> rect = Rectangle::new(<span class="hljs-number">2.0</span>, <span class="hljs-number">3.0</span>);
+<span class="hljs-keyword">let</span> area = rect.area();
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"area = {}"</span>, area);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">area = 6</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="17e39bb681bcf37ec1cdb3a8cb404d952add3d1b">struct Rectangle { width: f64, height: f64 }
+
+impl Rectangle {
+fn new(width: f64, height: f64) -> Self { Self { width, height } }
+    fn area(&self) -> f64 {
+        self.width * self.height
+    }
+}
+
+fn main() {
+let rect = Rectangle::new(2.0, 3.0);
+let area = rect.area();
+
+println!("area = {}", area);
+}</pre>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="методи">Методи</h3>
+<p>Могат да се извикват със синтаксиса за методи</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="17e39bb681bcf37ec1cdb3a8cb404d952add3d1b">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Rectangle</span></span> { width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span> }
+
+<span class="hljs-keyword">impl</span> Rectangle {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">area</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">f64</span> {
+        <span class="hljs-keyword">self</span>.width * <span class="hljs-keyword">self</span>.height
+    }
+}
+
+<span class="hljs-keyword">let</span> rect = Rectangle::new(<span class="hljs-number">2.0</span>, <span class="hljs-number">3.0</span>);
+<span class="hljs-keyword">let</span> area = rect.area();
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"area = {}"</span>, area);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">area = 6</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="17e39bb681bcf37ec1cdb3a8cb404d952add3d1b">struct Rectangle { width: f64, height: f64 }
+
+impl Rectangle {
+fn new(width: f64, height: f64) -> Self { Self { width, height } }
+    fn area(&self) -> f64 {
+        self.width * self.height
+    }
+}
+
+fn main() {
+let rect = Rectangle::new(2.0, 3.0);
+let area = rect.area();
+
+println!("area = {}", area);
+}</pre>
+<ul>
+<li>както полетата, методите се достъпват с <code>.</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="методи">Методи</h3>
+<p>Могат да се извикват със синтаксиса за методи</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="17e39bb681bcf37ec1cdb3a8cb404d952add3d1b">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Rectangle</span></span> { width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span> }
+
+<span class="hljs-keyword">impl</span> Rectangle {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">area</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">f64</span> {
+        <span class="hljs-keyword">self</span>.width * <span class="hljs-keyword">self</span>.height
+    }
+}
+
+<span class="hljs-keyword">let</span> rect = Rectangle::new(<span class="hljs-number">2.0</span>, <span class="hljs-number">3.0</span>);
+<span class="hljs-keyword">let</span> area = rect.area();
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"area = {}"</span>, area);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">area = 6</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="17e39bb681bcf37ec1cdb3a8cb404d952add3d1b">struct Rectangle { width: f64, height: f64 }
+
+impl Rectangle {
+fn new(width: f64, height: f64) -> Self { Self { width, height } }
+    fn area(&self) -> f64 {
+        self.width * self.height
+    }
+}
+
+fn main() {
+let rect = Rectangle::new(2.0, 3.0);
+let area = rect.area();
+
+println!("area = {}", area);
+}</pre>
+<ul>
+<li>както полетата, методите се достъпват с <code>.</code></li>
+<li>компилаторът автоматично добавя <code>*</code>, <code>&amp;</code> или <code>&amp;mut</code>, така че типа на аргумента да съвпадне с типа на method receiver-а</li>
+</ul>
+</div><div class="slide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="методи">Методи</h3>
+<p>Могат да се извикват и като асоциирани функции</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="9dd3e8a3ca27173dd512344552c00981233e0631">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Rectangle</span></span> { width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span> }
+
+<span class="hljs-keyword">impl</span> Rectangle {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">area</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">f64</span> {
+        <span class="hljs-keyword">self</span>.width * <span class="hljs-keyword">self</span>.height
+    }
+}
+
+<span class="hljs-keyword">let</span> rect = Rectangle::new(<span class="hljs-number">2.0</span>, <span class="hljs-number">3.0</span>);
+<span class="hljs-keyword">let</span> area = Rectangle::area(&amp;rect);
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"area = {}"</span>, area);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">area = 6</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="9dd3e8a3ca27173dd512344552c00981233e0631">struct Rectangle { width: f64, height: f64 }
+
+impl Rectangle {
+fn new(width: f64, height: f64) -> Self { Self { width, height } }
+    fn area(&self) -> f64 {
+        self.width * self.height
+    }
+}
+
+fn main() {
+let rect = Rectangle::new(2.0, 3.0);
+let area = Rectangle::area(&rect);
+
+println!("area = {}", area);
+}</pre>
+</div><div class="slide">
+<h1 id="методи-и-асоциирани-функции">Методи и асоциирани функции</h1>
+<h3 id="множество-impl-блокове">Множество impl блокове</h3>
+<p>Позволено е декларирането на повече от един <code>impl</code> блок. Удобно е при групиране на методи.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="37febf05b467c4731b61e6d23f3a1f0d5622ebd1">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Rectangle</span></span> { width: <span class="hljs-built_in">f64</span>, height: <span class="hljs-built_in">f64</span> }
+
+<span class="hljs-keyword">impl</span> Rectangle {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">area</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">f64</span> {
+        <span class="hljs-keyword">self</span>.width * <span class="hljs-keyword">self</span>.height
+    }
+}
+
+<span class="hljs-keyword">impl</span> Rectangle {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">perimeter</span></span>(&amp;<span class="hljs-keyword">self</span>) -&gt; <span class="hljs-built_in">f64</span> {
+        <span class="hljs-number">2.0</span> * (<span class="hljs-keyword">self</span>.width + <span class="hljs-keyword">self</span>.height)
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="37febf05b467c4731b61e6d23f3a1f0d5622ebd1">struct Rectangle { width: f64, height: f64 }
+
+impl Rectangle {
+    fn area(&self) -> f64 {
+        self.width * self.height
+    }
+}
+
+impl Rectangle {
+    fn perimeter(&self) -> f64 {
+        2.0 * (self.width + self.height)
+    }
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="tuples">Tuples</h1>
+<h3 id="преговор">(преговор)</h3>
+<ul>
+<li><code>(A, B, C, ...)</code></li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="a79d02e5eeb214a639c9495179e319eabb25ad08">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">let</span> tuple: (<span class="hljs-built_in">i32</span>, <span class="hljs-built_in">u32</span>, <span class="hljs-built_in">bool</span>) = (<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-literal">false</span>);
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}"</span>, tuple.<span class="hljs-number">0</span>);
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}"</span>, tuple.<span class="hljs-number">1</span>);
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"{}"</span>, tuple.<span class="hljs-number">2</span>);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">1
+2
+false</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="a79d02e5eeb214a639c9495179e319eabb25ad08">fn main() {
+let tuple: (i32, u32, bool) = (1, 2, false);
+
+println!("{}", tuple.0);
+println!("{}", tuple.1);
+println!("{}", tuple.2);
+}</pre>
+</div><div class="slide">
+<h1 id="tuple-structs">Tuple structs</h1>
+<p>Именувани кортежи</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="a5a4fae7c2eb8fe5bf2b07120f9105167da3485a">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Color</span></span>(<span class="hljs-built_in">f32</span>, <span class="hljs-built_in">f32</span>, <span class="hljs-built_in">f32</span>);
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Point</span></span>(<span class="hljs-built_in">f32</span>, <span class="hljs-built_in">f32</span>, <span class="hljs-built_in">f32</span>);
+
+<span class="hljs-keyword">let</span> black = Color(<span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>);
+<span class="hljs-keyword">let</span> origin = Point(<span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>);</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="a5a4fae7c2eb8fe5bf2b07120f9105167da3485a">fn main() {
+struct Color(f32, f32, f32);
+struct Point(f32, f32, f32);
+
+let black = Color(0.0, 0.0, 0.0);
+let origin = Point(0.0, 0.0, 0.0);
+}</pre>
+</div><div class="slide">
+<h1 id="tuple-structs">Tuple structs</h1>
+<p>Полетата се достъпват с <code>.0</code>, <code>.1</code>, и т.н., както при нормален tupple</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="ad2e4c5a365beb7e6e10c075f73690d0b83b8ebc">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Color</span></span>(<span class="hljs-built_in">f32</span>, <span class="hljs-built_in">f32</span>, <span class="hljs-built_in">f32</span>);
+
+<span class="hljs-keyword">let</span> black = Color(<span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>, <span class="hljs-number">0.0</span>);
+
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"r: {}, g: {}, b: {}"</span>, black.<span class="hljs-number">0</span>, black.<span class="hljs-number">1</span>, black.<span class="hljs-number">2</span>);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">r: 0, g: 0, b: 0</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="ad2e4c5a365beb7e6e10c075f73690d0b83b8ebc">fn main() {
+struct Color(f32, f32, f32);
+
+let black = Color(0.0, 0.0, 0.0);
+
+println!("r: {}, g: {}, b: {}", black.0, black.1, black.2);
+}</pre>
+</div><div class="slide">
+<h1 id="tuple-structs">Tuple structs</h1>
+<h3 id="newtype-wrapper">Newtype wrapper</h3>
+<p>Tuple struct с едно поле често се използва за typesafe wrapper.<br />
+Това се нарича newtype struct или newtype wrapper.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="242a768ca6459a870293f82d4666e2367fefbd30">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-meta">#[derive(Debug, Clone, Copy)]</span>
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Token</span></span>(<span class="hljs-built_in">u32</span>);</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(187,0,0)">error[E0601]</span><span style="font-weight:bold;color:rgb(0,0,0)">: `main` function not found in crate `main_242a768ca6459a870293f82d4666e2367fefbd30`</span>
+ <span style="font-weight:bold;color:rgb(0,187,187)">--&gt; </span>src\bin\main_242a768ca6459a870293f82d4666e2367fefbd30.rs:1:1
+  <span style="font-weight:bold;color:rgb(0,187,187)">|</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">1</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span><span style="font-weight:bold;color:rgb(187,0,0)">/</span> #[derive(Debug, Clone, Copy)]
+<span style="font-weight:bold;color:rgb(0,187,187)">2</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span><span style="font-weight:bold;color:rgb(187,0,0)">|</span> struct Token(u32);
+  <span style="font-weight:bold;color:rgb(0,187,187)">| </span><span style="font-weight:bold;color:rgb(187,0,0)">|__________________^</span> <span style="font-weight:bold;color:rgb(187,0,0)">consider adding a `main` function to `src\bin\main_242a768ca6459a870293f82d4666e2367fefbd30.rs`</span>
+
+<span style="font-weight:bold;color:rgb(0,0,0)">For more information about this error, try `rustc --explain E0601`.</span>
+<span style="font-weight:bold;color:rgb(187,0,0)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="242a768ca6459a870293f82d4666e2367fefbd30">#[derive(Debug, Clone, Copy)]
+struct Token(u32);</pre>
+</div><div class="slide">
+<h1 id="празни-структури">Празни структури</h1>
+<p>Възможна е декларацията на празни структури. Могат да се използват като маркери - големината им е 0 байта.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="b31745f1e416fb675d90df18d269b6bd75bd3b33">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Electron</span></span> {}
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Proton</span></span>;
+
+<span class="hljs-keyword">let</span> x = Electron {};
+<span class="hljs-keyword">let</span> y = Proton;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="b31745f1e416fb675d90df18d269b6bd75bd3b33">fn main() {
+struct Electron {}
+struct Proton;
+
+let x = Electron {};
+let y = Proton;
+}</pre>
+</div><div class="slide">
+<h1 id="модули">Модули</h1>
+<p><img src="resources\modules.png"></p>
+</div><div class="slide">
+<h1 id="модули">Модули</h1>
+<ul>
+<li>начин да си организираме кода в отделни namespaces</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="модули">Модули</h1>
+<ul>
+<li>начин да си организираме кода в отделни namespaces</li>
+<li>обикновенно йерархията от модули съвпада с йерархията на файловете на проекта ни</li>
+</ul>
+</div><div class="slide">
+<h1 id="модули">Модули</h1>
+<p>Нека си създадем библиотека:</p>
+<p><code>$ cargo new communicator --lib</code></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">communicator
+├── Cargo.toml
+└── src
+    └── lib.rs</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="модули">Модули</h1>
+<ul>
+<li>главния файл на проекта ни е и главния модул<ul>
+<li>src/main.rs</li>
+<li>src/lib.rs</li></ul></li>
+</ul>
+</div><div class="slide">
+<h1 id="модули">Модули</h1>
+<p>Можем да дефинираме подмодули в същия файл</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="0652d350a19eff44a87f2e9e69f7e8853f641341">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">// src/lib.rs</span>
+
+<span class="hljs-keyword">mod</span> network {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() {
+        <span class="hljs-comment">// ...</span>
+    }
+}
+
+<span class="hljs-keyword">mod</span> client {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() {
+        <span class="hljs-comment">// ...</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="0652d350a19eff44a87f2e9e69f7e8853f641341">
+mod network {
+    fn connect() {
+        // ...
+    }
+}
+
+mod client {
+    fn connect() {
+        // ...
+    }
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="модули">Модули</h1>
+<p>Можем да дефинираме подмодули и в отделни файлове</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">communicator
+├── Cargo.toml
+└── src
+    ├── client.rs
+    ├── lib.rs
+    └── network.rs</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">// src/lib.rs</span>
+
+<span class="hljs-keyword">mod</span> network;
+<span class="hljs-keyword">mod</span> client;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<div class="split-view" markdown="1"><div class="lhs" markdown="1"><p>
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="c1c489fd14ed0bb61b1690ec7438a5e65f9a8e23">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">// src/network.rs</span>
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() {
+    <span class="hljs-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                </p>
+<p><pre class="rustc-source" data-sha="c1c489fd14ed0bb61b1690ec7438a5e65f9a8e23">
+fn connect() {
+    // ...
+}
+fn main() {}</pre></p></div>
+<div class="rhs" markdown="1"><p>
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="a2e24040ca497254309b73f3f22979072fbb1d40">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">// src/client.rs</span>
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() {
+    <span class="hljs-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                </p>
+<p><pre class="rustc-source" data-sha="a2e24040ca497254309b73f3f22979072fbb1d40">
+fn connect() {
+    // ...
+}
+fn main() {}</pre></p></div></div>
+</div><div class="slide subslide">
+<h1 id="модули">Модули</h1>
+<p>Можем да дефинираме подмодули и в отделни файлове</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">communicator
+├── Cargo.toml
+└── src
+    ├── client.rs
+    ├── lib.rs
+    └── network.rs</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">// src/lib.rs</span>
+
+<span class="hljs-keyword">mod</span> network;
+<span class="hljs-keyword">mod</span> client;</code></pre>
+                    </div>
+                    
+                </div>
+                
+<div class="split-view" markdown="1"><div class="lhs" markdown="1"><p>
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="c1c489fd14ed0bb61b1690ec7438a5e65f9a8e23">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">// src/network.rs</span>
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() {
+    <span class="hljs-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                </p>
+<p><pre class="rustc-source" data-sha="c1c489fd14ed0bb61b1690ec7438a5e65f9a8e23">
+fn connect() {
+    // ...
+}
+fn main() {}</pre></p></div>
+<div class="rhs" markdown="1"><p>
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="a2e24040ca497254309b73f3f22979072fbb1d40">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">// src/client.rs</span>
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() {
+    <span class="hljs-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                </p>
+<p><pre class="rustc-source" data-sha="a2e24040ca497254309b73f3f22979072fbb1d40">
+fn connect() {
+    // ...
+}
+fn main() {}</pre></p></div></div>
+<ul>
+<li>декларираме подмодулите с <code>mod MOD_NAME;</code></li>
+<li>компилатора търси файл <code>./MOD_NAME.rs</code> или <code>./MOD_NAME/mod.rs</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="модули">Модули</h1>
+<p>Можем да имаме няколко нива на подмодули</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="c53bdd614ac9980bb0dcc347a51bdb3cdad84839">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">// src/lib.rs</span>
+
+<span class="hljs-keyword">mod</span> network {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() {
+        <span class="hljs-comment">// ...</span>
+    }
+
+    <span class="hljs-keyword">mod</span> client {
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() {
+            <span class="hljs-comment">// ...</span>
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="c53bdd614ac9980bb0dcc347a51bdb3cdad84839">
+mod network {
+    fn connect() {
+        // ...
+    }
+
+    mod client {
+        fn connect() {
+            // ...
+        }
+    }
+}
+
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="модули">Модули</h1>
+<p>Ако искаме да са в отделни файлове трябва да използваме директории</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">communicator
+├── Cargo.toml
+└── src
+    ├── lib.rs
+    └── network
+        ├── client.rs
+        └── mod.rs</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">// src/lib.rs</span>
+
+<span class="hljs-keyword">mod</span> network;</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">// src/network/mod.rs</span>
+
+<span class="hljs-keyword">mod</span> client;
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() {
+    <span class="hljs-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="ecefce14df4c6826605370b0fe9960e8f30e3e33">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">// src/network/client.rs</span>
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() {
+    <span class="hljs-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="ecefce14df4c6826605370b0fe9960e8f30e3e33">
+fn connect() {
+    // ...
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="модули">Модули</h1>
+<p><code>network</code> модула може да го сложим или в <code>src/network/mod.rs</code>, или в <code>src/network.rs</code></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">communicator
+├── Cargo.toml
+└── src
+    ├── lib.rs
+    ├── network.rs
+    └── network
+        └── client.rs</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">// src/lib.rs</span>
+
+<span class="hljs-keyword">mod</span> network;</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">// src/network.rs</span>
+
+<span class="hljs-keyword">mod</span> client;
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() {
+    <span class="hljs-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="ecefce14df4c6826605370b0fe9960e8f30e3e33">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-comment">// src/network/client.rs</span>
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() {
+    <span class="hljs-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="ecefce14df4c6826605370b0fe9960e8f30e3e33">
+fn connect() {
+    // ...
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="достъп">Достъп</h1>
+<p>В модул имаме директен достъп до всичко останало дефинирано в модула</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="fed68130428e099e9308ea708219e7adb366b668">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> client {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() { <span class="hljs-comment">/* ... */</span> }
+
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">init</span></span>() {
+        <span class="hljs-comment">// client::connect();</span>
+        connect();
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="fed68130428e099e9308ea708219e7adb366b668">mod client {
+    fn connect() { /* ... */ }
+
+    fn init() {
+        // client::connect();
+        connect();
+    }
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="достъп">Достъп</h1>
+<p>Ако искаме да използваме нещо извън модула трябва да използваме пълното име</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> client {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() { <span class="hljs-comment">/* ... */</span> }
+}
+
+<span class="hljs-keyword">mod</span> network {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">init</span></span>() {
+        crate::client::connect();
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide subslide">
+<h1 id="достъп">Достъп</h1>
+<p>Ако искаме да използваме нещо извън модула трябва да използваме пълното име</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> client {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() { <span class="hljs-comment">/* ... */</span> }
+}
+
+<span class="hljs-keyword">mod</span> network {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">init</span></span>() {
+        crate::client::connect();
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<ul>
+<li>пълното име започва с име на crate-а или ключовата дума <code>crate</code> ако е дефинирано в нашия проект</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="достъп">Достъп</h1>
+<p>Ако искаме да използваме нещо извън модула трябва да използваме пълното име</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> client {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() { <span class="hljs-comment">/* ... */</span> }
+}
+
+<span class="hljs-keyword">mod</span> network {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">init</span></span>() {
+        crate::client::connect();
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<ul>
+<li>пълното име започва с име на crate-а или ключовата дума <code>crate</code> ако е дефинирано в нашия проект</li>
+<li>след това следва пътя до item-а</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="достъп">Достъп</h1>
+<p>Ако искаме да използваме нещо извън модула трябва да използваме пълното име</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> client {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() { <span class="hljs-comment">/* ... */</span> }
+}
+
+<span class="hljs-keyword">mod</span> network {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">init</span></span>() {
+        crate::client::connect();
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<ul>
+<li>пълното име започва с име на crate-а или ключовата дума <code>crate</code> ако е дефинирано в нашия проект</li>
+<li>след това следва пътя до item-а<ul>
+<li><code>crate::client::connect</code></li>
+<li><code>std::vec::Vec</code></li></ul></li>
+</ul>
+</div><div class="slide">
+<h1 id="достъп">Достъп</h1>
+<p>Ако искаме да използваме нещо извън модула трябва да използваме пълното име..</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="45cfa89b529115e6bc0921c5bdec3a299e3e5247">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> client {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() { <span class="hljs-comment">/* ... */</span> }
+}
+
+<span class="hljs-keyword">mod</span> network {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">init</span></span>() {
+        crate::client::connect();
+    }
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(187,0,0)">error[E0603]</span><span style="font-weight:bold;color:rgb(0,0,0)">: function `connect` is private</span>
+ <span style="font-weight:bold;color:rgb(0,187,187)">--&gt; </span>src\bin\main_45cfa89b529115e6bc0921c5bdec3a299e3e5247.rs:7:24
+  <span style="font-weight:bold;color:rgb(0,187,187)">|</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">7</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span>        crate::client::connect();
+  <span style="font-weight:bold;color:rgb(0,187,187)">| </span>                       <span style="font-weight:bold;color:rgb(187,0,0)">^^^^^^^</span> <span style="font-weight:bold;color:rgb(187,0,0)">private function</span>
+  <span style="font-weight:bold;color:rgb(0,187,187)">|</span>
+<span style="font-weight:bold;color:rgb(0,187,0)">note</span>: the function `connect` is defined here
+ <span style="font-weight:bold;color:rgb(0,187,187)">--&gt; </span>src\bin\main_45cfa89b529115e6bc0921c5bdec3a299e3e5247.rs:2:5
+  <span style="font-weight:bold;color:rgb(0,187,187)">|</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">2</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span>    fn connect() { /* ... */ }
+  <span style="font-weight:bold;color:rgb(0,187,187)">| </span>    <span style="font-weight:bold;color:rgb(0,187,0)">^^^^^^^^^^^^</span>
+
+<span style="font-weight:bold;color:rgb(0,0,0)">For more information about this error, try `rustc --explain E0603`.</span>
+<span style="font-weight:bold;color:rgb(187,0,0)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="45cfa89b529115e6bc0921c5bdec3a299e3e5247">mod client {
+    fn connect() { /* ... */ }
+}
+
+mod network {
+    fn init() {
+        crate::client::connect();
+    }
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="достъп">Достъп</h1>
+<p>… и освен това то трябва да е публично достъпно (keyword <code>pub</code>)</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="64696d5c871ed48f928db638071b3d61605b24d4">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> client {
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() { <span class="hljs-comment">/* ... */</span> }
+}
+
+<span class="hljs-keyword">mod</span> network {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">init</span></span>() {
+        crate::client::connect();
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="64696d5c871ed48f928db638071b3d61605b24d4">mod client {
+    pub fn connect() { /* ... */ }
+}
+
+mod network {
+    fn init() {
+        crate::client::connect();
+    }
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="достъп">Достъп</h1>
+<p>Можем да използваме <code>use</code> за да импортираме имена от друг модул</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="1a11d117236387c97848bfa1e5d010affc93699e">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> client {
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() { <span class="hljs-comment">/* ... */</span> }
+}
+
+<span class="hljs-keyword">mod</span> network {
+    <span class="hljs-keyword">use</span> crate::client::connect;
+
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">init</span></span>() {
+        connect();
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="1a11d117236387c97848bfa1e5d010affc93699e">mod client {
+    pub fn connect() { /* ... */ }
+}
+
+mod network {
+    use crate::client::connect;
+
+    fn init() {
+        connect();
+    }
+}
+fn main() {}</pre>
+</div><div class="slide subslide">
+<h1 id="достъп">Достъп</h1>
+<p>Можем да използваме <code>use</code> за да импортираме имена от друг модул</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="1a11d117236387c97848bfa1e5d010affc93699e">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> client {
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() { <span class="hljs-comment">/* ... */</span> }
+}
+
+<span class="hljs-keyword">mod</span> network {
+    <span class="hljs-keyword">use</span> crate::client::connect;
+
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">init</span></span>() {
+        connect();
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="1a11d117236387c97848bfa1e5d010affc93699e">mod client {
+    pub fn connect() { /* ... */ }
+}
+
+mod network {
+    use crate::client::connect;
+
+    fn init() {
+        connect();
+    }
+}
+fn main() {}</pre>
+<ul>
+<li>ако искаме да импортираме повече от едно нещо: <code>use crate::client::{something, some_other_thing}</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="достъп">Достъп</h1>
+<p>Можем да използваме <code>use</code> за да импортираме имена от друг модул</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="1a11d117236387c97848bfa1e5d010affc93699e">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> client {
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() { <span class="hljs-comment">/* ... */</span> }
+}
+
+<span class="hljs-keyword">mod</span> network {
+    <span class="hljs-keyword">use</span> crate::client::connect;
+
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">init</span></span>() {
+        connect();
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="1a11d117236387c97848bfa1e5d010affc93699e">mod client {
+    pub fn connect() { /* ... */ }
+}
+
+mod network {
+    use crate::client::connect;
+
+    fn init() {
+        connect();
+    }
+}
+fn main() {}</pre>
+<ul>
+<li>ако искаме да импортираме повече от едно нещо: <code>use crate::client::{something, some_other_thing}</code></li>
+<li>или ако искаме да импортираме всичко от даден модул: <code>use crate::client::*</code> (удобно за <code>prelude</code> модули)</li>
+</ul>
+</div><div class="slide">
+<h1 id="достъп">Достъп</h1>
+<p>Ако искаме да импортираме неща от подмодул, може да използваме <code>use self::...</code> или <code>use super::...</code> за релативен път</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="05cf483147b998a734b3ec64def291e62f15d827">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> network {
+    <span class="hljs-keyword">mod</span> client {
+        <span class="hljs-comment">// еквивалентно на use crate::network::init;</span>
+        <span class="hljs-keyword">use</span> super::init;
+
+        <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">connect</span></span>() { <span class="hljs-comment">/* ... */</span> }
+    }
+
+    <span class="hljs-comment">// еквивалентно на use crate::network::client::connect;</span>
+    <span class="hljs-keyword">use</span> self::client::connect;
+
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">init</span></span>() {
+        connect();
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="05cf483147b998a734b3ec64def291e62f15d827">#![allow(unused_imports)]
+mod network {
+    mod client {
+        // еквивалентно на use crate::network::init;
+        use super::init;
+
+        pub fn connect() { /* ... */ }
+    }
+
+    // еквивалентно на use crate::network::client::connect;
+    use self::client::connect;
+
+    fn init() {
+        connect();
+    }
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="достъп-public-и-private">Достъп: public и private</h1>
+</div><div class="slide subslide">
+<h1 id="достъп-public-и-private">Достъп: public и private</h1>
+<ul>
+<li>по подразбиране всичко е private</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="достъп-public-и-private">Достъп: public и private</h1>
+<ul>
+<li>по подразбиране всичко е private</li>
+<li>за да се направи нещо достъпно извън модула, в който е дефинирано, се използва ключовата дума <code>pub</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="достъп-public-и-private">Достъп: public и private</h1>
+<ul>
+<li>по подразбиране всичко е private</li>
+<li>за да се направи нещо достъпно извън модула, в който е дефинирано, се използва ключовата дума <code>pub</code></li>
+<li>винаги има достъп до нещата, които са дефинирани в текущия модул, или по-нагоре в йерархията</li>
+</ul>
+</div><div class="slide">
+<h1 id="достъп-public-и-private">Достъп: public и private</h1>
+<p>Нека да пуснем следния код</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> product {
+    <span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> {
+        username: <span class="hljs-built_in">String</span>,
+        email: <span class="hljs-built_in">String</span>,
+    }
+}
+
+<span class="hljs-keyword">use</span> self::product::User;
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> user = User {
+        username: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>),
+        email: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>),
+    };
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="достъп-public-и-private">Достъп: public и private</h1>
+<p>Резултата</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="c0fba21675df6ceed4f332d59bc57cc61d74014d">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> product {
+    <span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> {
+        username: <span class="hljs-built_in">String</span>,
+        email: <span class="hljs-built_in">String</span>,
+    }
+}
+
+<span class="hljs-keyword">use</span> self::product::User;
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> user = User {
+        username: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>),
+        email: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>),
+    };
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(187,0,0)">error[E0451]</span><span style="font-weight:bold;color:rgb(0,0,0)">: field `username` of struct `User` is private</span>
+  <span style="font-weight:bold;color:rgb(0,187,187)">--&gt; </span>src\bin\main_c0fba21675df6ceed4f332d59bc57cc61d74014d.rs:12:9
+   <span style="font-weight:bold;color:rgb(0,187,187)">|</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">12</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span>        username: String::from("Иванчо"),
+   <span style="font-weight:bold;color:rgb(0,187,187)">| </span>        <span style="font-weight:bold;color:rgb(187,0,0)">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span> <span style="font-weight:bold;color:rgb(187,0,0)">private field</span>
+
+<span style="font-weight:bold;color:rgb(187,0,0)">error[E0451]</span><span style="font-weight:bold;color:rgb(0,0,0)">: field `email` of struct `User` is private</span>
+  <span style="font-weight:bold;color:rgb(0,187,187)">--&gt; </span>src\bin\main_c0fba21675df6ceed4f332d59bc57cc61d74014d.rs:13:9
+   <span style="font-weight:bold;color:rgb(0,187,187)">|</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">13</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span>        email: String::from("ivan40@abv.bg"),
+   <span style="font-weight:bold;color:rgb(0,187,187)">| </span>        <span style="font-weight:bold;color:rgb(187,0,0)">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span> <span style="font-weight:bold;color:rgb(187,0,0)">private field</span>
+
+<span style="font-weight:bold;color:rgb(0,0,0)">For more information about this error, try `rustc --explain E0451`.</span>
+<span style="font-weight:bold;color:rgb(187,0,0)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to 2 previous errors</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="c0fba21675df6ceed4f332d59bc57cc61d74014d">mod product {
+    pub struct User {
+        username: String,
+        email: String,
+    }
+}
+
+use self::product::User;
+
+fn main() {
+    let user = User {
+        username: String::from("Иванчо"),
+        email: String::from("ivan40@abv.bg"),
+    };
+}</pre>
+</div><div class="slide">
+<h1 id="достъп-public-и-private">Достъп: public и private</h1>
+<p>Както казахме, по подразбиране всичко е private за външни модули, включително и полета на структурата.<br />
+Затова трябва да ги отбележим с <code>pub</code>.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="7a1ecd3d3872679f873f1e5a737d8da0ef539e2a">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> product {
+    <span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> {
+        <span class="hljs-keyword">pub</span> username: <span class="hljs-built_in">String</span>,
+        <span class="hljs-keyword">pub</span> email: <span class="hljs-built_in">String</span>,
+    }
+}
+
+<span class="hljs-keyword">use</span> self::product::User;
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> user = User {
+        username: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>),
+        email: <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>),
+    };
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="7a1ecd3d3872679f873f1e5a737d8da0ef539e2a">mod product {
+    pub struct User {
+        pub username: String,
+        pub email: String,
+    }
+}
+
+use self::product::User;
+
+fn main() {
+    let user = User {
+        username: String::from("Иванчо"),
+        email: String::from("ivan40@abv.bg"),
+    };
+}</pre>
+</div><div class="slide">
+<h1 id="достъп-public-и-private">Достъп: public и private</h1>
+<p>Без проблем може да достъпим private полета от същия модул в който е дефинирана структурата</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="40dd2952cd3baea0de9292ba739c1ab51411b7f2">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> product {
+    <span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> {
+        username: <span class="hljs-built_in">String</span>,
+        email: <span class="hljs-built_in">String</span>,
+    }
+
+    <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(username: <span class="hljs-built_in">String</span>, email: <span class="hljs-built_in">String</span>) -&gt; User {
+        User { username, email }
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> user = product::new(
+        <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>),
+        <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>),
+    );
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="40dd2952cd3baea0de9292ba739c1ab51411b7f2">mod product {
+    pub struct User {
+        username: String,
+        email: String,
+    }
+
+    pub fn new(username: String, email: String) -> User {
+        User { username, email }
+    }
+}
+
+fn main() {
+    let user = product::new(
+        String::from("Иванчо"),
+        String::from("ivan40@abv.bg"),
+    );
+}</pre>
+</div><div class="slide">
+<h1 id="достъп-public-и-private">Достъп: public и private</h1>
+<p>Както и без проблем може да достъпим private полета от подмодул</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8886229d143f898cf24d2cbdadede4179bc11981">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> product {
+    <span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> {
+        username: <span class="hljs-built_in">String</span>,
+        email: <span class="hljs-built_in">String</span>,
+    }
+
+    <span class="hljs-keyword">pub</span> <span class="hljs-keyword">mod</span> init_user {
+        <span class="hljs-keyword">use</span> super::User;
+
+        <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(username: <span class="hljs-built_in">String</span>, email: <span class="hljs-built_in">String</span>) -&gt; User {
+            User { username, email }
+        }
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> user = product::init_user::new(
+        <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"Иванчо"</span>),
+        <span class="hljs-built_in">String</span>::from(<span class="hljs-string">"ivan40@abv.bg"</span>),
+    );
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="8886229d143f898cf24d2cbdadede4179bc11981">mod product {
+    pub struct User {
+        username: String,
+        email: String,
+    }
+
+    pub mod init_user {
+        use super::User;
+
+        pub fn new(username: String, email: String) -> User {
+            User { username, email }
+        }
+    }
+}
+
+fn main() {
+    let user = product::init_user::new(
+        String::from("Иванчо"),
+        String::from("ivan40@abv.bg"),
+    );
+}</pre>
+</div><div class="slide">
+<h1 id="достъп-public-и-private">Достъп: public и private</h1>
+<p>Но ако модулите са съседни не можем</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="6b1a305aea173c6966b97719e25b5ec58a4f6555">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> product {
+    <span class="hljs-keyword">mod</span> dto {
+        <span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">User</span></span> {
+            username: <span class="hljs-built_in">String</span>,
+            email: <span class="hljs-built_in">String</span>,
+        }
+    }
+
+    <span class="hljs-keyword">pub</span> <span class="hljs-keyword">mod</span> init_user {
+        <span class="hljs-keyword">use</span> super::dto::User;
+
+        <span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new</span></span>(username: <span class="hljs-built_in">String</span>, email: <span class="hljs-built_in">String</span>) -&gt; User {
+            User { username, email }
+        }
+    }
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(187,0,0)">error[E0451]</span><span style="font-weight:bold;color:rgb(0,0,0)">: field `username` of struct `User` is private</span>
+  <span style="font-weight:bold;color:rgb(0,187,187)">--&gt; </span>src\bin\main_6b1a305aea173c6966b97719e25b5ec58a4f6555.rs:13:20
+   <span style="font-weight:bold;color:rgb(0,187,187)">|</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">13</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span>            User { username, email }
+   <span style="font-weight:bold;color:rgb(0,187,187)">| </span>                   <span style="font-weight:bold;color:rgb(187,0,0)">^^^^^^^^</span> <span style="font-weight:bold;color:rgb(187,0,0)">private field</span>
+
+<span style="font-weight:bold;color:rgb(187,0,0)">error[E0451]</span><span style="font-weight:bold;color:rgb(0,0,0)">: field `email` of struct `User` is private</span>
+  <span style="font-weight:bold;color:rgb(0,187,187)">--&gt; </span>src\bin\main_6b1a305aea173c6966b97719e25b5ec58a4f6555.rs:13:30
+   <span style="font-weight:bold;color:rgb(0,187,187)">|</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">13</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span>            User { username, email }
+   <span style="font-weight:bold;color:rgb(0,187,187)">| </span>                             <span style="font-weight:bold;color:rgb(187,0,0)">^^^^^</span> <span style="font-weight:bold;color:rgb(187,0,0)">private field</span>
+
+<span style="font-weight:bold;color:rgb(0,0,0)">For more information about this error, try `rustc --explain E0451`.</span>
+<span style="font-weight:bold;color:rgb(187,0,0)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to 2 previous errors</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="6b1a305aea173c6966b97719e25b5ec58a4f6555">mod product {
+    mod dto {
+        pub struct User {
+            username: String,
+            email: String,
+        }
+    }
+
+    pub mod init_user {
+        use super::dto::User;
+
+        pub fn new(username: String, email: String) -> User {
+            User { username, email }
+        }
+    }
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="достъп-public-и-private">Достъп: public и private</h1>
+<p>Тези правила важат и за tuple structs</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="4ab3111369e2922d14fb54434dca1a25870e2bd1">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> product {
+    <span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">UserId</span></span>(<span class="hljs-built_in">u64</span>);
+}
+
+<span class="hljs-keyword">use</span> self::product::UserId;
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> id = UserId(<span class="hljs-number">123</span>);
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(187,0,0)">error[E0423]</span><span style="font-weight:bold;color:rgb(0,0,0)">: cannot initialize a tuple struct which contains private fields</span>
+ <span style="font-weight:bold;color:rgb(0,187,187)">--&gt; </span>src\bin\main_4ab3111369e2922d14fb54434dca1a25870e2bd1.rs:8:14
+  <span style="font-weight:bold;color:rgb(0,187,187)">|</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">8</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span>    let id = UserId(123);
+  <span style="font-weight:bold;color:rgb(0,187,187)">| </span>             <span style="font-weight:bold;color:rgb(187,0,0)">^^^^^^</span>
+  <span style="font-weight:bold;color:rgb(0,187,187)">|</span>
+<span style="font-weight:bold;color:rgb(0,187,0)">note</span>: constructor is not visible here due to private fields
+ <span style="font-weight:bold;color:rgb(0,187,187)">--&gt; </span>src\bin\main_4ab3111369e2922d14fb54434dca1a25870e2bd1.rs:2:23
+  <span style="font-weight:bold;color:rgb(0,187,187)">|</span>
+<span style="font-weight:bold;color:rgb(0,187,187)">2</span> <span style="font-weight:bold;color:rgb(0,187,187)">| </span>    pub struct UserId(u64);
+  <span style="font-weight:bold;color:rgb(0,187,187)">| </span>                      <span style="font-weight:bold;color:rgb(0,187,0)">^^^</span> <span style="font-weight:bold;color:rgb(0,187,0)">private field</span>
+
+<span style="font-weight:bold;color:rgb(0,0,0)">For more information about this error, try `rustc --explain E0423`.</span>
+<span style="font-weight:bold;color:rgb(187,0,0)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="4ab3111369e2922d14fb54434dca1a25870e2bd1">mod product {
+    pub struct UserId(u64);
+}
+
+use self::product::UserId;
+
+fn main() {
+    let id = UserId(123);
+}</pre>
+</div><div class="slide">
+<h1 id="достъп-public-и-private">Достъп: public и private</h1>
+<p>Тези правила важат и за tuple structs</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="cf6cc5d103200181edcf92f584b88d6b5feb2695">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">mod</span> product {
+    <span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">UserId</span></span>(<span class="hljs-keyword">pub</span> <span class="hljs-built_in">u64</span>);
+}
+
+<span class="hljs-keyword">use</span> self::product::UserId;
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> id = UserId(<span class="hljs-number">123</span>);
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="cf6cc5d103200181edcf92f584b88d6b5feb2695">mod product {
+    pub struct UserId(pub u64);
+}
+
+use self::product::UserId;
+
+fn main() {
+    let id = UserId(123);
+}</pre>
+</div><div class="slide">
+<h1 id="пакети">Пакети</h1>
+<p><a href="https://www.monkeyuser.com/2018/refactoring/" target="_blank">
+    <img width="500px" src="resources\packages.png">
+</a></p>
+</div><div class="slide">
+<h1 id="пакети">Пакети</h1>
+<p>Ще си направим игра за отгатване на число</p>
+<p><code>$ cargo new number_guessing_game --bin</code></p>
+</div><div class="slide">
+<h1 id="пакети">Пакети</h1>
+<ul>
+<li>трябва ни генератор на случайни числа</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="пакети">Пакети</h1>
+<ul>
+<li>трябва ни генератор на случайни числа</li>
+<li>в стандартната библиотека няма такъв</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="пакети">Пакети</h1>
+<ul>
+<li>трябва ни генератор на случайни числа</li>
+<li>в стандартната библиотека няма такъв</li>
+<li>може да потърсим в <a href="https://crates.io/" rel="noopener noreferrer" target="_blank">https://crates.io/</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="пакети">Пакети</h1>
+<ul>
+<li>трябва ни генератор на случайни числа</li>
+<li>в стандартната библиотека няма такъв</li>
+<li>може да потърсим в <a href="https://crates.io/" rel="noopener noreferrer" target="_blank">https://crates.io/</a></li>
+<li><a href="https://crates.io/crates/rand" rel="noopener noreferrer" target="_blank">https://crates.io/crates/rand</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="cargotoml">Cargo.toml</h1>
+<p>Трябва да си добавим пакета като зависомист на проекта ни</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="tomltoml language-toml hljs"><span class="hljs-section">[package]</span>
+<span class="hljs-attr">name</span> = <span class="hljs-string">"number_guessing_game"</span>
+<span class="hljs-attr">version</span> = <span class="hljs-string">"0.1.0"</span>
+<span class="hljs-attr">authors</span> = [<span class="hljs-string">"..."</span>]
+<span class="hljs-attr">edition</span> = <span class="hljs-string">"2018"</span>
+<span class="hljs-section">
+[dependencies]</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="cargotoml">Cargo.toml</h1>
+<p>Трябва да си добавим пакета като зависомист на проекта ни</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="tomltoml language-toml hljs"><span class="hljs-section">[package]</span>
+<span class="hljs-attr">name</span> = <span class="hljs-string">"number_guessing_game"</span>
+<span class="hljs-attr">version</span> = <span class="hljs-string">"0.1.0"</span>
+<span class="hljs-attr">authors</span> = [<span class="hljs-string">"..."</span>]
+<span class="hljs-attr">edition</span> = <span class="hljs-string">"2018"</span>
+<span class="hljs-section">
+[dependencies]</span>
+<span class="hljs-attr">rand</span> = <span class="hljs-string">"0.7.2"</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="използване">Използване</h1>
+<p>След като се добави библиотека в <code>[dependencies]</code>, може да се използва както всеки останал модул</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">use</span> rand::*;
+
+<span class="hljs-comment">// ...</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="документация">Документация</h1>
+<ul>
+<li><a href="https://docs.rs/" rel="noopener noreferrer" target="_blank">https://docs.rs/</a> - документация за всички пакети от crates.io</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="документация">Документация</h1>
+<ul>
+<li><a href="https://docs.rs/" rel="noopener noreferrer" target="_blank">https://docs.rs/</a> - документация за всички пакети от crates.io</li>
+<li><a href="https://docs.rs/rand/" rel="noopener noreferrer" target="_blank">https://docs.rs/rand/</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="имплементация">Имплементация</h1>
+<h3 id="live-demo">Live demo</h3>
+</div><div class="slide">
+<h1 id="имплементация">Имплементация</h1>
+<h3 id="код-от-демото">Код от демото</h3>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="hljs-keyword">use</span> rand::prelude::*;
+<span class="hljs-keyword">use</span> std::io::{<span class="hljs-keyword">self</span>, Write};
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-comment">// Generate a random number between 0 and 10</span>
+    <span class="hljs-keyword">let</span> secret = rand::thread_rng().gen_range(<span class="hljs-number">0</span>, <span class="hljs-number">10_u32</span>);
+    <span class="hljs-keyword">let</span> stdin = io::stdin();
+
+    <span class="hljs-keyword">let</span> tries = <span class="hljs-number">5</span>;
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"You have {} tries to guess the number. Good luck!"</span>, tries);
+
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-number">0</span>..tries {
+        <span class="hljs-comment">// Note that stdout is frequently line-buffered by default so it may be necessary</span>
+        <span class="hljs-comment">// to use io::stdout().flush() to ensure the output is emitted immediately.</span>
+        <span class="hljs-built_in">print!</span>(<span class="hljs-string">"Your guess: "</span>);
+        <span class="hljs-keyword">let</span> _ = io::stdout().flush();
+
+        <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> line = <span class="hljs-built_in">String</span>::new();
+        <span class="hljs-keyword">let</span> _ = stdin.read_line(&amp;<span class="hljs-keyword">mut</span> line);
+
+        <span class="hljs-comment">// No error handling - panic if parsing fails</span>
+        <span class="hljs-keyword">let</span> guess: <span class="hljs-built_in">u32</span> =
+            line
+            .trim()
+            .parse()
+            .unwrap();
+
+        <span class="hljs-keyword">if</span> secret &lt; guess {
+            <span class="hljs-built_in">println!</span>(<span class="hljs-string">"I am less than that"</span>);
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> secret &gt; guess {
+            <span class="hljs-built_in">println!</span>(<span class="hljs-string">"I am greater than that"</span>);
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-built_in">println!</span>(<span class="hljs-string">"Congratulations, you won!"</span>);
+            <span class="hljs-keyword">return</span>;
+        }
+    }
+
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">"The number was {}"</span>, secret);
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="въпроси">Въпроси</h1>
+</div>
+    </main>
+</body>
+</html>
