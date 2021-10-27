@@ -1,0 +1,2591 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <title>Шаблонни типове, типажи</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="rust,fmi">
+    <link rel="stylesheet" href="resources/codeblock/codeblock.css">
+<link rel="stylesheet" href="resources/frontend/controls.css">
+<link rel="stylesheet" href="resources/global/global.css">
+<link rel="stylesheet" href="resources/global/metadata.css">
+<link rel="stylesheet" href="resources/highlight/hljs-github.css">
+<link rel="stylesheet" href="resources/highlight/style.css">
+<link rel="stylesheet" href="resources/highlight/tshl-github.css">
+<link rel="stylesheet" href="resources/katex/katex.min.css">
+<link rel="stylesheet" href="resources/rustc/rustc.css">
+<link rel="stylesheet" href="resources/splitview/splitview.css">
+<link rel="stylesheet" href="resources/wrapping-pages/wrapping-pages.css">
+<script type="text/javascript" src="resources/codeblock/codeblock.js"></script>
+<script type="text/javascript" src="resources/frontend/controls.js"></script>
+</head>
+<body>
+    <main>
+        <div class="slide">
+<h1 id="шаблонни-типове-типажи">Шаблонни типове, типажи</h1>
+<h3 id="26-октомври-2021">26 октомври 2021</h3>
+</div><div class="slide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Първото домашното приключи</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Първото домашното приключи</li>
+<li>Rust 2021</li>
+</ul>
+</div><div class="slide">
+<h1 id="преговор">Преговор</h1>
+<h3 id="документация">Документация</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="a45a94756827128b3c11b52ede20ca11d8dffe87">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">/// Add 2 to a number</span>
+<span class="tshl-comment">///</span>
+<span class="tshl-comment">/// # Example</span>
+<span class="tshl-comment">///</span>
+<span class="tshl-comment">/// ```</span>
+<span class="tshl-comment">/// # use playground::add_two;</span>
+<span class="tshl-comment">/// assert_eq!(add_two(5), 7);</span>
+<span class="tshl-comment">/// ```</span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">add_two</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">n</span>: <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u32</span> {
+    n + <span class="tshl-constant_builtin">2</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="a45a94756827128b3c11b52ede20ca11d8dffe87">/// Add 2 to a number
+///
+/// Example
+///
+/// ```
+/// use playground::add_two;
+/// assert_eq!(add_two(5), 7);
+/// ```
+pub fn add_two(n: u32) -> u32 {
+    n + 2
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="преговор">Преговор</h1>
+<h3 id="тестове">Тестове</h3>
+<ul>
+<li><code>#[cfg(test)]</code></li>
+<li><code>#[test]</code></li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8476e931a3451bd7c04ac02a5f9d80f98c740c60">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">add_two</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">n</span>: <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u32</span> {
+    n + <span class="tshl-constant_builtin">2</span>
+}
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>cfg<span class="tshl-punctuation_bracket">(</span>test<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">mod</span> tests {
+    <span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>test<span class="tshl-punctuation_bracket">]</span></span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">it_works</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+        <span class="tshl-function_macro">assert_eq</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>add_two<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-constant_builtin">4</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="8476e931a3451bd7c04ac02a5f9d80f98c740c60">#![allow(dead_code)]
+fn main() {}
+fn add_two(n: u32) -> u32 {
+    n + 2
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        assert_eq!(add_two(2), 4);
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="generic-types-generics">Generic Types (Generics)</h1>
+<p><img src="resources/generics.jpeg" alt="" /></p>
+</div><div class="slide">
+<h1 id="generic-types-generics">Generic Types (Generics)</h1>
+<h3 id="oбобщени-типове">Oбобщени типове</h3>
+</div><div class="slide subslide">
+<h1 id="generic-types-generics">Generic Types (Generics)</h1>
+<h3 id="oбобщени-типове">Oбобщени типове</h3>
+<p>Вече сме ги виждали</p>
+</div><div class="slide subslide">
+<h1 id="generic-types-generics">Generic Types (Generics)</h1>
+<h3 id="oбобщени-типове">Oбобщени типове</h3>
+<p>Вече сме ги виждали</p>
+<ul>
+<li><code>Option&lt;T&gt;</code></li>
+<li><code>Vec&lt;T&gt;</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="oбобщени-типове">Oбобщени типове</h1>
+</div><div class="slide subslide">
+<h1 id="oбобщени-типове">Oбобщени типове</h1>
+<ul>
+<li>Позволяват да пишем код, валиден за различни ситуации</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="oбобщени-типове">Oбобщени типове</h1>
+<ul>
+<li>Позволяват да пишем код, валиден за различни ситуации</li>
+<li>Мономорфизация на кода, т.е няма runtime overhead</li>
+</ul>
+</div><div class="slide">
+<h1 id="oбобщени-типове">Oбобщени типове</h1>
+<h3 id="функции">функции</h3>
+<p>Със знанията събрани до сега</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="6fcdf04a7b5b21e5531fda3e30a6f4b353053c55">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">identity_i32</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">value</span>: <span class="tshl-type_builtin">i32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i32</span> {
+    value
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">identity_i8</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">value</span>: <span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u8</span> {
+    value
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="6fcdf04a7b5b21e5531fda3e30a6f4b353053c55">#![allow(dead_code)]
+fn main() {}
+fn identity_i32(value: i32) -> i32 {
+    value
+}
+
+fn identity_i8(value: u8) -> u8 {
+    value
+}</pre>
+</div><div class="slide">
+<h1 id="oбобщени-типове">Oбобщени типове</h1>
+<h3 id="функции">функции</h3>
+<p>С обобщени типове</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="32aed68cb5c372b3f92d57555d5257a763034e1e">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">identity</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">value</span>: <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">T</span> {
+    value
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="32aed68cb5c372b3f92d57555d5257a763034e1e">#![allow(dead_code)]
+fn main() {}
+fn identity<T>(value: T) -> T {
+    value
+}</pre>
+</div><div class="slide">
+<h1 id="oбобщени-типове">Oбобщени типове</h1>
+<h3 id="структури">структури</h3>
+<p>Нека разгледаме структурата</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="80ab4e84339368134037861a63f4f042a01f2a8f">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">Point</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-property">x</span>: <span class="tshl-type">T</span>,
+    <span class="tshl-property">y</span>: <span class="tshl-type">T</span>,
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-comment">// Може да я създадем с цели числа..</span>
+    <span class="tshl-keyword">let</span> integer = <span class="tshl-type">Point</span> { <span class="tshl-property">x</span>: <span class="tshl-constant_builtin">5</span>, <span class="tshl-property">y</span>: <span class="tshl-constant_builtin">10</span> }<span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-comment">// ..но може да я създадем и с числа с плаваща запетая.</span>
+    <span class="tshl-keyword">let</span> float = <span class="tshl-type">Point</span> { <span class="tshl-property">x</span>: <span class="tshl-constant_builtin">1.0</span>, <span class="tshl-property">y</span>: <span class="tshl-constant_builtin">4.0</span> }<span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="80ab4e84339368134037861a63f4f042a01f2a8f">#![allow(dead_code, unused_variables)]
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+fn main() {
+    // Може да я създадем с цели числа..
+    let integer = Point { x: 5, y: 10 };
+
+    // ..но може да я създадем и с числа с плаваща запетая.
+    let float = Point { x: 1.0, y: 4.0 };
+}</pre>
+</div><div class="slide">
+<h1 id="oбобщени-типове">Oбобщени типове</h1>
+<h3 id="структури">структури</h3>
+<p>А какво ще стане, ако опитаме да я създадем по този начин?</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> what_about_this = <span class="tshl-type">Point</span> { <span class="tshl-property">x</span>: <span class="tshl-constant_builtin">5</span>, <span class="tshl-property">y</span>: <span class="tshl-constant_builtin">4.0</span> }<span class="tshl-punctuation_delimiter">;</span> <span class="tshl-comment">// ??</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="oбобщени-типове">Oбобщени типове</h1>
+<h3 id="структури">структури</h3>
+<p>А какво ще стане, ако опитаме да я създадем по този начин?</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="2f97ad6350948c3ad36abcbec26aa61d24df52ce">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> what_about_this = <span class="tshl-type">Point</span> { <span class="tshl-property">x</span>: <span class="tshl-constant_builtin">5</span>, <span class="tshl-property">y</span>: <span class="tshl-constant_builtin">4.0</span> }<span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0308]</span><span style="font-weight:bold">: mismatched types</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_2f97ad6350948c3ad36abcbec26aa61d24df52ce.rs:5:44
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">5</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    let what_about_this = Point { x: 5, y: 4.0 };
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                                           <span style="font-weight:bold;color:rgb(255,85,85)">^^^</span> <span style="font-weight:bold;color:rgb(255,85,85)">expected integer, found floating-point number</span>
+
+<span style="font-weight:bold">For more information about this error, try `rustc --explain E0308`.</span>
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="2f97ad6350948c3ad36abcbec26aa61d24df52ce">#![allow(dead_code)]
+struct Point<T> { x: T, y: T }
+fn main() {
+    let what_about_this = Point { x: 5, y: 4.0 };
+}</pre>
+</div><div class="slide">
+<h1 id="oбобщени-типове">Oбобщени типове</h1>
+<h3 id="структури">структури</h3>
+<p>Ако искаме да позволим двете координати да са различни типове</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8ba4d0b97940446925b554475ed6c4c62e1f943c">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">Point</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span>, <span class="tshl-type">U</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-property">x</span>: <span class="tshl-type">T</span>,
+    <span class="tshl-property">y</span>: <span class="tshl-type">U</span>,
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> both_integer = <span class="tshl-type">Point</span> { <span class="tshl-property">x</span>: <span class="tshl-constant_builtin">5</span>, <span class="tshl-property">y</span>: <span class="tshl-constant_builtin">10</span> }<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> both_float = <span class="tshl-type">Point</span> { <span class="tshl-property">x</span>: <span class="tshl-constant_builtin">1.0</span>, <span class="tshl-property">y</span>: <span class="tshl-constant_builtin">4.0</span> }<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> integer_and_float = <span class="tshl-type">Point</span> { <span class="tshl-property">x</span>: <span class="tshl-constant_builtin">5</span>, <span class="tshl-property">y</span>: <span class="tshl-constant_builtin">4.0</span> }<span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="8ba4d0b97940446925b554475ed6c4c62e1f943c">#![allow(dead_code, unused_variables)]
+struct Point<T, U> {
+    x: T,
+    y: U,
+}
+
+fn main() {
+    let both_integer = Point { x: 5, y: 10 };
+    let both_float = Point { x: 1.0, y: 4.0 };
+    let integer_and_float = Point { x: 5, y: 4.0 };
+}</pre>
+</div><div class="slide">
+<h1 id="oбобщени-типове">Oбобщени типове</h1>
+<h3 id="енумерации">енумерации</h3>
+<p>Енумерациите с обобщени типове имат подобен вид:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="0d4de3ce817cf65f6e157a9d3d51cbd0c9cf57ce">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">enum</span> <span class="tshl-type">Message</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span>, <span class="tshl-type">A</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-constructor">Text</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">)</span>,
+    <span class="tshl-constructor">Action</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">A</span><span class="tshl-punctuation_bracket">)</span>,
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="0d4de3ce817cf65f6e157a9d3d51cbd0c9cf57ce">#![allow(dead_code)]
+fn main() {}
+enum Message<T, A> {
+    Text(T),
+    Action(A),
+}</pre>
+</div><div class="slide">
+<h1 id="oбобщени-типове">Oбобщени типове</h1>
+<h3 id="енумерации">енумерации</h3>
+<p>Ето как се дефинира <code>Option</code>:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="87fc9241ef552a3a052dda2b7419a8416dcf7d64">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">enum</span> <span class="tshl-type">Option</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">)</span>,
+    <span class="tshl-constructor">None</span>,
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="87fc9241ef552a3a052dda2b7419a8416dcf7d64">#![allow(dead_code)]
+fn main() {}
+enum Option<T> {
+    Some(T),
+    None,
+}</pre>
+</div><div class="slide">
+<h1 id="oбобщени-типове">Oбобщени типове</h1>
+<h3 id="методи">методи</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="3da8cde280ffe080f2c0817b82af9fe56da04696">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">Point</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> { <span class="tshl-property">x</span>: <span class="tshl-type">T</span>, <span class="tshl-property">y</span>: <span class="tshl-type">T</span> }
+
+<span class="tshl-comment">// Забележете impl&lt;T&gt;</span>
+<span class="tshl-keyword">impl</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-type">Point</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">x</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-operator">&amp;</span><span class="tshl-type">T</span> {
+        <span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">x</span>
+    }
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> p = <span class="tshl-type">Point</span> { <span class="tshl-property">x</span>: <span class="tshl-constant_builtin">5</span>, <span class="tshl-property">y</span>: <span class="tshl-constant_builtin">10</span> }<span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;p.x   = {}&quot;</span>, p.x<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>    <span class="tshl-comment">// ??</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;p.x() = {}&quot;</span>, p.x<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>  <span class="tshl-comment">// ??</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="3da8cde280ffe080f2c0817b82af9fe56da04696">#![allow(dead_code)]
+struct Point<T> { x: T, y: T }
+
+// Забележете impl<T>
+impl<T> Point<T> {
+    fn x(&self) -> &T {
+        &self.x
+    }
+}
+
+fn main() {
+    let p = Point { x: 5, y: 10 };
+
+    println!("p.x   = {}", p.x);    // ??
+    println!("p.x() = {}", p.x());  // ??
+}</pre>
+</div><div class="slide">
+<h1 id="oбобщени-типове">Oбобщени типове</h1>
+<h3 id="методи">методи</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="d0af614635cd1346b51b7d5611249aca3a1fc9a0">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">Point</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> { <span class="tshl-property">x</span>: <span class="tshl-type">T</span>, <span class="tshl-property">y</span>: <span class="tshl-type">T</span> }
+
+<span class="tshl-comment">// Забележете impl&lt;T&gt;</span>
+<span class="tshl-keyword">impl</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-type">Point</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">x</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-operator">&amp;</span><span class="tshl-type">T</span> {
+        <span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">x</span>
+    }
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> p = <span class="tshl-type">Point</span> { <span class="tshl-property">x</span>: <span class="tshl-constant_builtin">5</span>, <span class="tshl-property">y</span>: <span class="tshl-constant_builtin">10</span> }<span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;p.x   = {}&quot;</span>, p.x<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;p.x() = {}&quot;</span>, p.x<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">p.x   = 5
+p.x() = 5</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="d0af614635cd1346b51b7d5611249aca3a1fc9a0">#![allow(dead_code)]
+struct Point<T> { x: T, y: T }
+
+// Забележете impl<T>
+impl<T> Point<T> {
+    fn x(&self) -> &T {
+        &self.x
+    }
+}
+
+fn main() {
+    let p = Point { x: 5, y: 10 };
+
+    println!("p.x   = {}", p.x);
+    println!("p.x() = {}", p.x());
+}</pre>
+</div><div class="slide">
+<h1 id="oбобщени-типове">Oбобщени типове</h1>
+<h3 id="специализирани-имплементации">специализирани имплементации</h3>
+<p>В този пример само <code>Point&lt;f32&gt;</code> ще притежава този метод</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="5c65b87589ea01326cbfac865085979ed8cb7bc4">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// Този път няма impl&lt;T&gt;</span>
+<span class="tshl-keyword">impl</span> <span class="tshl-type">Point</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">f32</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">distance_from_origin</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">f32</span> {
+        <span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">x</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">powi</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span> + <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">y</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">powi</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">sqrt</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="5c65b87589ea01326cbfac865085979ed8cb7bc4">#![allow(dead_code)]
+struct Point<T> { x: T, y: T }
+fn main() {}
+// Този път няма impl<T>
+impl Point<f32> {
+    fn distance_from_origin(&self) -> f32 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="oбобщени-типове">Oбобщени типове</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="282a2057f012ca625607f080b84ed1167916b662">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">Point</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span>, <span class="tshl-type">U</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-property">x</span>: <span class="tshl-type">T</span>,
+    <span class="tshl-property">y</span>: <span class="tshl-type">U</span>,
+}
+
+<span class="tshl-keyword">impl</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span>, <span class="tshl-type">U</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-type">Point</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span>, <span class="tshl-type">U</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-comment">// Създава нова структура с `x` от `self` и `y` от `other`.</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">mixup</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">V</span>, <span class="tshl-type">W</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">other</span>: <span class="tshl-type">Point</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">V</span>, <span class="tshl-type">W</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Point</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span>, <span class="tshl-type">W</span><span class="tshl-punctuation_bracket">&gt;</span> {
+        <span class="tshl-type">Point</span> { <span class="tshl-property">x</span>: <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">x</span>, <span class="tshl-property">y</span>: other<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">y</span> }
+    }
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> p1 = <span class="tshl-type">Point</span> { <span class="tshl-property">x</span>: <span class="tshl-constant_builtin">5</span>, <span class="tshl-property">y</span>: <span class="tshl-constant_builtin">10.4</span> }<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> p2 = <span class="tshl-type">Point</span> { <span class="tshl-property">x</span>: <span class="tshl-string">&quot;Hello&quot;</span>, <span class="tshl-property">y</span>: <span class="tshl-string">&#39;c&#39;</span>}<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> p3 = p1<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">mixup</span><span class="tshl-punctuation_bracket">(</span>p2<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;p3.x = {}&quot;</span>, p3.x<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;p3.y = {}&quot;</span>, p3.y<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">p3.x = 5
+p3.y = c</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="282a2057f012ca625607f080b84ed1167916b662">#![allow(dead_code)]
+struct Point<T, U> {
+    x: T,
+    y: U,
+}
+
+impl<T, U> Point<T, U> {
+    // Създава нова структура с `x` от `self` и `y` от `other`.
+    fn mixup<V, W>(self, other: Point<V, W>) -> Point<T, W> {
+        Point { x: self.x, y: other.y }
+    }
+}
+
+fn main() {
+    let p1 = Point { x: 5, y: 10.4 };
+    let p2 = Point { x: "Hello", y: 'c'};
+    let p3 = p1.mixup(p2);
+    println!("p3.x = {}", p3.x);
+    println!("p3.y = {}", p3.y);
+}</pre>
+</div><div class="slide">
+<h1 id="константни-обобщени-типове">Константни обобщени типове</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="4b5311b1bcf257be204ae6905328ea1d87d9fe05">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">f</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span>, <span class="tshl-keyword">const</span> <span class="tshl-constructor">N</span>: <span class="tshl-type_builtin">usize</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">_a</span>: <span class="tshl-punctuation_bracket">[</span><span class="tshl-type">T</span><span class="tshl-punctuation_delimiter">;</span> <span class="tshl-constructor">N</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span> { }
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function">f</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">String</span>, <span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">[</span>
+        <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;hello&quot;</span><span class="tshl-punctuation_bracket">)</span>,
+    <span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="4b5311b1bcf257be204ae6905328ea1d87d9fe05">fn f<T, const N: usize>(_a: [T; N]) { }
+
+fn main() {
+    f::<String, 1>([
+        String::from("hello"),
+    ]);
+}</pre>
+</div><div class="slide">
+<h1 id="константни-обобщени-типове">Константни обобщени типове</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="a4a8661274aab5b10c01aab9e6bf4235b8e7288b">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">f</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span>, <span class="tshl-keyword">const</span> <span class="tshl-constructor">N</span>: <span class="tshl-type_builtin">usize</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">_a</span>: <span class="tshl-punctuation_bracket">[</span><span class="tshl-type">T</span><span class="tshl-punctuation_delimiter">;</span> <span class="tshl-constructor">N</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span> { }
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function">f</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">String</span>, <span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">[</span>
+        <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;hello&quot;</span><span class="tshl-punctuation_bracket">)</span>,
+        <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;world&quot;</span><span class="tshl-punctuation_bracket">)</span>,
+    <span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0308]</span><span style="font-weight:bold">: mismatched types</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_a4a8661274aab5b10c01aab9e6bf4235b8e7288b.rs:4:20
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">4</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>      f::&lt;String, 1&gt;([
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span> <span style="font-weight:bold;color:rgb(255,85,85)">____________________^</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">5</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(255,85,85)">|</span>         String::from("hello"),
+<span style="font-weight:bold;color:rgb(85,85,255)">6</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(255,85,85)">|</span>         String::from("world"),
+<span style="font-weight:bold;color:rgb(85,85,255)">7</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(255,85,85)">|</span>     ]);
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(255,85,85)">|_____^</span> <span style="font-weight:bold;color:rgb(255,85,85)">expected an array with a fixed size of 1 element, found one with 2 elements</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: expected array `<span style="font-weight:bold">[String; 1]</span>`
+             found array `<span style="font-weight:bold">[String; 2]</span>`
+
+<span style="font-weight:bold">For more information about this error, try `rustc --explain E0308`.</span>
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="a4a8661274aab5b10c01aab9e6bf4235b8e7288b">fn f<T, const N: usize>(_a: [T; N]) { }
+
+fn main() {
+    f::<String, 1>([
+        String::from("hello"),
+        String::from("world"),
+    ]);
+}</pre>
+</div><div class="slide">
+<h1 id="константно-фибоначи">Константно фибоначи</h1>
+<p>🤔</p>
+</div><div class="slide subslide">
+<h1 id="константно-фибоначи">Константно фибоначи</h1>
+<p>🤔</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="eb32fcdebfb17c6ed14b78b68ee078c17991b2a7">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">const</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">fib</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">n</span>: <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u32</span> {
+    <span class="tshl-keyword">const</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">rec</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">i</span>: <span class="tshl-type_builtin">u32</span>, <span class="tshl-variable_parameter">a</span>: <span class="tshl-type_builtin">u32</span>, <span class="tshl-variable_parameter">b</span>: <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u32</span> {
+        <span class="tshl-keyword">if</span> i == <span class="tshl-constant_builtin">0</span> { a } <span class="tshl-keyword">else</span> { <span class="tshl-function">rec</span><span class="tshl-punctuation_bracket">(</span>i - <span class="tshl-constant_builtin">1</span>, b, a + b<span class="tshl-punctuation_bracket">)</span> }
+    }
+
+    <span class="tshl-function">rec</span><span class="tshl-punctuation_bracket">(</span>n, <span class="tshl-constant_builtin">0</span>, <span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">)</span>
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, fib<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, fib<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">4</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, fib<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">5</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">2
+3
+5</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="eb32fcdebfb17c6ed14b78b68ee078c17991b2a7">const fn fib(n: u32) -> u32 {
+    const fn rec(i: u32, a: u32, b: u32) -> u32 {
+        if i == 0 { a } else { rec(i - 1, b, a + b) }
+    }
+
+    rec(n, 0, 1)
+}
+
+fn main() {
+    println!("{}", fib(3));
+    println!("{}", fib(4));
+    println!("{}", fib(5));
+}</pre>
+</div><div class="slide">
+<h1 id="константи-и-константни-функции">Константи и константни функции</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="c554402a63ceddd11d0554b16839fe23bb3fb8d2">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">const</span> <span class="tshl-constructor">A</span>: <span class="tshl-type_builtin">usize</span> = <span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">const</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">identity</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">value</span>: <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">T</span> { value }</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="c554402a63ceddd11d0554b16839fe23bb3fb8d2">const A: usize = 1;
+const fn identity<T>(value: T) -> T { value }
+fn main() {}</pre>
+<ul>
+<li>Константите се inline-ват по време на компилация</li>
+<li>Функциите се изпълняват по време на компилация</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="константи-и-константни-функции">Константи и константни функции</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="c554402a63ceddd11d0554b16839fe23bb3fb8d2">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">const</span> <span class="tshl-constructor">A</span>: <span class="tshl-type_builtin">usize</span> = <span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">const</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">identity</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">value</span>: <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">T</span> { value }</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="c554402a63ceddd11d0554b16839fe23bb3fb8d2">const A: usize = 1;
+const fn identity<T>(value: T) -> T { value }
+fn main() {}</pre>
+<ul>
+<li>Константите се inline-ват по време на компилация</li>
+<li>Функциите се изпълняват по време на компилация</li>
+</ul>
+<p>Имат множество правила, които няма да се съберат на един слайд, затова:</p>
+<p><a href="https://doc.rust-lang.org/reference/const_eval.html" target="_blank">https://doc.rust-lang.org/reference/const_eval.html</a></p>
+</div><div class="slide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+<ul>
+<li>Искаме да си направим логика, която да преобразува Rust данни в JSON.</li>
+<li>Низа <code>"stuff"</code> трябва да се преобразува до <code>"\"stuff\""</code>.</li>
+<li>Числото <code>5</code> трябва да се преобразува в <code>"5"</code>.</li>
+<li>Ако си дефинираме функция, тя ще изглежда така:</li>
+</ul>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">to_json</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">val</span>: <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">String</span> {
+    ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+<p>Тук възникват няколко въпроса:</p>
+</div><div class="slide subslide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+<p>Тук възникват няколко въпроса:</p>
+<ul>
+<li>Как да я имплементираме?</li>
+<li>Какъв тип да е T? Може да е всичко? Ще правиме проверки дали получаваме число или низ?</li>
+<li>А ако е наш собствен тип?</li>
+</ul>
+</div><div class="slide">
+<h1 id="типажи">Типажи</h1>
+<h3 id="traits">Traits</h3>
+<ul>
+<li>Споделенo поведение.</li>
+<li>Подобни на интерфейси от други езици.</li>
+</ul>
+</div><div class="slide">
+<h1 id="типажи">Типажи</h1>
+<h3 id="traits">Traits</h3>
+<p>Всъщност ние сме виждали вече trait-ове.</p>
+</div><div class="slide subslide">
+<h1 id="типажи">Типажи</h1>
+<h3 id="traits">Traits</h3>
+<p>Всъщност ние сме виждали вече trait-ове.<br />
+Помните ли <code>{:?}</code>, когато отпечатваме на екрана?</p>
+</div><div class="slide subslide">
+<h1 id="типажи">Типажи</h1>
+<h3 id="traits">Traits</h3>
+<p>Всъщност ние сме виждали вече trait-ове.<br />
+Помните ли <code>{:?}</code>, когато отпечатваме на екрана?<br />
+Това има значение за данни от тип, който имплементира trait-а <code>Debug</code>.</p>
+</div><div class="slide subslide">
+<h1 id="типажи">Типажи</h1>
+<h3 id="traits">Traits</h3>
+<p>Всъщност ние сме виждали вече trait-ове.<br />
+Помните ли <code>{:?}</code>, когато отпечатваме на екрана?<br />
+Това има значение за данни от тип, който имплементира trait-а <code>Debug</code>.<br />
+Но нека се върнем на нашия пример с JSON encoder-a.</p>
+</div><div class="slide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+<p>Дефинираме си trait:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="102d96b9ed0085cdc09f7d5da3517ef71699166d">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">trait</span> <span class="tshl-type">ToJson</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="102d96b9ed0085cdc09f7d5da3517ef71699166d">#![allow(dead_code)]
+fn main() {}
+trait ToJson {
+    fn to_json(&self) -> String;
+}</pre>
+</div><div class="slide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+<p>Сега можем да го имплементираме за някои вградени типове данни:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="1717ca52c503c71e7aac9d05c3202e6d10458e15">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">impl</span> <span class="tshl-type">ToJson</span> <span class="tshl-keyword">for</span> <span class="tshl-type">String</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">String</span> {
+        <span class="tshl-function_macro">format</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;<span class="tshl-escape">\&quot;</span>{}<span class="tshl-escape">\&quot;</span>&quot;</span>, <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="1717ca52c503c71e7aac9d05c3202e6d10458e15">#![allow(dead_code)]
+fn main() {}
+trait ToJson { fn to_json(&self) -> String; }
+impl ToJson for String {
+    fn to_json(&self) -> String {
+        format!("\"{}\"", self)
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+<p>Сега можем да го имплементираме за някои вградени типове данни:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="595c3bc6052f1a6c059a6aa751b68f53bf60f68a">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">impl</span> <span class="tshl-type">ToJson</span> <span class="tshl-keyword">for</span> <span class="tshl-type_builtin">i32</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">String</span> {
+        <span class="tshl-function_macro">format</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span>
+    }
+}
+
+<span class="tshl-keyword">impl</span> <span class="tshl-type">ToJson</span> <span class="tshl-keyword">for</span> <span class="tshl-type_builtin">f32</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">String</span> {
+        <span class="tshl-function_macro">format</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="595c3bc6052f1a6c059a6aa751b68f53bf60f68a">#![allow(dead_code)]
+fn main() {}
+trait ToJson { fn to_json(&self) -> String; }
+impl ToJson for i32 {
+    fn to_json(&self) -> String {
+        format!("{}", self)
+    }
+}
+
+impl ToJson for f32 {
+    fn to_json(&self) -> String {
+        format!("{}", self)
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="2e958747c90d0aab5377a462cdfc5bb154fde5e9">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;String as json: {}&quot;</span>, <span class="tshl-constructor">String</span>::from<span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;mamal&quot;</span><span class="tshl-punctuation_bracket">)</span>.to_json<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Number as json: {}&quot;</span>, <span class="tshl-constant_builtin">3</span>.to_json<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">String as json: "mamal"
+Number as json: 3</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="2e958747c90d0aab5377a462cdfc5bb154fde5e9">trait ToJson {
+fn to_json(&self) -> String;
+}
+impl ToJson for String {
+fn to_json(&self) -> String {
+format!(r#""{}""#, self)
+}
+}
+impl ToJson for i32 {
+fn to_json(&self) -> String {
+format!("{}", self)
+}
+}
+fn main() {
+println!("String as json: {}", String::from("mamal").to_json());
+
+println!("Number as json: {}", 3.to_json());
+}</pre>
+</div><div class="slide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+<p>Можем да имаме имплементация по подразбиране:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="36dd6c16b5b80c59ee60edb65389a1fc62af01da">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">trait</span> <span class="tshl-type">ToJson</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">String</span> {
+        <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;null&quot;</span><span class="tshl-punctuation_bracket">)</span>
+    }
+}
+
+<span class="tshl-keyword">impl</span> <span class="tshl-type">ToJson</span> <span class="tshl-keyword">for</span> <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Unit as json: {}&quot;</span>, <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>.to_json<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">Unit as json: null</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="36dd6c16b5b80c59ee60edb65389a1fc62af01da">trait ToJson {
+    fn to_json(&self) -> String {
+        String::from("null")
+    }
+}
+
+impl ToJson for () {}
+
+fn main() {
+    println!("Unit as json: {}", ().to_json());
+}</pre>
+</div><div class="slide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+<p>Още малко - за <code>Option</code>!</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="af30aa6cb507a8a8e12be5f681a01021c1bec09c">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">impl</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-type">ToJson</span> <span class="tshl-keyword">for</span> <span class="tshl-type">Option</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span> <span class="tshl-type">T</span>: <span class="tshl-type">ToJson</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">String</span> {
+        <span class="tshl-keyword">match</span> <span class="tshl-variable_builtin">self</span> {
+            <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span>val<span class="tshl-punctuation_bracket">)</span> =&gt; val<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>,
+            <span class="tshl-constructor">None</span> =&gt; <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;null&quot;</span><span class="tshl-punctuation_bracket">)</span>,
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="af30aa6cb507a8a8e12be5f681a01021c1bec09c">#![allow(dead_code)]
+fn main() {}
+trait ToJson { fn to_json(&self) -> String; }
+impl<T> ToJson for Option<T> where T: ToJson {
+    fn to_json(&self) -> String {
+        match self {
+            Some(val) => val.to_json(),
+            None => String::from("null"),
+        }
+    }
+}</pre>
+</div><div class="slide subslide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+<p>Още малко - за <code>Option</code>!</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="af30aa6cb507a8a8e12be5f681a01021c1bec09c">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">impl</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-type">ToJson</span> <span class="tshl-keyword">for</span> <span class="tshl-type">Option</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span> <span class="tshl-type">T</span>: <span class="tshl-type">ToJson</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">String</span> {
+        <span class="tshl-keyword">match</span> <span class="tshl-variable_builtin">self</span> {
+            <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span>val<span class="tshl-punctuation_bracket">)</span> =&gt; val<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>,
+            <span class="tshl-constructor">None</span> =&gt; <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;null&quot;</span><span class="tshl-punctuation_bracket">)</span>,
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="af30aa6cb507a8a8e12be5f681a01021c1bec09c">#![allow(dead_code)]
+fn main() {}
+trait ToJson { fn to_json(&self) -> String; }
+impl<T> ToJson for Option<T> where T: ToJson {
+    fn to_json(&self) -> String {
+        match self {
+            Some(val) => val.to_json(),
+            None => String::from("null"),
+        }
+    }
+}</pre>
+<p>Забележете, че използваме type bound <code>T: ToJson</code>, за да работи функцията само върху <code>Option</code>, който съдържа стойност имплементираща <code>ToJson</code>.</p>
+</div><div class="slide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+<p>В JSON има списъци, нека да пробваме да го направим за вектор:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="ae236cf9cf19930fa3bcf607fb36b603aa3e322c">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">impl</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-type">ToJson</span> <span class="tshl-keyword">for</span> <span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span> <span class="tshl-type">T</span>: <span class="tshl-type">ToJson</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">String</span> {
+        <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> iter = <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">iter</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        <span class="tshl-keyword">let</span> first = iter<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">next</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+        <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> result = <span class="tshl-keyword">match</span> first {
+            <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span>first<span class="tshl-punctuation_bracket">)</span> =&gt; first<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>,
+            <span class="tshl-constructor">None</span> =&gt; <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>,
+        }<span class="tshl-punctuation_delimiter">;</span>
+
+        <span class="tshl-keyword">for</span> e <span class="tshl-keyword">in</span> iter {
+            result<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">push_str</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;, &quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+            result<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">push_str</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span>e<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        }
+
+        <span class="tshl-function_macro">format</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;[{}]&quot;</span>, result<span class="tshl-punctuation_bracket">)</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="ae236cf9cf19930fa3bcf607fb36b603aa3e322c">#![allow(dead_code)]
+fn main() {}
+trait ToJson { fn to_json(&self) -> String; }
+impl<T> ToJson for Option<T> where T: ToJson {
+fn to_json(&self) -> String {
+match self {
+&Some(ref val) => val.to_json(),
+&None => String::from("null"),
+}
+}
+}
+impl<'a, T> ToJson for &'a T where T: ToJson {
+fn to_json(&self) -> String {
+(*self).to_json()
+}
+}
+impl<T> ToJson for Vec<T> where T: ToJson {
+    fn to_json(&self) -> String {
+        let mut iter = self.iter();
+        let first = iter.next();
+
+        let mut result = match first {
+            Some(first) => first.to_json(),
+            None => String::new(),
+        };
+
+        for e in iter {
+            result.push_str(", ");
+            result.push_str(&e.to_json());
+        }
+
+        format!("[{}]", result)
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+<p>В JSON има списъци, нека да пробваме да го направим за вектор:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="84f54c67eb1c6b50ec296c59ef76b3f434c159de">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> arr = <span class="tshl-function_macro">vec</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">1.1</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2.2</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-constructor">None</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Vector as json: {}&quot;</span>, arr<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">Vector as json: [1.1, 2.2, null]</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="84f54c67eb1c6b50ec296c59ef76b3f434c159de">trait ToJson { fn to_json(&self) -> String; }
+impl ToJson for f32 {
+fn to_json(&self) -> String {
+format!("{}", self)
+}
+}
+impl<T> ToJson for Option<T> where T: ToJson {
+fn to_json(&self) -> String {
+match self {
+&Some(ref val) => val.to_json(),
+&None => String::from("null"),
+}
+}
+}
+impl<'a, T> ToJson for &'a T where T: ToJson {
+fn to_json(&self) -> String {
+(*self).to_json()
+}
+}
+impl <T> ToJson for Vec<T> where T: ToJson {
+fn to_json(&self) -> String {
+let mut iter = self.iter();
+let first = iter.next();
+let mut result = match first {
+Some(first) => first.to_json(),
+None => String::new(),
+};
+for e in iter {
+result.push_str(", ");
+result.push_str(&e.to_json());
+}
+format!("[{}]", result)
+}
+}
+fn main() {
+    let arr = vec![Some(1.1), Some(2.2), None].to_json();
+    println!("Vector as json: {}", arr);
+}</pre>
+</div><div class="slide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+<p>А сега и за наш си тип:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="ae5bc06922fd82c8b3a0d75b842dee73e318a699">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">Student</span> {
+    <span class="tshl-property">age</span>: <span class="tshl-type_builtin">i32</span>,
+    <span class="tshl-property">full_name</span>: <span class="tshl-type">String</span>,
+    <span class="tshl-property">number</span>: <span class="tshl-type_builtin">i32</span>,
+    <span class="tshl-property">hobby</span>: <span class="tshl-type">Option</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">String</span><span class="tshl-punctuation_bracket">&gt;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="ae5bc06922fd82c8b3a0d75b842dee73e318a699">#![allow(dead_code)]
+fn main() {}
+struct Student {
+    age: i32,
+    full_name: String,
+    number: i32,
+    hobby: Option<String>
+}</pre>
+</div><div class="slide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="ebba5a0807e0307fbe0aa22c38845d16daaaaeef">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">impl</span> <span class="tshl-type">ToJson</span> <span class="tshl-keyword">for</span> <span class="tshl-type">Student</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">String</span> {
+        <span class="tshl-function_macro">format</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>
+<span class="tshl-string">r#&quot;{{</span>
+<span class="tshl-string">    &quot;age&quot;: {},</span>
+<span class="tshl-string">    &quot;full_name&quot;: {},</span>
+<span class="tshl-string">    &quot;number&quot;: {},</span>
+<span class="tshl-string">    &quot;hobby&quot;: {}</span>
+<span class="tshl-string">}}&quot;#</span>,
+            <span class="tshl-variable_builtin">self</span>.age.to_json<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-variable_builtin">self</span>.full_name.to_json<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>,
+            <span class="tshl-variable_builtin">self</span>.number.to_json<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-variable_builtin">self</span>.hobby.to_json<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+        <span class="tshl-punctuation_bracket">)</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="ebba5a0807e0307fbe0aa22c38845d16daaaaeef">#![allow(dead_code)]
+trait ToJson { fn to_json(&self) -> String; }
+struct Student {
+age: i32,
+full_name: String,
+number: i32,
+hobby: Option<String>
+}
+impl ToJson for i32 {
+fn to_json(&self) -> String {
+format!("{}", self)
+}
+}
+impl<T> ToJson for Option<T> where T: ToJson {
+fn to_json(&self) -> String {
+match self {
+&Some(ref val) => val.to_json(),
+&None => String::from("null"),
+}
+}
+}
+impl ToJson for String {
+fn to_json(&self) -> String {
+format!("\"{}\"", self)
+}
+}
+fn main() {}
+impl ToJson for Student {
+    fn to_json(&self) -> String {
+        format!(
+r#"{{
+    "age": {},
+    "full_name": {},
+    "number": {},
+    "hobby": {}
+}}"#,
+            self.age.to_json(), self.full_name.to_json(),
+            self.number.to_json(), self.hobby.to_json()
+        )
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="6412a9584ab5851e1f3068067597b7f6eec2fdda">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> student = <span class="tshl-type">Student</span> {
+        <span class="tshl-property">age</span>: <span class="tshl-constant_builtin">16</span>,
+        <span class="tshl-property">full_name</span>: <span class="tshl-string">&quot;Jane Doe&quot;</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">to_owned</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>,
+        <span class="tshl-property">number</span>: <span class="tshl-constant_builtin">5</span>,
+        <span class="tshl-property">hobby</span>: <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Tennis&quot;</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">to_string</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>
+    }<span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, student.to_json<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">{
+"age": 16,
+"full_name": "Jane Doe",
+"number": 5,
+"hobby": "Tennis"
+}</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="6412a9584ab5851e1f3068067597b7f6eec2fdda">trait ToJson { fn to_json(&self) -> String; }
+struct Student {
+age: i32,
+full_name: String,
+number: i32,
+hobby: Option<String>
+}
+impl ToJson for i32 {
+fn to_json(&self) -> String {
+format!("{}", self)
+}
+}
+impl<T> ToJson for Option<T> where T: ToJson {
+fn to_json(&self) -> String {
+match self {
+&Some(ref val) => val.to_json(),
+&None => String::from("null"),
+}
+}
+}
+impl ToJson for String {
+fn to_json(&self) -> String {
+format!("\"{}\"", self)
+}
+}
+impl ToJson for Student {
+fn to_json(&self) -> String {
+format!(
+r#"{{
+"age": {},
+"full_name": {},
+"number": {},
+"hobby": {}
+}}"#,
+self.age.to_json(), self.full_name.to_json(),
+self.number.to_json(), self.hobby.to_json()
+)
+}
+}
+fn main() {
+    let student = Student {
+        age: 16,
+        full_name: "Jane Doe".to_owned(),
+        number: 5,
+        hobby: Some("Tennis".to_string())
+    };
+
+    println!("{}", student.to_json());
+}</pre>
+</div><div class="slide">
+<h1 id="упражнение">Упражнение</h1>
+<h3 id="the-json-encoder">The JSON encoder</h3>
+<p>Сега можем да си дефинираме функцията, от която започна всичко:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8e6b0c6b0b0818bfec41472bee544837857c0789">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">to_json</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span>: <span class="tshl-type">ToJson</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">value</span>: <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">String</span> {
+    value<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="8e6b0c6b0b0818bfec41472bee544837857c0789">#![allow(dead_code)]
+trait ToJson { fn to_json(&self) -> String; }
+fn main() {}
+fn to_json<T: ToJson>(value: T) -> String {
+    value.to_json()
+}</pre>
+</div><div class="slide">
+<h1 id="типажи">Типажи</h1>
+<h3 id="traits">Traits</h3>
+<p>А ако искаме дадена стойност да имплементира повече от един trait?</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="4d5bab90ad0921bc49a227ddac5d5aebecb8aba1">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">log_json_transformation</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span>: <span class="tshl-type">ToJson</span> + <span class="tshl-type">Debug</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">value</span>: <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{:?} -&gt; {}&quot;</span>, value, value.to_json<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="4d5bab90ad0921bc49a227ddac5d5aebecb8aba1">#![allow(dead_code)]
+use std::fmt::Debug;
+trait ToJson { fn to_json(&self) -> String; }
+fn main() {}
+fn log_json_transformation<T: ToJson + Debug>(value: T) {
+    println!("{:?} -> {}", value, value.to_json());
+}</pre>
+</div><div class="slide">
+<h1 id="traits">Traits</h1>
+<h3 id="кога-можем-да-имлементираме-trait">Кога можем да имлементираме trait?</h3>
+<ul>
+<li>За определена структура може да има само една имплементация на определен trait</li>
+<li>За да няма грешки поради имплементации в други библиотеки, има създадени правила</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="traits">Traits</h1>
+<h3 id="кога-можем-да-имлементираме-trait">Кога можем да имлементираме trait?</h3>
+<ul>
+<li>За определена структура може да има само една имплементация на определен trait</li>
+<li>За да няма грешки поради имплементации в други библиотеки, има създадени правила</li>
+</ul>
+<p>Можем да имплементираме trait <code>T</code> за тип <code>S</code> ако:</p>
+<ul>
+<li>trait-a <code>T</code> е дефиниран в нашия crate, или</li>
+<li>типа <code>S</code> е дефиниран в нашия crate</li>
+</ul>
+</div><div class="slide">
+<h1 id="traits">Traits</h1>
+<h3 id="static-dispatch">static dispatch</h3>
+</div><div class="slide subslide">
+<h1 id="traits">Traits</h1>
+<h3 id="static-dispatch">static dispatch</h3>
+<ul>
+<li>Компилатора генерира отделна версия на <code>to_json</code> за всяка нейна имплементация</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="traits">Traits</h1>
+<h3 id="static-dispatch">static dispatch</h3>
+<ul>
+<li>Компилатора генерира отделна версия на <code>to_json</code> за всяка нейна имплементация</li>
+<li>При компилиране се избира правилният вариант на функцията за дадения случай</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="traits">Traits</h1>
+<h3 id="static-dispatch">static dispatch</h3>
+<ul>
+<li>Компилатора генерира отделна версия на <code>to_json</code> за всяка нейна имплементация</li>
+<li>При компилиране се избира правилният вариант на функцията за дадения случай</li>
+<li>Това изпълва executable-а с тези дефиниции</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="traits">Traits</h1>
+<h3 id="static-dispatch">static dispatch</h3>
+<ul>
+<li>Компилатора генерира отделна версия на <code>to_json</code> за всяка нейна имплементация</li>
+<li>При компилиране се избира правилният вариант на функцията за дадения случай</li>
+<li>Това изпълва executable-а с тези дефиниции</li>
+<li>Този вид генериране на код се нарича мономорфизация</li>
+</ul>
+</div><div class="slide">
+<h1 id="traits">Traits</h1>
+<h3 id="static-dispatch">static dispatch</h3>
+<p><img src="resources/static_dispatch.png" alt="" /></p>
+</div><div class="slide">
+<h1 id="trait-objects">Trait Objects</h1>
+<h3 id="dynamic-dispatch">dynamic dispatch</h3>
+<p>Има начин да се използва една версия на функцията, която определя типа at runtime.</p>
+</div><div class="slide subslide">
+<h1 id="trait-objects">Trait Objects</h1>
+<h3 id="dynamic-dispatch">dynamic dispatch</h3>
+<p>Има начин да се използва една версия на функцията, която определя типа at runtime.<br />
+Това става с trait objects.</p>
+</div><div class="slide">
+<h1 id="trait-objects">Trait Objects</h1>
+<h3 id="dynamic-dispatch">dynamic dispatch</h3>
+<p>Ако имаме trait <code>Stuff</code>, <code>&amp;dyn Stuff</code> да представлява какъвто и да е обект имплементиращ trait-а.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8708ec4f6cd97b58af5669aefc7d25c10289c5f8">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">value</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">dyn</span> <span class="tshl-type">ToJson</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">String</span> {
+    value<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">to_json</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> trait_object: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">dyn</span> <span class="tshl-type">ToJson</span> = <span class="tshl-operator">&amp;</span><span class="tshl-constant_builtin">5</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, to_json<span class="tshl-punctuation_bracket">(</span>trait_object<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, to_json<span class="tshl-punctuation_bracket">(</span>&amp;<span class="tshl-constant_builtin">5</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, to_json<span class="tshl-punctuation_bracket">(</span>&amp;<span class="tshl-constant_builtin">5</span> <span class="tshl-operator">as</span> &amp;dyn <span class="tshl-constructor">ToJson</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">5
+5
+5</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="8708ec4f6cd97b58af5669aefc7d25c10289c5f8">trait ToJson { fn to_json(&self) -> String; }
+impl ToJson for i32 {
+fn to_json(&self) -> String {
+format!("{}", self)
+}
+}
+fn to_json(value: &dyn ToJson) -> String {
+    value.to_json()
+}
+
+fn main() {
+    let trait_object: &dyn ToJson = &5;
+
+    println!("{}", to_json(trait_object));
+    println!("{}", to_json(&5));
+    println!("{}", to_json(&5 as &dyn ToJson));
+}</pre>
+</div><div class="slide">
+<h1 id="trait-objects">Trait Objects</h1>
+<h3 id="dynamic-dispatch">dynamic dispatch</h3>
+</div><div class="slide subslide">
+<h1 id="trait-objects">Trait Objects</h1>
+<h3 id="dynamic-dispatch">dynamic dispatch</h3>
+<ul>
+<li>Сега не изпълваме binary-то с много дефиниции</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="trait-objects">Trait Objects</h1>
+<h3 id="dynamic-dispatch">dynamic dispatch</h3>
+<ul>
+<li>Сега не изпълваме binary-то с много дефиниции</li>
+<li>Runtime нещата са малко по-сложни</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="trait-objects">Trait Objects</h1>
+<h3 id="dynamic-dispatch">dynamic dispatch</h3>
+<ul>
+<li>Сега не изпълваме binary-то с много дефиниции</li>
+<li>Runtime нещата са малко по-сложни</li>
+<li>Имплементирано е с vtable създаден при компилация</li>
+</ul>
+</div><div class="slide">
+<h1 id="trait-objects">Trait Objects</h1>
+<h3 id="dynamic-dispatch">dynamic dispatch</h3>
+<p>Има правила при създаването на trait object, които дефинират, че един trait е object safe:</p>
+</div><div class="slide subslide">
+<h1 id="trait-objects">Trait Objects</h1>
+<h3 id="dynamic-dispatch">dynamic dispatch</h3>
+<p>Има правила при създаването на trait object, които дефинират, че един trait е object safe:</p>
+<ul>
+<li>Всички supertraits трябва да са object safe</li>
+<li><code>Sized</code> не трябва да е supertrait. Т.е. не е позволено <code>Self: Sized</code>.</li>
+<li>Не трябва да има асоциирани константи.</li>
+<li>Всички функции трябва да могат да се викат през trait object-a или да са маркирани експлицитно, че не са такива:<ul>
+<li>Функции, които можем да викаме през trait object:<ul>
+<li>Не могат да имат generic параметри, освен lifetime параметри</li>
+<li>Не могат да ползват Self освен за типа на receiver параметъра (self)</li>
+<li>Типът на receiver-a може да бъде:<ul>
+<li><code>&amp;Self</code> (i.e. <code>&amp;self</code>)</li>
+<li><code>&amp;mut Self</code> (i.e <code>&amp;mut self</code>)</li>
+<li><code>Box&lt;Self&gt;</code></li>
+<li><code>Rc&lt;Self&gt;</code></li>
+<li><code>Arc&lt;Self&gt;</code></li>
+<li><code>Pin&lt;P&gt;</code> където <code>P</code> е един от горните типове</li></ul></li>
+<li>Няма <code>where Self: Sized</code>.</li></ul></li>
+<li>Експлицитните функции, които не могат да се викат през trait object:<ul>
+<li>Имат <code>where Self: Sized</code>.</li></ul></li></ul></li>
+</ul>
+</div><div class="slide">
+<h1 id="trait-objects">Trait Objects</h1>
+<p>Пример за object safe trait</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="6c631f504b55ab2c6044a68174c3e50edbc167af">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">trait</span> <span class="tshl-type">Dispatchable</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">by_ref</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">)</span> {}
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">by_ref_mut</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">)</span> {}
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">by_box</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>: <span class="tshl-type">Box</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">)</span> {}
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">by_rc</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>: <span class="tshl-type">Rc</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">)</span> {}
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">by_arc</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>: <span class="tshl-type">Arc</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">)</span> {}
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">by_pin</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>: <span class="tshl-type">Pin</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&amp;</span><span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">)</span> {}
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">with_lifetime</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>: <span class="tshl-operator">&amp;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span> <span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">)</span> {}
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">nested_pin</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>: <span class="tshl-type">Pin</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Arc</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">)</span> {}
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="6c631f504b55ab2c6044a68174c3e50edbc167af">use std::rc::Rc;
+use std::sync::Arc;
+use std::pin::Pin;
+trait Dispatchable {
+    fn by_ref(self: &Self) {}
+    fn by_ref_mut(self: &mut Self) {}
+    fn by_box(self: Box<Self>) {}
+    fn by_rc(self: Rc<Self>) {}
+    fn by_arc(self: Arc<Self>) {}
+    fn by_pin(self: Pin<&Self>) {}
+    fn with_lifetime<'a>(self: &'a Self) {}
+    fn nested_pin(self: Pin<Arc<Self>>) {}
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="trait-objects">Trait Objects</h1>
+<p>Пример за object safe trait, където не можем да викаме изредените функции от trait object-a</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="92c754e098a51d90d7d04236cdf0c0d12d44cff2">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">trait</span> <span class="tshl-type">NonDispatchable</span> {
+    <span class="tshl-comment">// Статичните функции не могат да се викат през trait object.</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">foo</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> <span class="tshl-keyword">where</span> <span class="tshl-type">Self</span>: <span class="tshl-type">Sized</span> {}
+    <span class="tshl-comment">// Self типа не се знае докато не се изпълни програмата.</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">returns</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Self</span> <span class="tshl-keyword">where</span> <span class="tshl-type">Self</span>: <span class="tshl-type">Sized</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-comment">// `other` може да има друг конкретен тип (concrete type) спрямо receiver-a self.</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">param</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">other</span>: <span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">)</span> <span class="tshl-keyword">where</span> <span class="tshl-type">Self</span>: <span class="tshl-type">Sized</span> {}
+    <span class="tshl-comment">// Обобщените типове не са съвместими с vtable.</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">typed</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">x</span>: <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">)</span> <span class="tshl-keyword">where</span> <span class="tshl-type">Self</span>: <span class="tshl-type">Sized</span> {}
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="92c754e098a51d90d7d04236cdf0c0d12d44cff2">trait NonDispatchable {
+    // Статичните функции не могат да се викат през trait object.
+    fn foo() where Self: Sized {}
+    // Self типа не се знае докато не се изпълни програмата.
+    fn returns(&self) -> Self where Self: Sized;
+    // `other` може да има друг конкретен тип (concrete type) спрямо receiver-a self.
+    fn param(&self, other: Self) where Self: Sized {}
+    // Обобщените типове не са съвместими с vtable.
+    fn typed<T>(&self, x: T) where Self: Sized {}
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="trait-objects">Trait Objects</h1>
+<p>Пример за non-object safe traits</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="08b3f61c8cf4de11972ccb1176c86c2996f77bb6">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">trait</span> <span class="tshl-type">NotObjectSafe</span> {
+    <span class="tshl-comment">// ERROR: не може да има асоциирани константи</span>
+    <span class="tshl-keyword">const</span> <span class="tshl-constructor">CONST</span>: <span class="tshl-type_builtin">i32</span> = <span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-comment">// ERROR: асоциирана функция, която няма Self: Sized</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">foo</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {}
+    <span class="tshl-comment">// ERROR: Self в return</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">returns</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Self</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-comment">// ERROR: има обобщен тип</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">typed</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">x</span>: <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">)</span> {}
+    <span class="tshl-comment">// ERROR: вложени receiver-и не се поддържат все още</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">nested</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>: <span class="tshl-type">Rc</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Box</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">)</span> {}
+}
+
+<span class="tshl-comment">// Self: Sized трейтовете не са object safe.</span>
+<span class="tshl-keyword">trait</span> <span class="tshl-type">TraitWithSize</span> <span class="tshl-keyword">where</span> <span class="tshl-type">Self</span>: <span class="tshl-type">Sized</span> {}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="08b3f61c8cf4de11972ccb1176c86c2996f77bb6">use std::rc::Rc;
+trait NotObjectSafe {
+    // ERROR: не може да има асоциирани константи
+    const CONST: i32 = 1;
+
+    // ERROR: асоциирана функция, която няма Self: Sized
+    fn foo() {}
+    // ERROR: Self в return
+    fn returns(&self) -> Self;
+    // ERROR: има обобщен тип
+    fn typed<T>(&self, x: T) {}
+    // ERROR: вложени receiver-и не се поддържат все още
+    fn nested(self: Rc<Box<Self>>) {}
+}
+
+// Self: Sized трейтовете не са object safe.
+trait TraitWithSize where Self: Sized {}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="trait-objects">Trait Objects</h1>
+<p>Можем да използваме trait обекти да си направим не-хомогенен вектор, който може да се принтира.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="f4ac763ce8be1fc36c5cf2a7bd5c5f981ee84dea">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>fmt<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Debug</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{:?}&quot;</span>, vec!<span class="tshl-punctuation_bracket">[</span>
+    &amp;<span class="tshl-constant_builtin">1.1</span> <span class="tshl-operator">as</span> &amp;dyn <span class="tshl-constructor">Debug</span>,
+    &amp;<span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">String</span>::from<span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Stuff&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>,
+    &amp;<span class="tshl-constant_builtin">3</span>
+<span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">[1.1, Some("Stuff"), 3]</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="f4ac763ce8be1fc36c5cf2a7bd5c5f981ee84dea">fn main() {
+use std::fmt::Debug;
+
+println!("{:?}", vec![
+    &1.1 as &dyn Debug,
+    &Some(String::from("Stuff")),
+    &3
+]);
+}</pre>
+</div><div class="slide">
+<h1 id="trait-objects">Trait Objects</h1>
+<p>Големината на един trait object е два указателя - един към самата стойност и един към vtable-a.</p>
+<p>Може да ги срещнете още като "fat pointer".</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="e6e32b8d7318fa04c33a81d9991543bf509c6b42">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, mem::size_of::&lt;&amp;<span class="tshl-type_builtin">u32</span>&gt;<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, mem::size_of::&lt;&amp;dyn <span class="tshl-constructor">Debug</span>&gt;<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">8
+16</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="e6e32b8d7318fa04c33a81d9991543bf509c6b42">use std::fmt::Debug;
+use std::mem;
+fn main() {
+println!("{}", mem::size_of::<&u32>());
+println!("{}", mem::size_of::<&dyn Debug>());
+}</pre>
+</div><div class="slide">
+<h1 id="turbofish">Turbofish!</h1>
+<p><img src="resources/turbofish.jpg" alt="" /></p>
+</div><div class="slide">
+<h1 id="generic-traits">Generic Traits</h1>
+<p>Нека разгледаме как бихме имплементирали <code>Graph</code> trait</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="4fddb56ae4bef97c2a77023adf8791e74f430837">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">trait</span> <span class="tshl-type">Graph</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">N</span>, <span class="tshl-type">E</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">has_edge</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">node1</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type">N</span>, <span class="tshl-variable_parameter">node2</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type">N</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">bool</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">edges</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">node</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type">N</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">E</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="4fddb56ae4bef97c2a77023adf8791e74f430837">#![allow(dead_code)]
+fn main () {}
+trait Graph<N, E> {
+    fn has_edge(&self, node1: &N, node2: &N) -> bool;
+    fn edges(&self, node: &N) -> Vec<E>;
+    // ...
+}</pre>
+</div><div class="slide">
+<h1 id="generic-traits">Generic Traits</h1>
+<p>Ако се опитаме да направим функция</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="59860bb97f73526ee920449aaf12bcfb878fff40">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">distance</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">N</span>, <span class="tshl-type">E</span>, <span class="tshl-type">G</span>: <span class="tshl-type">Graph</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">N</span>, <span class="tshl-type">E</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">graph</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type">G</span>, <span class="tshl-variable_parameter">start</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type">N</span>, <span class="tshl-variable_parameter">end</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type">N</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u32</span> {
+    <span class="tshl-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="59860bb97f73526ee920449aaf12bcfb878fff40">#![allow(dead_code, unused_variables)]
+fn main () {}
+trait Graph<N, E> {
+fn has_edge(&self, node1: &N, node2: &N) -> bool;
+fn edges(&self, node: &N) -> Vec<E>;
+}
+fn distance<N, E, G: Graph<N, E>>(graph: &G, start: &N, end: &N) -> u32 {
+    // ...
+0
+}</pre>
+</div><div class="slide subslide">
+<h1 id="generic-traits">Generic Traits</h1>
+<p>Ако се опитаме да направим функция</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="59860bb97f73526ee920449aaf12bcfb878fff40">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">distance</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">N</span>, <span class="tshl-type">E</span>, <span class="tshl-type">G</span>: <span class="tshl-type">Graph</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">N</span>, <span class="tshl-type">E</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">graph</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type">G</span>, <span class="tshl-variable_parameter">start</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type">N</span>, <span class="tshl-variable_parameter">end</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type">N</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u32</span> {
+    <span class="tshl-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="59860bb97f73526ee920449aaf12bcfb878fff40">#![allow(dead_code, unused_variables)]
+fn main () {}
+trait Graph<N, E> {
+fn has_edge(&self, node1: &N, node2: &N) -> bool;
+fn edges(&self, node: &N) -> Vec<E>;
+}
+fn distance<N, E, G: Graph<N, E>>(graph: &G, start: &N, end: &N) -> u32 {
+    // ...
+0
+}</pre>
+<p>Тук дефиницията на типа <code>E</code> за ребрата на графа няма пряко отношение към сигнатурата на функцията.</p>
+</div><div class="slide">
+<h1 id="traits">Traits</h1>
+<h3 id="асоциирани-типове">Асоциирани типове</h3>
+<p>Нека пробваме отново..</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="426db3d44ddd4a8d3960f64618ea560212abdbd2">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">trait</span> <span class="tshl-type">Graph</span> {
+    <span class="tshl-keyword">type</span> <span class="tshl-type">N</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">type</span> <span class="tshl-type">E</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">has_edge</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">node1</span>: <span class="tshl-operator">&amp;</span><span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">N</span>, <span class="tshl-variable_parameter">node2</span>: <span class="tshl-operator">&amp;</span><span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">N</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">bool</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">edges</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">node</span>: <span class="tshl-operator">&amp;</span><span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">N</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">E</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="426db3d44ddd4a8d3960f64618ea560212abdbd2">#![allow(dead_code)]
+fn main() {}
+trait Graph {
+    type N;
+    type E;
+
+    fn has_edge(&self, node1: &Self::N, node2: &Self::N) -> bool;
+    fn edges(&self, node: &Self::N) -> Vec<Self::E>;
+}</pre>
+</div><div class="slide subslide">
+<h1 id="traits">Traits</h1>
+<h3 id="асоциирани-типове">Асоциирани типове</h3>
+<p>Нека пробваме отново..</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="426db3d44ddd4a8d3960f64618ea560212abdbd2">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">trait</span> <span class="tshl-type">Graph</span> {
+    <span class="tshl-keyword">type</span> <span class="tshl-type">N</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">type</span> <span class="tshl-type">E</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">has_edge</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">node1</span>: <span class="tshl-operator">&amp;</span><span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">N</span>, <span class="tshl-variable_parameter">node2</span>: <span class="tshl-operator">&amp;</span><span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">N</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">bool</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">edges</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">node</span>: <span class="tshl-operator">&amp;</span><span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">N</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">E</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="426db3d44ddd4a8d3960f64618ea560212abdbd2">#![allow(dead_code)]
+fn main() {}
+trait Graph {
+    type N;
+    type E;
+
+    fn has_edge(&self, node1: &Self::N, node2: &Self::N) -> bool;
+    fn edges(&self, node: &Self::N) -> Vec<Self::E>;
+}</pre>
+<p>Асоциираните типове служат за, един вид, групиране на типове.</p>
+</div><div class="slide">
+<h1 id="traits">Traits</h1>
+<h3 id="асоциирани-типове">Асоциирани типове</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="ebe666cfb58d629be0b877210f91e38c6c7bba8c">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">Node</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">struct</span> <span class="tshl-type">Edge</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">struct</span> <span class="tshl-type">MyGraph</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">impl</span> <span class="tshl-type">Graph</span> <span class="tshl-keyword">for</span> <span class="tshl-type">MyGraph</span> {
+    <span class="tshl-keyword">type</span> <span class="tshl-type">N</span> = <span class="tshl-type">Node</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">type</span> <span class="tshl-type">E</span> = <span class="tshl-type">Edge</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">has_edge</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">n1</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type">Node</span>, <span class="tshl-variable_parameter">n2</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type">Node</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">bool</span> {
+        <span class="tshl-constant_builtin">true</span>
+    }
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">edges</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">n</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type">Node</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Edge</span><span class="tshl-punctuation_bracket">&gt;</span> {
+        <span class="tshl-type">Vec</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="ebe666cfb58d629be0b877210f91e38c6c7bba8c">#![allow(dead_code, unused_variables)]
+fn main() {}
+trait Graph {
+type N;
+type E;
+fn has_edge(&self, node1: &Self::N, node2: &Self::N) -> bool;
+fn edges(&self, node: &Self::N) -> Vec<Self::E>;
+}
+struct Node;
+struct Edge;
+struct MyGraph;
+
+impl Graph for MyGraph {
+    type N = Node;
+    type E = Edge;
+
+    fn has_edge(&self, n1: &Node, n2: &Node) -> bool {
+        true
+    }
+
+    fn edges(&self, n: &Node) -> Vec<Edge> {
+        Vec::new()
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="generic-traits">Generic Traits</h1>
+<p>И сега ако се опитаме да направим функцията отново</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="ef6a542ec06bda7eb815ddb92c6002383c459044">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">distance</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">G</span>: <span class="tshl-type">Graph</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">N</span>=<span class="tshl-type">Node</span>, <span class="tshl-type">E</span>=<span class="tshl-type">Edge</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">graph</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type">G</span>, <span class="tshl-variable_parameter">start</span>: <span class="tshl-operator">&amp;</span><span class="tshl-constructor">G</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">N</span>, <span class="tshl-variable_parameter">end</span>: <span class="tshl-operator">&amp;</span><span class="tshl-constructor">G</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">N</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u32</span> {
+    <span class="tshl-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="ef6a542ec06bda7eb815ddb92c6002383c459044">#![allow(dead_code, unused_variables)]
+fn main() {}
+trait Graph {
+type N;
+type E;
+fn has_edge(&self, node1: &Self::N, node2: &Self::N) -> bool;
+fn edges(&self, node: &Self::N) -> Vec<Self::E>;
+}
+struct Node;
+struct Edge;
+struct MyGraph;
+impl Graph for MyGraph {
+type N = Node;
+type E = Edge;
+fn has_edge(&self, n1: &Node, n2: &Node) -> bool {
+true
+}
+fn edges(&self, n: &Node) -> Vec<Edge> {
+Vec::new()
+}
+}
+fn distance<G: Graph<N=Node, E=Edge>>(graph: &G, start: &G::N, end: &G::N) -> u32 {
+    // ...
+0
+}</pre>
+</div><div class="slide">
+<h1 id="traits">Traits</h1>
+<h3 id="асоциирани-типове">Асоциирани типове</h3>
+<p>Може да си дефинираме trait за събиране като комбинираме Generic Traits и Associated Types:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8c6137c230968c5b274458c0ae0eb9eecd460bb6">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">trait</span> <span class="tshl-type">Add</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">RHS</span>=<span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">type</span> <span class="tshl-type">Output</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">rhs</span>: <span class="tshl-type">RHS</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Output</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="8c6137c230968c5b274458c0ae0eb9eecd460bb6">#![allow(dead_code)]
+fn main() {}
+trait Add<RHS=Self> {
+    type Output;
+
+    fn add(self, rhs: RHS) -> Self::Output;
+}</pre>
+</div><div class="slide subslide">
+<h1 id="traits">Traits</h1>
+<h3 id="асоциирани-типове">Асоциирани типове</h3>
+<p>Може да си дефинираме trait за събиране като комбинираме Generic Traits и Associated Types:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8c6137c230968c5b274458c0ae0eb9eecd460bb6">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">trait</span> <span class="tshl-type">Add</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">RHS</span>=<span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">type</span> <span class="tshl-type">Output</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">rhs</span>: <span class="tshl-type">RHS</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Output</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="8c6137c230968c5b274458c0ae0eb9eecd460bb6">#![allow(dead_code)]
+fn main() {}
+trait Add<RHS=Self> {
+    type Output;
+
+    fn add(self, rhs: RHS) -> Self::Output;
+}</pre>
+<p><code>RHS=Self</code> указва тип по подразбиране. Това е позволено само за <code>struct</code>, <code>enum</code>, <code>type</code> и <code>trait</code>.</p>
+</div><div class="slide">
+<h1 id="traits">Traits</h1>
+<h3 id="асоциирани-типове">Асоциирани типове</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="3801fd610930424482293e455854d9e3083f731b">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">impl</span> <span class="tshl-type">Add</span> <span class="tshl-keyword">for</span> <span class="tshl-type_builtin">i32</span> {
+    <span class="tshl-keyword">type</span> <span class="tshl-type">Output</span> = <span class="tshl-type_builtin">i32</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">rhs</span>: <span class="tshl-type_builtin">i32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i32</span> {
+        <span class="tshl-variable_builtin">self</span> + rhs
+    }
+}
+
+<span class="tshl-keyword">impl</span> <span class="tshl-type">Add</span> <span class="tshl-keyword">for</span> <span class="tshl-type">String</span> {
+    <span class="tshl-keyword">type</span> <span class="tshl-type">Output</span> = <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">rhs</span>: <span class="tshl-type">String</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">String</span> {
+        <span class="tshl-function_macro">format</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{} {}&quot;</span>, <span class="tshl-variable_builtin">self</span>, rhs<span class="tshl-punctuation_bracket">)</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="3801fd610930424482293e455854d9e3083f731b">#![allow(dead_code)]
+fn main() {}
+trait Add<RHS=Self> {
+type Output;
+fn add(self, rhs: RHS) -> Self::Output;
+}
+impl Add for i32 {
+    type Output = i32;
+
+    fn add(self, rhs: i32) -> i32 {
+        self + rhs
+    }
+}
+
+impl Add for String {
+    type Output = String;
+
+    fn add(self, rhs: String) -> String {
+        format!("{} {}", self, rhs)
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="traits">Traits</h1>
+<h3 id="асоциирани-типове">Асоциирани типове</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="5704c85b0a685f5f98d5dc6ebe20bb0ce5111408">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">Student</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">struct</span> <span class="tshl-type">StudentGroup</span> {
+    <span class="tshl-property">members</span>: <span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Student</span><span class="tshl-punctuation_bracket">&gt;</span>
+}
+
+<span class="tshl-keyword">impl</span> <span class="tshl-type">Add</span> <span class="tshl-keyword">for</span> <span class="tshl-type">Student</span> {
+    <span class="tshl-keyword">type</span> <span class="tshl-type">Output</span> = <span class="tshl-type">StudentGroup</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">rhs</span>: <span class="tshl-type">Student</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">StudentGroup</span> {
+        <span class="tshl-type">StudentGroup</span> { <span class="tshl-property">members</span>: <span class="tshl-function_macro">vec</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-variable_builtin">self</span>, rhs<span class="tshl-punctuation_bracket">]</span> }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="5704c85b0a685f5f98d5dc6ebe20bb0ce5111408">#![allow(dead_code)]
+fn main() {}
+trait Add<RHS=Self> {
+type Output;
+fn add(self, rhs: RHS) -> Self::Output;
+}
+struct Student;
+struct StudentGroup {
+    members: Vec<Student>
+}
+
+impl Add for Student {
+    type Output = StudentGroup;
+
+    fn add(self, rhs: Student) -> StudentGroup {
+        StudentGroup { members: vec![self, rhs] }
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="traits">Traits</h1>
+<h3 id="каква-е-разликата-между-асоцииран-тип-и-generic-тип">Каква е разликата между "асоцииран тип" и "generic тип"?</h3>
+<p>Да речем, че имаме <code>Add</code> trait дефиниран така:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="bf3091b250b36fd94d4927eeb54eca786a9879af">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">trait</span> <span class="tshl-type">Add</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">rhs</span>: <span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Self</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="bf3091b250b36fd94d4927eeb54eca786a9879af">#![allow(dead_code)]
+fn main() {}
+trait Add {
+    fn add(self, rhs: Self) -> Self;
+}</pre>
+<p>Това ще работи само за един и същ тип отляво, отдясно и като резултат:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">i32<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">add</span><span class="tshl-punctuation_bracket">(</span>i32<span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i32</span>             <span class="tshl-comment">// Self=i32</span>
+f64<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">add</span><span class="tshl-punctuation_bracket">(</span>f64<span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">f64</span>             <span class="tshl-comment">// Self=f64</span>
+<span class="tshl-constructor">Student</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">Student</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-constructor">Student</span> <span class="tshl-comment">// Self=Student</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="traits">Traits</h1>
+<h3 id="каква-е-разликата-между-асоцииран-тип-и-generic-тип">Каква е разликата между "асоцииран тип" и "generic тип"?</h3>
+<p>За да варираме дясната страна:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="557e02717fa34f57b8fa47a530f40505822c3854">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">trait</span> <span class="tshl-type">Add</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">RHS</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">rhs</span>: <span class="tshl-type">RHS</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Self</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="557e02717fa34f57b8fa47a530f40505822c3854">#![allow(dead_code)]
+fn main() {}
+trait Add<RHS> {
+    fn add(self, rhs: RHS) -> Self;
+}</pre>
+<p>Това ще позволи различни типове отляво и отдясно, но резултата задължително трябва да е левия:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">i32<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">add</span><span class="tshl-punctuation_bracket">(</span>i8<span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i32</span>                        <span class="tshl-comment">// Self=i32, RHS=i8</span>
+f64<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">add</span><span class="tshl-punctuation_bracket">(</span>f32<span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">f64</span>                       <span class="tshl-comment">// Self=f64, RHS=f32</span>
+<span class="tshl-constructor">StudentGroup</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">Student</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-constructor">StudentGroup</span> <span class="tshl-comment">// Self=StudentGroup, RHS=Student</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>(Или може да върнем <code>-&gt; RHS</code> вместо <code>-&gt; Self</code>, за да върнем задължително десния тип.)</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">rhs</span>: <span class="tshl-type">RHS</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">RHS</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="traits">Traits</h1>
+<h3 id="каква-е-разликата-между-асоцииран-тип-и-generic-тип">Каква е разликата между "асоцииран тип" и "generic тип"?</h3>
+<p>За да сме напълно свободни:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="9cf0ab118cd1abb17b62f2e77c4d395d89fe389b">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">trait</span> <span class="tshl-type">Add</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">RHS</span>, <span class="tshl-type">OUTPUT</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">rhs</span>: <span class="tshl-type">RHS</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">OUTPUT</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="9cf0ab118cd1abb17b62f2e77c4d395d89fe389b">#![allow(dead_code)]
+fn main() {}
+trait Add<RHS, OUTPUT> {
+    fn add(self, rhs: RHS) -> OUTPUT;
+}</pre>
+<p>Проблема е, че това позволява:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">i32<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">add</span><span class="tshl-punctuation_bracket">(</span>i8<span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i64</span> <span class="tshl-comment">// Self=i32, RHS=i8, OUTPUT=i64</span>
+i32<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">add</span><span class="tshl-punctuation_bracket">(</span>i8<span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i32</span> <span class="tshl-comment">// Self=i32, RHS=i8, OUTPUT=i32</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Компилатора сега няма как да знае със сигурност какъв е типа на <code>i32.add(i8)</code>. Може да е което и да е от двете. Налага се експлицитно да го укажем, или с <code>::&lt;&gt;</code>, или с <code>let result: i32 = ...</code></p>
+</div><div class="slide">
+<h1 id="traits">Traits</h1>
+<h3 id="каква-е-разликата-между-асоцииран-тип-и-generic-тип">Каква е разликата между "асоцииран тип" и "generic тип"?</h3>
+<p>Асоциирания тип е компромисен вариант -- можем да изберем какъв е типа на output-а, но този тип е винаги един и същ за всяка двойка ляв+десен тип:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">trait</span> <span class="tshl-type">Add</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">RHS</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">type</span> <span class="tshl-type">Output</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">rhs</span>: <span class="tshl-type">RHS</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Output</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Така можем да кажем:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">impl</span> <span class="tshl-type">Add</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">i8</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">for</span> <span class="tshl-type_builtin">i32</span> {  <span class="tshl-comment">// Имплементирай ми &quot;добавяне на i8 към i32&quot;</span>
+    <span class="tshl-keyword">type</span> <span class="tshl-type">Output</span> = <span class="tshl-type_builtin">i64</span><span class="tshl-punctuation_delimiter">;</span>  <span class="tshl-comment">// Като резултата ще е винаги i64</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">rhs</span>: <span class="tshl-type_builtin">i8</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i64</span> { ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span> }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="заключение">Заключение</h1>
+<ul>
+<li>Generic Traits се използват когато искаме да имаме имплементация с различен тип при използване.</li>
+<li>Associated Type се използват когато искаме да има имаме свобода на типа, но да бъде фиксиран при имплементация.</li>
+</ul>
+</div><div class="slide">
+<h1 id="въпроси">Въпроси</h1>
+</div>
+    </main>
+</body>
+</html>
