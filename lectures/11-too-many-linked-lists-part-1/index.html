@@ -1,0 +1,529 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <title>Свързани списъци, част 1</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="rust,fmi">
+    <link rel="stylesheet" href="resources/codeblock/codeblock.css">
+<link rel="stylesheet" href="resources/frontend/controls.css">
+<link rel="stylesheet" href="resources/global/global.css">
+<link rel="stylesheet" href="resources/global/metadata.css">
+<link rel="stylesheet" href="resources/highlight/hljs-github.css">
+<link rel="stylesheet" href="resources/highlight/style.css">
+<link rel="stylesheet" href="resources/highlight/tshl-github.css">
+<link rel="stylesheet" href="resources/katex/katex.min.css">
+<link rel="stylesheet" href="resources/rustc/rustc.css">
+<link rel="stylesheet" href="resources/splitview/splitview.css">
+<link rel="stylesheet" href="resources/wrapping-pages/wrapping-pages.css">
+<script type="text/javascript" src="resources/codeblock/codeblock.js"></script>
+<script type="text/javascript" src="resources/frontend/controls.js"></script>
+</head>
+<body>
+    <main>
+        <div class="slide">
+<h1 id="свързани-списъци-част-1">Свързани списъци, част 1</h1>
+<h3 id="11-ноември-2021">11 ноември 2021</h3>
+</div><div class="slide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Домашно 2: <a href="https://fmi.rust-lang.bg/tasks/2" target="_blank">https://fmi.rust-lang.bg/tasks/2</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Домашно 2: <a href="https://fmi.rust-lang.bg/tasks/2" target="_blank">https://fmi.rust-lang.bg/tasks/2</a></li>
+<li>Още не сме свършили с review-тата на домашно 1, we'll get there</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Домашно 2: <a href="https://fmi.rust-lang.bg/tasks/2" target="_blank">https://fmi.rust-lang.bg/tasks/2</a></li>
+<li>Още не сме свършили с review-тата на домашно 1, we'll get there</li>
+<li>(Hint: може да гледате решенията на колегите)</li>
+</ul>
+</div><div class="slide">
+<h1 id="преговор-box">Преговор: Box</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="a91cefc85b6645a7267b69b26e347ccf03840209">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> x = <span class="tshl-type">Box</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> y = <span class="tshl-type">Box</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">5</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, *x + *y<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> x = <span class="tshl-operator">&amp;</span><span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> y = <span class="tshl-operator">&amp;</span><span class="tshl-constant_builtin">5</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, *x + *y<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">8
+8</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="a91cefc85b6645a7267b69b26e347ccf03840209">fn main() {
+    let x = Box::new(3);
+    let y = Box::new(5);
+
+    println!("{}", *x + *y);
+
+    let x = &3;
+    let y = &5;
+
+    println!("{}", *x + *y);
+}</pre>
+<p>Като reference, но държи ownership</p>
+</div><div class="slide">
+<h1 id="преговор-deref">Преговор: Deref</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">pub</span> <span class="tshl-keyword">trait</span> <span class="tshl-type">Deref</span> {
+    <span class="tshl-keyword">type</span> <span class="tshl-type">Target</span>: ?<span class="tshl-type">Sized</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">deref</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-operator">&amp;</span><span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Target</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">trait</span> <span class="tshl-type">DerefMut</span>: <span class="tshl-type">Deref</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">deref_mut</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Target</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Дефинира как се "вади reference" от един smart pointer</p>
+</div><div class="slide">
+<h1 id="learning-rust-with-entirely-too-many-linked-lists">Learning Rust With Entirely Too Many Linked Lists</h1>
+<p>Оригиналния източник: <a href="https://rust-unofficial.github.io/too-many-lists/" target="_blank">https://rust-unofficial.github.io/too-many-lists/</a></p>
+<p>Пълния код: <a href="https://github.com/rust-unofficial/too-many-lists/tree/master/lists" target="_blank">https://github.com/rust-unofficial/too-many-lists/tree/master/lists</a></p>
+<p>Тези слайдове ще съдържат само кратки обобщения на интересни части от кода.</p>
+</div><div class="slide">
+<h1 id="test-driven-development-tdd">Test-Driven Development (TDD)</h1>
+<ol>
+<li><p>"Red": Писане на тест за липсваща функционалност. Теста се проверява, че fail-ва, за да се потвърди че наистина тества нещо истинско. Пишем кода, който искаме да имаме.</p></li>
+<li><p>"Green": Имплементираме горния код, докарваме тестовете да минават. Стъпка по стъпка, докарваме зелен output.</p></li>
+<li><p>"Refactor": Имайки зелени тестове, спокойно можем да пробваме различни начини да подобрим кода, да го направим по-четим.</p></li>
+</ol>
+</div><div class="slide">
+<h1 id="test-driven-development-tdd">Test-Driven Development (TDD)</h1>
+<ul>
+<li><p>Ако пишете код по този начин, винаги ще имате тестове. Ако първо пишете кода, голямо е изкушението просто да си кажете "то работи, не си заслужава". Или да ги забравите.</p></li>
+<li><p>Добра идея е да "триангулирате" -- да нямате само тест със един комплект от вход и изход, защото може кода по случайност да работи.</p></li>
+<li><p>Не е единствения добър начин за писане на код. Но води до дисциплина, и затова си заслужава да се пробва.</p></li>
+</ul>
+</div><div class="slide">
+<h1 id="stdmemreplace"><code>std::mem::replace</code></h1>
+<p>Удобна функция, която ни позволява да разменим две стойности:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>mem<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">let</span> head = mem<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">replace</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">head</span>, <span class="tshl-constructor">None</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter"></span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<ul>
+<li>Първия аргумент е mutable reference, той се променя.</li>
+<li>Втория аргумент е стойността, която записваме в него. Тя се move-ва.</li>
+<li>Резултата е старата стойност на първия аргумент.</li>
+<li>По този начин, нищо не се деинициализира, "вземаме" стойността на <code>self.head</code>, като слагаме някаква "празна" стойност като заместител.</li>
+</ul>
+</div><div class="slide">
+<h1 id="optiontake"><code>Option::take</code></h1>
+<p>По-четим и удобен за използване вариант на предната функция за <code>Option</code></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> head = <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">head</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">take</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-comment">// Превежда се отдолу до:</span>
+<span class="tshl-keyword">let</span> head = <span class="tshl-type">Option</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">take</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">head</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">let</span> head = std<span class="tshl-punctuation_delimiter">::</span>mem<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">replace</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">head</span>, <span class="tshl-constructor">None</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Трябва <code>self</code> да е взето или като <code>mut self</code>, или <code>&amp;mut self</code></p>
+</div><div class="slide">
+<h1 id="map--as_ref"><code>map</code> &amp; <code>as_ref</code></h1>
+<p>Метода <code>map</code> се използва често когато имаме <code>Option</code>:</p>
+<ul>
+<li>Ако стойността е <code>None</code>, просто не вика функцията/closure-а.</li>
+<li>Ако стойността е <code>Some(val)</code>, вика функцията върху <code>val</code> и я пакетира отново в <code>Some</code>.</li>
+</ul>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">peek</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Option</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&amp;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">head</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_ref</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span>|node| <span class="tshl-operator">&amp;</span>node<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">value</span><span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Map обаче взема ownership! Метода <code>as_ref</code> Конвертира <code>Option&lt;T&gt;</code> в <code>Option&lt;&amp;T&gt;</code>, което ни позволява да достъпим вътрешната стойност по reference (ако изобщо има такава).</p>
+</div><div class="slide">
+<h1 id="итерация-по-reference">Итерация по reference</h1>
+<p>Итерирането по този начин включва вземане на вътрешния <code>&amp;Node</code> изпод Box-а. Това може да изглежда объркващо…</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">iter</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Iter</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-type">Iter</span> {
+        <span class="tshl-property">current</span>: <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">head</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_ref</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span>|node| <span class="tshl-operator">&amp;</span><span class="tshl-operator">*</span><span class="tshl-operator">*</span>node<span class="tshl-punctuation_bracket">)</span>,
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Винаги трябва да мислим за типовете! В случая имаме:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-constructor">Option</span>&lt;<span class="tshl-constructor">Box</span>&lt;<span class="tshl-constructor">Node</span>&lt;<span class="tshl-constructor">T</span>&gt;&gt;&gt; <span class="tshl-comment">// в списъка.</span>
+<span class="tshl-constructor">Option</span>&lt;<span class="tshl-operator">&amp;</span><span class="tshl-constructor">Node</span>&lt;<span class="tshl-constructor">T</span>&gt;&gt;     <span class="tshl-comment">// в итератора. Не искаме Box, защото не искаме ownership</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="итерация-по-reference">Итерация по reference</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// self.head: Option&lt;Box&lt;Node&lt;T&gt;&gt;&gt;</span>
+<span class="tshl-comment">// current:   Option&lt;&amp;Node&lt;T&gt;&gt;</span>
+<span class="tshl-keyword">let</span> current = <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">head</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_ref</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span>|node| <span class="tshl-operator">&amp;</span><span class="tshl-operator">*</span><span class="tshl-operator">*</span>node<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-comment">//    node: &amp;Box&lt;Node&lt;T&gt;&gt;</span>
+<span class="tshl-comment">//   *node: *&amp;Box&lt;Node&lt;T&gt;&gt; -&gt; Box&lt;Node&lt;T&gt;&gt;</span>
+<span class="tshl-comment">//  **node: *Box&lt;Node&lt;T&gt;&gt; -&gt; *&amp;Node&lt;T&gt; -&gt; Node&lt;T&gt;</span>
+<span class="tshl-comment">// &amp;**node: &amp;Node&lt;T&gt;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Алтернативно, функцията <code>Box::as_ref</code> ни дава същия процес с по-малко perl-like код:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> current = <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">head</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_ref</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span>|node| <span class="tshl-type">Box</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">as_ref</span><span class="tshl-punctuation_bracket">(</span>node<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-comment">// Или, за по-кратко:</span>
+<span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> current = <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">head</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_ref</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">Box</span><span class="tshl-punctuation_delimiter">::</span>as_ref<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="итерация-по-mutable-reference">Итерация по mutable reference</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> current = <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">head</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_mut</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span>|node| <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-operator">*</span><span class="tshl-operator">*</span>node<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-comment">// Или</span>
+<span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> current = <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">head</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_mut</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">Box</span><span class="tshl-punctuation_delimiter">::</span>as_mut<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Благодарение на всичките safety check-ове, спокойно можем и да си вземем mutable reference, с почти същия код.</p>
+</div><div class="slide">
+<h1 id="итерация-по-mutable-reference">Итерация по mutable reference</h1>
+<p>Ключова разлика между итерирането по immutable vs mutable reference:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">impl</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span>, <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-type">Iterator</span> <span class="tshl-keyword">for</span> <span class="tshl-type">Iter</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span>, <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">type</span> <span class="tshl-type">Item</span> = <span class="tshl-operator">&amp;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span> <span class="tshl-type">T</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">next</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Option</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Item</span><span class="tshl-punctuation_bracket">&gt;</span> {
+        <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">current</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span>|node| {
+            <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">current</span> = node<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">next</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_ref</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span>|node| <span class="tshl-operator">&amp;</span><span class="tshl-operator">*</span><span class="tshl-operator">*</span>node<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+            <span class="tshl-operator">&amp;</span>node<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">value</span>
+        }<span class="tshl-punctuation_bracket">)</span>
+    }
+}
+
+<span class="tshl-keyword">impl</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span>, <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-type">Iterator</span> <span class="tshl-keyword">for</span> <span class="tshl-type">IterMut</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span>, <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">type</span> <span class="tshl-type">Item</span> = <span class="tshl-operator">&amp;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span> <span class="tshl-keyword">mut</span> <span class="tshl-type">T</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">next</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Option</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Item</span><span class="tshl-punctuation_bracket">&gt;</span> {
+        <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">current</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">take</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span>|node| {
+            <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">current</span> = node<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">next</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_mut</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span>|node| <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-operator">*</span><span class="tshl-operator">*</span>node<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+            <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> node<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">value</span>
+        }<span class="tshl-punctuation_bracket">)</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="итерация-по-mutable-reference">Итерация по mutable reference</h1>
+<p>Разликата е в тези два реда:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// immutable:</span>
+<span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">next</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">map</span><span class="tshl-punctuation_bracket">(</span>|node| {
+<span class="tshl-comment">// mutable:</span>
+<span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">next</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">take</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">map</span><span class="tshl-punctuation_bracket">(</span>|node| {</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Защо е нужно да викнем <code>take</code>? В първия случай, <code>self.next</code> е от тип <code>Option&lt;&amp;Node&gt;</code>, докато във втория e <code>Option&lt;&amp;mut Node&gt;</code>.</p>
+</div><div class="slide">
+<h1 id="итерация-по-mutable-reference">Итерация по mutable reference</h1>
+<p>Викането на <code>self.next.map</code> в първия случай прави <strong>копие</strong> на този option, понеже типа <code>&amp;T</code>, за което и да е <code>T</code>, е <code>Copy</code>. Това е смислено, понеже можем да имаме колкото си искаме immutable references към нещо.</p>
+<p>Типа <code>&amp;mut T</code> не е <code>Copy</code>, обаче. Това не се компилира, защото mutable reference-а има move semantics:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="0767fd34d56f3e7809af0124610fe055577d7d22">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> source = <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;foo&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> first_ref = <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> source<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> second_ref = first_ref<span class="tshl-punctuation_delimiter">;</span>
+
+    first_ref<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">push_str</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot; bar&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, second_ref<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0382]</span><span style="font-weight:bold">: borrow of moved value: `first_ref`</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_0767fd34d56f3e7809af0124610fe055577d7d22.rs:7:5
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">4</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    let first_ref = &amp;mut source;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>        <span style="font-weight:bold;color:rgb(85,85,255)">---------</span> <span style="font-weight:bold;color:rgb(85,85,255)">move occurs because `first_ref` has type `&amp;mut String`, which does not implement the `Copy` trait</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">5</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    let second_ref = first_ref;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                     <span style="font-weight:bold;color:rgb(85,85,255)">---------</span> <span style="font-weight:bold;color:rgb(85,85,255)">value moved here</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">6</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>
+<span style="font-weight:bold;color:rgb(85,85,255)">7</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    first_ref.push_str(" bar");
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    <span style="font-weight:bold;color:rgb(255,85,85)">^^^^^^^^^</span> <span style="font-weight:bold;color:rgb(255,85,85)">value borrowed here after move</span>
+
+<span style="font-weight:bold">For more information about this error, try `rustc --explain E0382`.</span>
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="0767fd34d56f3e7809af0124610fe055577d7d22">fn main() {
+    let mut source = String::from("foo");
+
+    let first_ref = &mut source;
+    let second_ref = first_ref;
+
+    first_ref.push_str(" bar");
+    println!("{}", second_ref);
+}</pre>
+</div><div class="slide">
+<h1 id="итерация-по-mutable-reference">Итерация по mutable reference</h1>
+<p>Това, от друга страна, се компилира без проблеми, защото immutable references се копират:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="f33bb04460a97d86e983ab41ad526366828c0813">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> source = <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;foo&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> first_ref = <span class="tshl-operator">&amp;</span>source<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> second_ref = first_ref<span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, first_ref<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, second_ref<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">foo
+foo</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="f33bb04460a97d86e983ab41ad526366828c0813">fn main() {
+    let source = String::from("foo");
+
+    let first_ref = &source;
+    let second_ref = first_ref;
+
+    println!("{}", first_ref);
+    println!("{}", second_ref);
+}</pre>
+<p>Тук не става въпрос за преместване или копиране на <code>source</code>, а за <em>references</em> към <code>source</code>! И references са някакви конкретни типове, алокирани на стека, и за тях може да се мисли дали ще се копират или ще се преместват.</p>
+</div><div class="slide">
+<h1 id="не-е-нужно-да-се-ползва-map">Не е нужно да се ползва map</h1>
+<p>Тези три имплементации на <code>peek</code> са еквивалентни:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">peek</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Option</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&amp;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">head</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_ref</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span>|node| <span class="tshl-operator">&amp;</span>node<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">value</span><span class="tshl-punctuation_bracket">)</span>
+}
+
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">peek</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Option</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&amp;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">match</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">head</span> {
+        <span class="tshl-constructor">None</span> =&gt; <span class="tshl-constructor">None</span>,
+        <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">ref</span> node<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span>node<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">value</span><span class="tshl-punctuation_bracket">)</span>
+    }
+}
+
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">peek</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Option</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&amp;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">let</span> node = <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">head</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_ref</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>?<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span>node<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">value</span><span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="не-е-нужно-да-се-ползва-map">Не е нужно да се ползва map</h1>
+<p>Дали ще ползвате map, експлицитен pattern-matching, или <code>?</code> оператора е предимно въпрос на предпочитание. Не всички варианти са използваеми на всички места, разбира се.</p>
+<p>Напълно е възможно да започнете с експлицитен pattern-matching, и да видите, че можете да си опростите кода значително с един map. Или да "извадите" стойност от option рано в метода и оттам нататък да работите безопасно с нея.</p>
+<p>Експериментирайте, за да откриете с какво се чувствате най-комфортни. Правете го редовно -- силно е вероятно предпочитанията ви да се променят с времето.</p>
+</div><div class="slide">
+<h1 id="въпроси">Въпроси</h1>
+</div>
+    </main>
+</body>
+</html>
