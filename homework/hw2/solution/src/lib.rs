@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug)]
 pub struct Matrix<T: Clone> {
     // Каквито данни ви вършат работа
     pub m: [[Cell<T>; 2]; 2] 
@@ -36,7 +36,7 @@ impl<T: Clone> Matrix<T> {
     /// Очакваме `.by_row` да върне елементите в ред: 1, 2, 3, 4
     ///
     pub fn by_row(&self) -> Vec<Cell<T>> {
-        let mut vec: Vec<Cell<T>> = Vec::with_capacity(4);
+        let mut vec = Vec::with_capacity(4);
 
         for i in 0..2 {
             for j in 0..2 {
@@ -55,7 +55,7 @@ impl<T: Clone> Matrix<T> {
     /// Очакваме `.by_col` да върне елементите в ред: 1, 3, 2, 4
     ///
     pub fn by_col(&self) -> Vec<Cell<T>> {
-        let mut vec: Vec<Cell<T>> = Vec::with_capacity(4);
+        let mut vec = Vec::with_capacity(4);
 
         for j in 0..2 {
             for i in 0..2 {
@@ -99,7 +99,7 @@ impl Add<Matrix<String>> for Matrix<i32> {
     type Output = Matrix<String>;
 
     fn add(self, other: Matrix<String>) -> Self::Output {
-        let mut result = other.clone();
+        let mut result = Matrix::new(&[String::from(""), String::from(""), String::from(""), String::from("")]);
 
         for i in 0..2 {
             for j in 0..2 {
@@ -127,16 +127,11 @@ impl Mul<Matrix<String>> for Matrix<i32> {
 
 #[cfg(test)]
 mod custom_tests {
-    use crate::*;
+    use super::*;
 
-    fn vec_to_string(vec: Vec<Cell<String>>) -> String {
-        vec.into_iter()
-            .map(|c| c.0 + " ")                   //                    ¯\_(ツ)_/¯
-            .collect::<String>()                  // Прави вектора на низ като добавя след всеки елемент ' ',
-            .chars().rev()                        // затова трябва да махнем последния елемент. Не се сетих за
-            .collect::<String>()[1..]             // по-чист начин, а и го ползвам само за тестовете, та си остана така. 
-            .chars().rev().collect::<String>()    //                    
-    }                                                                                                 
+    fn string_cell_vec(s1: &str, s2: &str, s3: &str, s4: &str) -> Vec<Cell<String>> {
+        [s1, s2, s3, s4].into_iter().map(String::from).map(Cell).collect::<Vec<Cell<String>>>()
+    }
 
     #[test]
     pub fn custom_test() {
@@ -155,11 +150,21 @@ mod custom_tests {
 
         let mat1 = Matrix::new(&[String::from("this"), String::from("is"), 
                                 String::from("a"), String::from("matrix")]);
-        let mat2 = Matrix::new(&[-1,0,2,1]);
+        assert_eq!((mat + mat1).by_row(), string_cell_vec("1 this", "2 is", "3 a", "4 matrix"));
 
-        assert_eq!(vec_to_string((mat.clone() + mat1.clone()).by_row()), String::from("1 this 2 is 3 a 4 matrix"));
-        assert_eq!(vec_to_string((mat2.clone() + mat1.clone()).by_row()), String::from("siht 1 0 is 2 a 1 matrix"));
-        assert_eq!(mat * mat1.clone(), String::from("this aa isisis matrixmatrixmatrixmatrix"));
+        let mat1 = Matrix::new(&[String::from("this"), String::from("is"), 
+                                String::from("a"), String::from("matrix")]);
+        let mat2 = Matrix::new(&[-1,0,2,1]);
+        assert_eq!((mat2 + mat1).by_row(), string_cell_vec("siht 1", "0 is", "2 a", "1 matrix"));
+
+        let mat1 = Matrix::new(&[String::from("this"), String::from("is"), 
+                                String::from("a"), String::from("matrix")]);
+        let mat = Matrix::<i32>::new(&[1,2,3,4]);
+        assert_eq!(mat * mat1, String::from("this aa isisis matrixmatrixmatrixmatrix"));
+
+        let mat1 = Matrix::new(&[String::from("this"), String::from("is"), 
+                                String::from("a"), String::from("matrix")]);
+        let mat2 = Matrix::new(&[-1,0,2,1]);
         assert_eq!(mat2 * mat1, String::from("siht  isis matrix"));
     }
 }
