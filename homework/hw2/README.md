@@ -80,7 +80,7 @@ assert_eq!(Cell(0) + Cell(String::from("expectation")), Cell(String::from("0 exp
 assert_eq!(Cell(-4) + Cell(String::from("xirtam")), Cell(String::from("matrix 4")))
 ```
 
-Очакваме да имплементирате само събиране на ```Cell<i32>``` отляво със ```Cell<String>``` отдясно, като резултата трябва да е ```Cell<String>```. Би трябвало това да ви е достатъчно информация, за имплементирате събирането с trait-а ```[std::ops::Add](https://doc.rust-lang.org/stable/std/ops/trait.Add.html)```. Стига да се справите, горните примери (и базовия тест) ще ви се компилират.
+Очакваме да имплементирате само събиране на ```Cell<i32>``` отляво със ```Cell<String>``` отдясно, като резултата трябва да е ```Cell<String>```. Би трябвало това да ви е достатъчно информация, за имплементирате събирането с trait-а [```std::ops::Add```](https://doc.rust-lang.org/stable/std/ops/trait.Add.html). Стига да се справите, горните примери (и базовия тест) ще ви се компилират.
 
 Как се умножава число-клетка с низ-клетка? Ако числото е положително или нула, повтаряме толкова пъти низа:
 
@@ -95,7 +95,7 @@ assert_eq!(Cell(0) * Cell(String::from("woah?")), Cell(String::from("")))
 assert_eq!(Cell(-3) * Cell(String::from(",regdab")), Cell(String::from("badger,badger,badger,")))
 ```
 
-Също както горния пример, умножението има ```Cell<i32>``` от лявата страна и ```Cell<String>``` от дясната, и резултата е ```Cell<String>```. Trait-а е ```[std::ops::Mul](https://doc.rust-lang.org/stable/std/ops/trait.Mul.html)```
+Също както горния пример, умножението има ```Cell<i32>``` от лявата страна и ```Cell<String>``` от дясната, и резултата е ```Cell<String>```. Trait-а е [```std::ops::Mul```](https://doc.rust-lang.org/stable/std/ops/trait.Mul.html)
 
 ## Събиране и умножение на матрици
 
@@ -124,9 +124,7 @@ Trait-овете както по-горе са [```std::ops::Add```](https://doc
 
 Погрижете се да имате версия на Rust компилатора и на cargo поне 1.56.0. Може да проверите като извикате ```rustc --version``` и ```cargo --version```. Проверете и че в ```Cargo.toml``` файла си имате следния ред:
 
-```
-edition = "2021"
-```
+```edition = "2021"```
 
 В случай, че версиите ви са стари, може да използвате тази команда, за да си ги обновите:
 
