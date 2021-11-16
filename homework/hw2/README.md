@@ -118,7 +118,7 @@ assert_eq!(Cell(-3) * Cell(String::from(",regdab")), Cell(String::from("badger,b
 - ```Matrix<i32>``` + ```Matrix<String>``` = ```Matrix<String>```
 - ```Matrix<i32>``` * ```Matrix<String>``` = ```String```
 
-Trait-овете както по-горе са ```<a href="https://doc.rust-lang.org/stable/std/ops/trait.Add.html">std::ops::Add</a>``` и ```[std::ops::Mul](https://doc.rust-lang.org/stable/std/ops/trait.Mul.html)```.
+Trait-овете както по-горе са [```std::ops::Add```](https://doc.rust-lang.org/stable/std/ops/trait.Add.html) и [```std::ops::Mul```](https://doc.rust-lang.org/stable/std/ops/trait.Mul.html).
 
 ## Важно!
 
