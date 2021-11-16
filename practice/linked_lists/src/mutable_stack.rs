@@ -63,6 +63,7 @@ impl<T> List<T> {
 
     pub fn iter(&self) -> Iter<T> {
         let first = self.head.as_ref().map(Box::as_ref);
+        //let first = self.head.as_deref();
 
         Iter { current: first }
     }
