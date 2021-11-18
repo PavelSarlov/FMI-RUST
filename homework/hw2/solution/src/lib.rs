@@ -121,7 +121,8 @@ impl Mul<Matrix<String>> for Matrix<i32> {
                 result = format!("{} {}", result, (self.m[i][j].clone() * other.m[j][i].clone()).0);
             }
         }
-        result.trim().to_string()
+        result.remove(0);
+        result
     }
 }
 

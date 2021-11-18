@@ -64,10 +64,10 @@ fn test_basic() {
         String::from("one abacabac owtowtowt fourfourfourfour")
     );
     assert_eq!(
-        (Matrix::new(&[1, 0, -3, 4]) * Matrix::new(&[
+        (Matrix::new(&[0, 1, -3, 4]) * Matrix::new(&[
                                         String::from("one"), String::from("two"),
                                         String::from("abac"), String::from("four")
                                     ])),
-        String::from("one  owtowtowt fourfourfourfour")
+        String::from(" abac owtowtowt fourfourfourfour")
     );
 }
