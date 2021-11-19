@@ -1,0 +1,2264 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <title>Макроси</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="rust,fmi">
+    <link rel="stylesheet" href="resources/codeblock/codeblock.css">
+<link rel="stylesheet" href="resources/frontend/controls.css">
+<link rel="stylesheet" href="resources/global/global.css">
+<link rel="stylesheet" href="resources/global/metadata.css">
+<link rel="stylesheet" href="resources/highlight/hljs-github.css">
+<link rel="stylesheet" href="resources/highlight/style.css">
+<link rel="stylesheet" href="resources/highlight/tshl-github.css">
+<link rel="stylesheet" href="resources/katex/katex.min.css">
+<link rel="stylesheet" href="resources/rustc/rustc.css">
+<link rel="stylesheet" href="resources/splitview/splitview.css">
+<link rel="stylesheet" href="resources/wrapping-pages/wrapping-pages.css">
+<script type="text/javascript" src="resources/codeblock/codeblock.js"></script>
+<script type="text/javascript" src="resources/frontend/controls.js"></script>
+</head>
+<body>
+    <main>
+        <div class="slide">
+<h1 id="макроси">Макроси</h1>
+<h3 id="18-ноември-2021">18 ноември 2021</h3>
+</div><div class="slide">
+<h1 id="макроси">Макроси</h1>
+<p>Каква е целта им?</p>
+</div><div class="slide subslide">
+<h1 id="макроси">Макроси</h1>
+<p>Каква е целта им?</p>
+<p>Генериране на код преди компилация</p>
+</div><div class="slide">
+<h1 id="try">try!</h1>
+<p>Това вече сме го виждали, макар и за кратко</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> try {
+    <span class="tshl-punctuation_bracket">(</span>$expr:expr<span class="tshl-punctuation_bracket">)</span> =&gt; {
+        <span class="tshl-keyword">match</span> $expr {
+            <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span>value<span class="tshl-punctuation_bracket">)</span> =&gt; value,
+            <span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span>e<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-keyword">return</span> <span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span>e.into<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>,
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide subslide">
+<h1 id="try">try!</h1>
+<p>Това вече сме го виждали, макар и за кратко</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> try {
+    <span class="tshl-punctuation_bracket">(</span>$expr:expr<span class="tshl-punctuation_bracket">)</span> =&gt; {
+        <span class="tshl-keyword">match</span> $expr {
+            <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span>value<span class="tshl-punctuation_bracket">)</span> =&gt; value,
+            <span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span>e<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-keyword">return</span> <span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span>e.into<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>,
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>В новите версии на Rust се използва специалният синтаксис <code>?</code> и <code>try</code> е запазена дума<br />
+Но това е добър пример за лесен макрос</p>
+</div><div class="slide">
+<h1 id="add">add!</h1>
+<p>Общата схема</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="6b0f96a7a5d598d3bdb6421c0e289d9f4728daec">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> add {
+    <span class="tshl-punctuation_bracket">(</span>$var1:expr, $var2:expr<span class="tshl-punctuation_bracket">)</span> =&gt; {
+        $var1 + $var2;
+    }
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, add!<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">1</span>, <span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, add!<span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;foo&quot;</span>.to_string<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-string">&quot;bar&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(187,187,85)">warning</span><span style="font-weight:bold">: trailing semicolon in macro used in expression position</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_6b0f96a7a5d598d3bdb6421c0e289d9f4728daec.rs:3:22
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">3</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>        $var1 + $var2;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                     <span style="font-weight:bold;color:rgb(187,187,85)">^</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">...</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">8</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    println!("{}", add!(1, 1));
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                   <span style="font-weight:bold;color:rgb(85,85,255)">----------</span> <span style="font-weight:bold;color:rgb(85,85,255)">in this macro invocation</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: `#[warn(semicolon_in_expressions_from_macros)]` on by default
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">warning</span>: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: for more information, see issue #79813 &lt;https://github.com/rust-lang/rust/issues/79813&gt;
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: this warning originates in the macro `add` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+<span style="font-weight:bold;color:rgb(187,187,85)">warning</span><span style="font-weight:bold">: trailing semicolon in macro used in expression position</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_6b0f96a7a5d598d3bdb6421c0e289d9f4728daec.rs:3:22
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">3</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>        $var1 + $var2;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                     <span style="font-weight:bold;color:rgb(187,187,85)">^</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">...</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">9</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    println!("{}", add!("foo".to_string(), "bar"));
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                   <span style="font-weight:bold;color:rgb(85,85,255)">------------------------------</span> <span style="font-weight:bold;color:rgb(85,85,255)">in this macro invocation</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">warning</span>: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: for more information, see issue #79813 &lt;https://github.com/rust-lang/rust/issues/79813&gt;
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: this warning originates in the macro `add` (in Nightly builds, run with -Z macro-backtrace for more info)</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="6b0f96a7a5d598d3bdb6421c0e289d9f4728daec">macro_rules! add {
+    ($var1:expr, $var2:expr) => {
+        $var1 + $var2;
+    }
+}
+
+fn main() {
+    println!("{}", add!(1, 1));
+    println!("{}", add!("foo".to_string(), "bar"));
+}</pre>
+</div><div class="slide">
+<h1 id="add">add!</h1>
+<p>Общата схема</p>
+</div><div class="slide subslide">
+<h1 id="add">add!</h1>
+<p>Общата схема</p>
+<ul>
+<li><code>macro_rules!</code> всъщност не е макро, а е "syntax extension", имплементирано на ниво компилатор</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="add">add!</h1>
+<p>Общата схема</p>
+<ul>
+<li><code>macro_rules!</code> всъщност не е макро, а е "syntax extension", имплементирано на ниво компилатор</li>
+<li>Името на макроса следвано от чифт скоби за тялото на макроса: <code>macro_rules! add { ... }</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="add">add!</h1>
+<p>Общата схема</p>
+<ul>
+<li><code>macro_rules!</code> всъщност не е макро, а е "syntax extension", имплементирано на ниво компилатор</li>
+<li>Името на макроса следвано от чифт скоби за тялото на макроса: <code>macro_rules! add { ... }</code></li>
+<li>Аргументи в скоби, последвани от стрелкичка и още един чифт скоби: <code>(...) =&gt; { ... }</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="add">add!</h1>
+<p>Общата схема</p>
+<ul>
+<li><code>macro_rules!</code> всъщност не е макро, а е "syntax extension", имплементирано на ниво компилатор</li>
+<li>Името на макроса следвано от чифт скоби за тялото на макроса: <code>macro_rules! add { ... }</code></li>
+<li>Аргументи в скоби, последвани от стрелкичка и още един чифт скоби: <code>(...) =&gt; { ... }</code></li>
+<li>Всички тези скоби са взаимозаменяеми измежду кръгли, квадратни и къдрави скоби</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="add">add!</h1>
+<p>Общата схема</p>
+<ul>
+<li><code>macro_rules!</code> всъщност не е макро, а е "syntax extension", имплементирано на ниво компилатор</li>
+<li>Името на макроса следвано от чифт скоби за тялото на макроса: <code>macro_rules! add { ... }</code></li>
+<li>Аргументи в скоби, последвани от стрелкичка и още един чифт скоби: <code>(...) =&gt; { ... }</code></li>
+<li>Всички тези скоби са взаимозаменяеми измежду кръгли, квадратни и къдрави скоби</li>
+<li>"Променливите" <code>$var1</code>, <code>$var2</code> се наричат метапроменливи и в случая са от "тип" expression - цялостен израз</li>
+</ul>
+</div><div class="slide">
+<h1 id="add">add!</h1>
+<p>Защо не "променливи"? Защото в кръглите скоби се прави pattern-matching на ниво token-и:</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="f57be85444c112b49502f6b6f21f168461e01b3b">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> add {
+    <span class="tshl-punctuation_bracket">(</span>Чш, я събери <span class="tshl-punctuation_bracket">(</span>$var1:expr<span class="tshl-punctuation_bracket">)</span> и <span class="tshl-punctuation_bracket">(</span>$var2:expr<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span> =&gt; {
+        $var1 + $var2;
+    }
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, add!<span class="tshl-punctuation_bracket">(</span>Чш, я събери <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">)</span> и <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, add!<span class="tshl-punctuation_bracket">(</span>Чш, я събери <span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;foo&quot;</span>.to_string<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span> и <span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;bar&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(187,187,85)">warning</span><span style="font-weight:bold">: trailing semicolon in macro used in expression position</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_f57be85444c112b49502f6b6f21f168461e01b3b.rs:3:22
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">3</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>        $var1 + $var2;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                     <span style="font-weight:bold;color:rgb(187,187,85)">^</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">...</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">8</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    println!("{}", add!(Чш, я събери (1) и (1)));
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                   <span style="font-weight:bold;color:rgb(85,85,255)">----------------------------</span> <span style="font-weight:bold;color:rgb(85,85,255)">in this macro invocation</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: `#[warn(semicolon_in_expressions_from_macros)]` on by default
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">warning</span>: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: for more information, see issue #79813 &lt;https://github.com/rust-lang/rust/issues/79813&gt;
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: this warning originates in the macro `add` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+<span style="font-weight:bold;color:rgb(187,187,85)">warning</span><span style="font-weight:bold">: trailing semicolon in macro used in expression position</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_f57be85444c112b49502f6b6f21f168461e01b3b.rs:3:22
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">3</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>        $var1 + $var2;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                     <span style="font-weight:bold;color:rgb(187,187,85)">^</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">...</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">9</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    println!("{}", add!(Чш, я събери ("foo".to_string()) и ("bar")));
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                   <span style="font-weight:bold;color:rgb(85,85,255)">------------------------------------------------</span> <span style="font-weight:bold;color:rgb(85,85,255)">in this macro invocation</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">warning</span>: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: for more information, see issue #79813 &lt;https://github.com/rust-lang/rust/issues/79813&gt;
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: this warning originates in the macro `add` (in Nightly builds, run with -Z macro-backtrace for more info)</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="f57be85444c112b49502f6b6f21f168461e01b3b">macro_rules! add {
+    (Чш, я събери ($var1:expr) и ($var2:expr)) => {
+        $var1 + $var2;
+    }
+}
+
+fn main() {
+    println!("{}", add!(Чш, я събери (1) и (1)));
+    println!("{}", add!(Чш, я събери ("foo".to_string()) и ("bar")));
+}</pre>
+</div><div class="slide">
+<h1 id="add">add!</h1>
+<p>Защо има скоби? За да се знае къде свършва expression/израз.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="be9c85d3e58c64ae0ab6a9978ece02a78cdf0563">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> add {
+    <span class="tshl-punctuation_bracket">(</span>Чш, я събери $var1:expr и $var2:expr<span class="tshl-punctuation_bracket">)</span> =&gt; {
+        $var1 + $var2;
+    }
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">: `$var1:expr` is followed by `и`, which is not allowed for `expr` fragments</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_be9c85d3e58c64ae0ab6a9978ece02a78cdf0563.rs:5:30
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">5</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    (Чш, я събери $var1:expr и $var2:expr) =&gt; {
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                             <span style="font-weight:bold;color:rgb(255,85,85)">^</span> <span style="font-weight:bold;color:rgb(255,85,85)">not allowed after `expr` fragments</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: allowed there are: `=&gt;`, `,` or `;`
+
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="be9c85d3e58c64ae0ab6a9978ece02a78cdf0563">#![allow(unused_macros)]
+fn main () {}
+macro_rules! add {
+    (Чш, я събери $var1:expr и $var2:expr) => {
+        $var1 + $var2;
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="add">add!</h1>
+<p>Непосредствено след expr са позволени само (<code>=&gt;</code>), (<code>,</code>) и  (<code>;</code>), ако expr не е в скоби</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="5d8abaa0152280df2b24f0f3bd1c67815970799e">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> add {
+    <span class="tshl-punctuation_bracket">(</span>Чш, я събери $var1:expr, $var2:expr<span class="tshl-punctuation_bracket">)</span> =&gt; {
+        $var1 + $var2;
+    }
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, add!<span class="tshl-punctuation_bracket">(</span>Чш, я събери <span class="tshl-constant_builtin">1</span>, <span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, add!<span class="tshl-punctuation_bracket">(</span>Чш, я събери <span class="tshl-string">&quot;foo&quot;</span>.to_string<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-string">&quot;bar&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(187,187,85)">warning</span><span style="font-weight:bold">: trailing semicolon in macro used in expression position</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_5d8abaa0152280df2b24f0f3bd1c67815970799e.rs:3:22
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">3</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>        $var1 + $var2;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                     <span style="font-weight:bold;color:rgb(187,187,85)">^</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">...</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">8</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    println!("{}", add!(Чш, я събери 1, 1));
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                   <span style="font-weight:bold;color:rgb(85,85,255)">-----------------------</span> <span style="font-weight:bold;color:rgb(85,85,255)">in this macro invocation</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: `#[warn(semicolon_in_expressions_from_macros)]` on by default
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">warning</span>: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: for more information, see issue #79813 &lt;https://github.com/rust-lang/rust/issues/79813&gt;
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: this warning originates in the macro `add` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+<span style="font-weight:bold;color:rgb(187,187,85)">warning</span><span style="font-weight:bold">: trailing semicolon in macro used in expression position</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_5d8abaa0152280df2b24f0f3bd1c67815970799e.rs:3:22
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">3</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>        $var1 + $var2;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                     <span style="font-weight:bold;color:rgb(187,187,85)">^</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">...</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">9</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    println!("{}", add!(Чш, я събери "foo".to_string(), "bar"));
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                   <span style="font-weight:bold;color:rgb(85,85,255)">-------------------------------------------</span> <span style="font-weight:bold;color:rgb(85,85,255)">in this macro invocation</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">warning</span>: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: for more information, see issue #79813 &lt;https://github.com/rust-lang/rust/issues/79813&gt;
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: this warning originates in the macro `add` (in Nightly builds, run with -Z macro-backtrace for more info)</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="5d8abaa0152280df2b24f0f3bd1c67815970799e">macro_rules! add {
+    (Чш, я събери $var1:expr, $var2:expr) => {
+        $var1 + $var2;
+    }
+}
+
+fn main() {
+    println!("{}", add!(Чш, я събери 1, 1));
+    println!("{}", add!(Чш, я събери "foo".to_string(), "bar"));
+}</pre>
+</div><div class="slide">
+<h1 id="map">map!</h1>
+<p>Нещо малко по-практично</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> map {
+    {
+        $<span class="tshl-punctuation_bracket">(</span> $key: expr : $value: expr <span class="tshl-punctuation_bracket">)</span>,<span class="tshl-operator">*</span>
+    } =&gt; {
+        <span class="tshl-comment">// Забележете блока</span>
+        {
+            <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> map = ::std::collections::<span class="tshl-constructor">HashMap</span>::new<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>;
+            $<span class="tshl-punctuation_bracket">(</span> map.insert<span class="tshl-punctuation_bracket">(</span>$key, $value<span class="tshl-punctuation_bracket">)</span>; <span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span>
+            map
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="map">map!</h1>
+<p>Какво прави <code>$( ... ),*</code> ?</p>
+</div><div class="slide subslide">
+<h1 id="map">map!</h1>
+<p>Какво прави <code>$( ... ),*</code> ?</p>
+<ul>
+<li>Това е repetition operator</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="map">map!</h1>
+<p>Какво прави <code>$( ... ),*</code> ?</p>
+<ul>
+<li>Това е repetition operator</li>
+<li>Винаги се състои от <code>$( ... )</code> и едно от трите:</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="map">map!</h1>
+<p>Какво прави <code>$( ... ),*</code> ?</p>
+<ul>
+<li>Това е repetition operator</li>
+<li>Винаги се състои от <code>$( ... )</code> и едно от трите:</li>
+<li><code>*</code> - 0 или повече повторения</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="map">map!</h1>
+<p>Какво прави <code>$( ... ),*</code> ?</p>
+<ul>
+<li>Това е repetition operator</li>
+<li>Винаги се състои от <code>$( ... )</code> и едно от трите:</li>
+<li><code>*</code> - 0 или повече повторения</li>
+<li><code>+</code> - 1 или повече повторения</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="map">map!</h1>
+<p>Какво прави <code>$( ... ),*</code> ?</p>
+<ul>
+<li>Това е repetition operator</li>
+<li>Винаги се състои от <code>$( ... )</code> и едно от трите:</li>
+<li><code>*</code> - 0 или повече повторения</li>
+<li><code>+</code> - 1 или повече повторения</li>
+<li><code>?</code> - 0 или 1 повторения</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="map">map!</h1>
+<p>Какво прави <code>$( ... ),*</code> ?</p>
+<ul>
+<li>Това е repetition operator</li>
+<li>Винаги се състои от <code>$( ... )</code> и едно от трите:</li>
+<li><code>*</code> - 0 или повече повторения</li>
+<li><code>+</code> - 1 или повече повторения</li>
+<li><code>?</code> - 0 или 1 повторения</li>
+<li>Може да сложим разделител веднага след затварящата скоба например <code>,</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="map">map!</h1>
+<p>Какво прави <code>$( ... ),*</code> ?</p>
+<ul>
+<li>Това е repetition operator</li>
+<li>Винаги се състои от <code>$( ... )</code> и едно от трите:</li>
+<li><code>*</code> - 0 или повече повторения</li>
+<li><code>+</code> - 1 или повече повторения</li>
+<li><code>?</code> - 0 или 1 повторения</li>
+<li>Може да сложим разделител веднага след затварящата скоба например <code>,</code></li>
+<li><code>$( ... ),*</code> търси нещо от вида <code>... , ... , ...</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="map">map!</h1>
+<p>Какво прави <code>$( ... ),*</code> ?</p>
+<ul>
+<li>Това е repetition operator</li>
+<li>Винаги се състои от <code>$( ... )</code> и едно от трите:</li>
+<li><code>*</code> - 0 или повече повторения</li>
+<li><code>+</code> - 1 или повече повторения</li>
+<li><code>?</code> - 0 или 1 повторения</li>
+<li>Може да сложим разделител веднага след затварящата скоба например <code>,</code></li>
+<li><code>$( ... ),*</code> търси нещо от вида <code>... , ... , ...</code></li>
+<li>Операторът не поддържа optional trailing разделител</li>
+</ul>
+</div><div class="slide">
+<h1 id="map">map!</h1>
+<p>Ок, нека да компилираме</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> map {
+    {
+        $<span class="tshl-punctuation_bracket">(</span> $key: expr : $value: expr <span class="tshl-punctuation_bracket">)</span>,<span class="tshl-operator">*</span>
+    } =&gt; {
+        {
+            <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> map = ::std::collections::<span class="tshl-constructor">HashMap</span>::new<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>;
+            $<span class="tshl-punctuation_bracket">(</span> map.insert<span class="tshl-punctuation_bracket">(</span>$key, $value<span class="tshl-punctuation_bracket">)</span>; <span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span>
+            map
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="map">map!</h1>
+<p>Ок, нека да компилираме</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="48aecfc760527ed5f683faae57a6895a4507076a">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> map {
+    {
+        $<span class="tshl-punctuation_bracket">(</span> $key: expr : $value: expr <span class="tshl-punctuation_bracket">)</span>,<span class="tshl-operator">*</span>
+    } =&gt; {
+        {
+            <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> map = ::std::collections::<span class="tshl-constructor">HashMap</span>::new<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>;
+            $<span class="tshl-punctuation_bracket">(</span> map.insert<span class="tshl-punctuation_bracket">(</span>$key, $value<span class="tshl-punctuation_bracket">)</span>; <span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span>
+            map
+        }
+    }
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">: `$key:expr` is followed by `:`, which is not allowed for `expr` fragments</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_48aecfc760527ed5f683faae57a6895a4507076a.rs:6:23
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">6</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>        $( $key: expr : $value: expr ),*
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                      <span style="font-weight:bold;color:rgb(255,85,85)">^</span> <span style="font-weight:bold;color:rgb(255,85,85)">not allowed after `expr` fragments</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: allowed there are: `=&gt;`, `,` or `;`
+
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="48aecfc760527ed5f683faae57a6895a4507076a">#![allow(unused_macros)]
+fn main() {}
+macro_rules! map {
+    {
+        $( $key: expr : $value: expr ),*
+    } => {
+        {
+            let mut map = ::std::collections::HashMap::new();
+            $( map.insert($key, $value); )*
+            map
+        }
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="map">map!</h1>
+<p>Правилата са си правила… Ще ги разгледаме подробно по-късно</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="c4a192896038103aae985c4a228d8b522b327348">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> map {
+    {
+        $<span class="tshl-punctuation_bracket">(</span> $key: expr =&gt; $value: expr <span class="tshl-punctuation_bracket">)</span>,<span class="tshl-operator">*</span>
+    } =&gt; {
+        {
+            <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> map = ::std::collections::<span class="tshl-constructor">HashMap</span>::new<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>;
+            $<span class="tshl-punctuation_bracket">(</span> map.insert<span class="tshl-punctuation_bracket">(</span>$key, $value<span class="tshl-punctuation_bracket">)</span>; <span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span>
+            map
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="c4a192896038103aae985c4a228d8b522b327348">#![allow(unused_macros)]
+fn main() {}
+macro_rules! map {
+    {
+        $( $key: expr => $value: expr ),*
+    } => {
+        {
+            let mut map = ::std::collections::HashMap::new();
+            $( map.insert($key, $value); )*
+            map
+        }
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="map">map!</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="0969270fabf1d03e5ba39c5d205a9402873e7782">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> m = <span class="tshl-function_macro">map</span><span class="tshl-function_macro">!</span> {
+    <span class="tshl-string">&quot;a&quot;</span> =&gt; <span class="tshl-constant_builtin">1</span>,
+    <span class="tshl-string">&quot;b&quot;</span> =&gt; <span class="tshl-constant_builtin">2</span>
+}<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{:?}&quot;</span>, m<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">{"a": 1, "b": 2}</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="0969270fabf1d03e5ba39c5d205a9402873e7782">macro_rules! map {
+{
+$( $key: expr => $value: expr ),*
+} => {
+{
+let mut map = ::std::collections::HashMap::new();
+$( map.insert($key, $value); )*
+map
+}
+}
+}
+fn main() {
+let m = map! {
+    "a" => 1,
+    "b" => 2
+};
+
+println!("{:?}", m);
+}</pre>
+</div><div class="slide">
+<h1 id="map">map!</h1>
+<p>А какво става, ако искаме да поддържаме trailing comma 🤔</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> m = <span class="tshl-function_macro">map</span><span class="tshl-function_macro">!</span> {
+    <span class="tshl-string">&quot;a&quot;</span> =&gt; <span class="tshl-constant_builtin">1</span>,
+    <span class="tshl-string">&quot;b&quot;</span> =&gt; <span class="tshl-constant_builtin">2</span>,
+}<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{:?}&quot;</span>, m<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="map">map!</h1>
+<p>А какво става, ако искаме да поддържаме trailing comma 🤔</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="5c32cc6affa79f7fd4a16843f01c100a2bb3f65e">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> m = <span class="tshl-function_macro">map</span><span class="tshl-function_macro">!</span> {
+    <span class="tshl-string">&quot;a&quot;</span> =&gt; <span class="tshl-constant_builtin">1</span>,
+    <span class="tshl-string">&quot;b&quot;</span> =&gt; <span class="tshl-constant_builtin">2</span>,
+}<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{:?}&quot;</span>, m<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">: unexpected end of macro invocation</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_5c32cc6affa79f7fd4a16843f01c100a2bb3f65e.rs:15:14
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">1</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>macro_rules! map {
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">----------------</span> <span style="font-weight:bold;color:rgb(85,85,255)">when calling this macro</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">...</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">15</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    "b" =&gt; 2,
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>             <span style="font-weight:bold;color:rgb(255,85,85)">^</span> <span style="font-weight:bold;color:rgb(255,85,85)">missing tokens in macro arguments</span>
+
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="5c32cc6affa79f7fd4a16843f01c100a2bb3f65e">macro_rules! map {
+{
+$( $key: expr => $value: expr ),*
+} => {
+{
+let mut map = ::std::collections::HashMap::new();
+$( map.insert($key, $value); )*
+map
+}
+}
+}
+fn main() {
+let m = map! {
+    "a" => 1,
+    "b" => 2,
+};
+
+println!("{:?}", m);
+}</pre>
+</div><div class="slide">
+<h1 id="map">map!</h1>
+<p>Не точно каквото очаквахме..</p>
+</div><div class="slide">
+<h1 id="map">map!</h1>
+<p>Може би така?</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> map {
+    {
+        $<span class="tshl-punctuation_bracket">(</span> $key: expr =&gt; $value: expr <span class="tshl-punctuation_bracket">)</span>,<span class="tshl-operator">*</span>,
+    } =&gt; {
+        <span class="tshl-comment">/* ... */</span>
+    }
+}
+
+<span class="tshl-keyword">let</span> m = <span class="tshl-function_macro">map</span><span class="tshl-function_macro">!</span> {
+    <span class="tshl-string">&quot;a&quot;</span> =&gt; <span class="tshl-constant_builtin">1</span>,
+    <span class="tshl-string">&quot;b&quot;</span> =&gt; <span class="tshl-constant_builtin">2</span>
+}<span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="map">map!</h1>
+<p>Може би така?</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="069557a786e297d4c06486f2019e02e452864ede">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> map {
+    {
+        $<span class="tshl-punctuation_bracket">(</span> $key: expr =&gt; $value: expr <span class="tshl-punctuation_bracket">)</span>,<span class="tshl-operator">*</span>,
+    } =&gt; {
+        <span class="tshl-comment">/* ... */</span>
+    }
+}
+
+<span class="tshl-keyword">let</span> m = <span class="tshl-function_macro">map</span><span class="tshl-function_macro">!</span> {
+    <span class="tshl-string">&quot;a&quot;</span> =&gt; <span class="tshl-constant_builtin">1</span>,
+    <span class="tshl-string">&quot;b&quot;</span> =&gt; <span class="tshl-constant_builtin">2</span>
+}<span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">: unexpected end of macro invocation</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_069557a786e297d4c06486f2019e02e452864ede.rs:17:13
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">1</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>macro_rules! map {
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">----------------</span> <span style="font-weight:bold;color:rgb(85,85,255)">when calling this macro</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">...</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">17</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    "b" =&gt; 2
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>            <span style="font-weight:bold;color:rgb(255,85,85)">^</span> <span style="font-weight:bold;color:rgb(255,85,85)">missing tokens in macro arguments</span>
+
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="069557a786e297d4c06486f2019e02e452864ede">macro_rules! map {
+    {
+        $( $key: expr => $value: expr ),*,
+    } => {
+        /* ... */
+{
+let mut map = ::std::collections::HashMap::new();
+$( map.insert($key, $value); )*
+map
+}
+    }
+}
+
+fn main() {
+let m = map! {
+    "a" => 1,
+    "b" => 2
+};
+}</pre>
+</div><div class="slide">
+<h1 id="map">map!</h1>
+<p>Не..</p>
+</div><div class="slide">
+<h1 id="map">map!</h1>
+<p>Не бойте се, има си трик за това</p>
+<p>Преди време се налагаше да правим следното, може да го видите в legacy код</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> map {
+    {
+        $<span class="tshl-punctuation_bracket">(</span> $key: expr =&gt; $value: expr <span class="tshl-punctuation_bracket">)</span>,<span class="tshl-operator">*</span> $<span class="tshl-punctuation_bracket">(</span>,<span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span>
+    } =&gt; {
+        <span class="tshl-comment">/* ... */</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="map">map!</h1>
+<p>Недостатъка е, че може да match-нем нещо такова</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="c0e19b058cf97004932261db877eeb0d1f16dcc5">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> m = <span class="tshl-function_macro">map</span><span class="tshl-function_macro">!</span> {
+    <span class="tshl-string">&quot;a&quot;</span> =&gt; <span class="tshl-constant_builtin">1</span>,
+    <span class="tshl-string">&quot;b&quot;</span> =&gt; <span class="tshl-constant_builtin">2</span>,,,,,,,,,,,,
+}<span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="c0e19b058cf97004932261db877eeb0d1f16dcc5">macro_rules! map {
+{
+$( $key: expr => $value: expr ),* $(,)*
+} => {
+{
+let mut map = ::std::collections::HashMap::new();
+$( map.insert($key, $value); )*
+map
+}
+}
+}
+fn main() {
+let m = map! {
+    "a" => 1,
+    "b" => 2,,,,,,,,,,,,
+};
+}</pre>
+</div><div class="slide">
+<h1 id="map">map!</h1>
+<p>Но както казахме има оператор <code>?</code></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> map {
+    {
+        $<span class="tshl-punctuation_bracket">(</span> $key: expr =&gt; $value: expr <span class="tshl-punctuation_bracket">)</span>,<span class="tshl-operator">*</span> $<span class="tshl-punctuation_bracket">(</span>,<span class="tshl-punctuation_bracket">)</span>?
+    } =&gt; {
+        <span class="tshl-comment">/* ... */</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="map">map!</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8787b3de5743c50c369a6f22529470193c634782">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> map {
+    {
+        $<span class="tshl-punctuation_bracket">(</span> $key: expr =&gt; $value: expr <span class="tshl-punctuation_bracket">)</span>,<span class="tshl-operator">*</span> $<span class="tshl-punctuation_bracket">(</span>,<span class="tshl-punctuation_bracket">)</span>?
+    } =&gt; {
+        <span class="tshl-comment">/* ... */</span>
+    }
+}
+
+<span class="tshl-function_macro">map</span><span class="tshl-function_macro">!</span> {
+    <span class="tshl-string">&quot;a&quot;</span> =&gt; <span class="tshl-constant_builtin">1</span>,
+    <span class="tshl-string">&quot;b&quot;</span> =&gt; <span class="tshl-constant_builtin">2</span>
+}<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-function_macro">map</span><span class="tshl-function_macro">!</span> {
+    <span class="tshl-string">&quot;a&quot;</span> =&gt; <span class="tshl-constant_builtin">1</span>,
+    <span class="tshl-string">&quot;b&quot;</span> =&gt; <span class="tshl-constant_builtin">2</span>,
+}<span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="8787b3de5743c50c369a6f22529470193c634782">macro_rules! map {
+    {
+        $( $key: expr => $value: expr ),* $(,)?
+    } => {
+        /* ... */
+{
+let mut map = ::std::collections::HashMap::new();
+$( map.insert($key, $value); )*
+map
+}
+    }
+}
+
+fn main() {
+map! {
+    "a" => 1,
+    "b" => 2
+};
+
+map! {
+    "a" => 1,
+    "b" => 2,
+};
+}</pre>
+</div><div class="slide">
+<h1 id="хигиена">Хигиена</h1>
+<p>Макросите в Rust са хигиенични</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> five_times {
+    <span class="tshl-punctuation_bracket">(</span>$x:expr<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">5</span> * $x<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, five_times!<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2</span> + <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="хигиена">Хигиена</h1>
+<p>Макросите в Rust са хигиенични</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="35ef4e6a1fbf3a620d90ee74b9ef0dfb7b430b01">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> five_times {
+    <span class="tshl-punctuation_bracket">(</span>$x:expr<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">5</span> * $x<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, five_times!<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2</span> + <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">25</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="35ef4e6a1fbf3a620d90ee74b9ef0dfb7b430b01">macro_rules! five_times {
+    ($x:expr) => (5 * $x);
+}
+
+fn main() {
+println!("{}", five_times!(2 + 3));
+}</pre>
+</div><div class="slide subslide">
+<h1 id="хигиена">Хигиена</h1>
+<p>Макросите в Rust са хигиенични</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="35ef4e6a1fbf3a620d90ee74b9ef0dfb7b430b01">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> five_times {
+    <span class="tshl-punctuation_bracket">(</span>$x:expr<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">5</span> * $x<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, five_times!<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2</span> + <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">25</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="35ef4e6a1fbf3a620d90ee74b9ef0dfb7b430b01">macro_rules! five_times {
+    ($x:expr) => (5 * $x);
+}
+
+fn main() {
+println!("{}", five_times!(2 + 3));
+}</pre>
+<p>Нещо подобно в C/C++ би изчислило 13</p>
+</div><div class="slide">
+<h1 id="хигиена">Хигиена</h1>
+<p>В този пример отново заради хигиена двата state-а не се shadow-ват взаимно</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="b2183ae77c0f7bcb085c48d41dcfb387547d866b">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> log {
+    <span class="tshl-punctuation_bracket">(</span>$msg:expr<span class="tshl-punctuation_bracket">)</span> =&gt; {{
+        <span class="tshl-keyword">let</span> state: <span class="tshl-type_builtin">i32</span> = get_log_state<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>;
+        <span class="tshl-keyword">if</span> state &gt; <span class="tshl-constant_builtin">0</span> {
+            println!<span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;log({}): {}&quot;</span>, state, $msg<span class="tshl-punctuation_bracket">)</span>;
+        }
+    }}<span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-keyword">let</span> state: <span class="tshl-operator">&amp;</span><span class="tshl-type_builtin">str</span> = <span class="tshl-string">&quot;reticulating splines&quot;</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-function_macro">log</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>state<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">log(1): reticulating splines</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="b2183ae77c0f7bcb085c48d41dcfb387547d866b">fn get_log_state() -> i32 { 1 }
+macro_rules! log {
+    ($msg:expr) => {{
+        let state: i32 = get_log_state();
+        if state > 0 {
+            println!("log({}): {}", state, $msg);
+        }
+    }};
+}
+
+fn main() {
+let state: &str = "reticulating splines";
+log!(state);
+}</pre>
+</div><div class="slide">
+<h1 id="хигиена">Хигиена</h1>
+<p>Всяко разгъване на макрос се случва в различен синтактичен контекст.<br />
+В този случай може да го мислите все едно двете променливи имат различен цвят който ги разграничава.</p>
+</div><div class="slide">
+<h1 id="хигиена">Хигиена</h1>
+<p>По тази причина не може да представяме нови променливи чрез макрос по следния начин</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="f77bccafcffc077ab7e68cffcdade87e2b6d1674">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> foo {
+    <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">let</span> x = <span class="tshl-constant_builtin">3</span>;<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-function_macro">foo</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, x<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0425]</span><span style="font-weight:bold">: cannot find value `x` in this scope</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_f77bccafcffc077ab7e68cffcdade87e2b6d1674.rs:7:16
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">7</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>println!("{}", x);
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>               <span style="font-weight:bold;color:rgb(255,85,85)">^</span> <span style="font-weight:bold;color:rgb(255,85,85)">not found in this scope</span>
+
+<span style="font-weight:bold">For more information about this error, try `rustc --explain E0425`.</span>
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="f77bccafcffc077ab7e68cffcdade87e2b6d1674">macro_rules! foo {
+    () => (let x = 3;);
+}
+
+fn main() {
+foo!();
+println!("{}", x);
+}</pre>
+</div><div class="slide">
+<h1 id="хигиена">Хигиена</h1>
+<p>Ще трябва да подадем името на променлива на макроса за да се получи</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="e8b12bcdcb6d38d43fbf52294b286ac34f8a2057">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> foo {
+    <span class="tshl-punctuation_bracket">(</span>$v:ident<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">let</span> $v = <span class="tshl-constant_builtin">3</span>;<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-function_macro">foo</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>x<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, x<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">3</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="e8b12bcdcb6d38d43fbf52294b286ac34f8a2057">macro_rules! foo {
+    ($v:ident) => (let $v = 3;);
+}
+
+fn main() {
+foo!(x);
+println!("{}", x);
+}</pre>
+</div><div class="slide">
+<h1 id="хигиена">Хигиена</h1>
+<p>Правило важи за <code>let</code> и цикли като <code>loop while for</code>, но не и за <a href="https://doc.rust-lang.org/reference/items.html" target="_blank">item</a>-и, което значи, че следното ще се компилира</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="f149a6b544f4f3d4c792b74158a128f5679e0d3e">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> foo {
+    <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">fn</span> x<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> { println!<span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;macros!&quot;</span><span class="tshl-punctuation_bracket">)</span> }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-function_macro">foo</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-function">x</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">macros!</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="f149a6b544f4f3d4c792b74158a128f5679e0d3e">macro_rules! foo {
+    () => (fn x() { println!("macros!") });
+}
+
+fn main() {
+foo!();
+x();
+}</pre>
+</div><div class="slide">
+<h1 id="синтаксис">Синтаксис</h1>
+<h3 id="извикване-на-макроси">Извикване на макроси</h3>
+<p>Макросите следват същите правила както останалата част от синтаксиса на Rust</p>
+</div><div class="slide subslide">
+<h1 id="синтаксис">Синтаксис</h1>
+<h3 id="извикване-на-макроси">Извикване на макроси</h3>
+<p>Макросите следват същите правила както останалата част от синтаксиса на Rust</p>
+<ul>
+<li><code>foo!( ... );</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="синтаксис">Синтаксис</h1>
+<h3 id="извикване-на-макроси">Извикване на макроси</h3>
+<p>Макросите следват същите правила както останалата част от синтаксиса на Rust</p>
+<ul>
+<li><code>foo!( ... );</code></li>
+<li><code>foo![ ... ];</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="синтаксис">Синтаксис</h1>
+<h3 id="извикване-на-макроси">Извикване на макроси</h3>
+<p>Макросите следват същите правила както останалата част от синтаксиса на Rust</p>
+<ul>
+<li><code>foo!( ... );</code></li>
+<li><code>foo![ ... ];</code></li>
+<li><code>foo! { ... }</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="синтаксис">Синтаксис</h1>
+</div><div class="slide subslide">
+<h1 id="синтаксис">Синтаксис</h1>
+<ul>
+<li>Макросите трябва да съдържат само валидни Rust token-и</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="синтаксис">Синтаксис</h1>
+<ul>
+<li>Макросите трябва да съдържат само валидни Rust token-и</li>
+<li>Скобите в макросите трябва да са балансирани т.е. <code>foo!([)</code> е невалидно</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="синтаксис">Синтаксис</h1>
+<ul>
+<li>Макросите трябва да съдържат само валидни Rust token-и</li>
+<li>Скобите в макросите трябва да са балансирани т.е. <code>foo!([)</code> е невалидно</li>
+<li>Без това ограничение, Rust няма как да знае къде свършва извикването на макроса</li>
+</ul>
+</div><div class="slide">
+<h1 id="синтаксис">Синтаксис</h1>
+<p>Формално извикването на макрос се състои от поредица от token trees които са</p>
+</div><div class="slide subslide">
+<h1 id="синтаксис">Синтаксис</h1>
+<p>Формално извикването на макрос се състои от поредица от token trees които са</p>
+<ul>
+<li>произволна поредица от token trees обградена от <code>()</code>, <code>[]</code> или <code>{}</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="синтаксис">Синтаксис</h1>
+<p>Формално извикването на макрос се състои от поредица от token trees които са</p>
+<ul>
+<li>произволна поредица от token trees обградена от <code>()</code>, <code>[]</code> или <code>{}</code></li>
+<li>всеки друг единичен token</li>
+</ul>
+</div><div class="slide">
+<h1 id="синтаксис">Синтаксис</h1>
+<p>Затова Rust макросите винаги приоритизират затварянето на скобите пред match-ването, което е полезно при някои подходи за match-ване</p>
+</div><div class="slide">
+<h1 id="синтаксис">Синтаксис</h1>
+<h3 id="metavariables--fragment-specifiers">Metavariables &amp; Fragment specifiers</h3>
+<p>Tиповете на метапроменливите са:</p>
+<ul>
+<li><code>ident</code>: an identifier. <code>x</code>; <code>foo</code></li>
+<li><code>path</code>: a qualified name. <code>T::SpecialA</code></li>
+<li><code>expr</code>: an expression. <code>2 + 2</code>; <code>if true { 1 } else { 2 }</code>; <code>f(42)</code></li>
+<li><code>ty</code>: a type. <code>i32</code>; <code>Vec&lt;(char, String)&gt;</code>; <code>&amp;T</code></li>
+<li><code>pat</code>: a pattern. <code>Some(t)</code>; <code>(17, 'a')</code>; <code>_</code></li>
+<li><code>pat_param</code>: a pattern (edition 2021). Supports nested <code>|</code>.</li>
+<li><code>stmt</code>: a single statement. <code>let x = 3</code></li>
+<li><code>block</code>: a brace-delimited sequence of statements and optionally an expression. <code>{ log(error, "hi"); return 12; }</code></li>
+<li><code>item</code>: an item. <code>fn foo() { }</code>; <code>struct Bar;</code></li>
+<li><code>meta</code>: a "meta item", as found in attributes. <code>cfg(target_os = "windows")</code></li>
+<li><code>tt</code>: a single token tree.</li>
+<li><code>lifetime</code>: a lifetime <code>'a</code>.</li>
+<li><code>vis</code>: a possibly empty Visibility qualifier.</li>
+<li><code>literal</code>: literal expression.</li>
+</ul>
+</div><div class="slide">
+<h1 id="синтаксис">Синтаксис</h1>
+<h3 id="metavariables--fragment-specifiers">Metavariables &amp; Fragment specifiers</h3>
+<p>Ограниченията за типовете са:</p>
+<ul>
+<li><code>expr</code> and <code>stmt</code> may only be followed by one of: <code>=&gt;</code>, <code>,</code>, or <code>;</code>.</li>
+<li><code>pat</code> and <code>pat_param</code> may only be followed by one of: <code>=&gt;</code>, <code>,</code>, <code>=</code>, <code>|</code>, <code>if</code>, or <code>in</code>.</li>
+<li><code>path</code> and <code>ty</code> may only be followed by one of: <code>=&gt;</code>, <code>,</code>, <code>=</code>, <code>|</code>, <code>;</code>, <code>:</code>, <code>&gt;</code>, <code>&gt;&gt;</code>, <code>[</code>, <code>{</code>, <code>as</code>, <code>where</code>, or a macro variable of <code>block</code> fragment specifier.</li>
+<li><code>vis</code> may only be followed by one of: <code>,</code>, an identifier other than a non-raw priv, any token that can begin a type, or a metavariable with a <code>ident</code>, <code>ty</code>, or <code>path</code> fragment specifier.</li>
+<li>All other fragment specifiers have no restrictions.</li>
+</ul>
+</div><div class="slide">
+<h1 id="ръкави">Ръкави</h1>
+<p>Макросите могат да имат повече от един ръкав за matching разделени с ;</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> my_macro {
+    <span class="tshl-punctuation_bracket">(</span>$e: expr<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span>...<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span>$i: ident<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span>...<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">for</span> $i: ident in $e: expr<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span>...<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="ръкави">Ръкави</h1>
+<p>Има и конвенция за private ръкави <code>@text</code>, които да се викат чрез рекурсия<br />
+Това не е официален синтаксис, а по-скоро нещо което общността на Rust е приела за стандартно</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> my_macro {
+    <span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">for</span> $i: ident in $e: expr<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span>...<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span>@private1 $e: expr<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span>...<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span>@private2 $i: ident<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span>...<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="рекурсия">Рекурсия</h1>
+<p>Макросите могат да извикват други макроси и дори себе си както този прост HTML shorthand</p>
+<p>Дъното на рекурсията е най-отгоре, защото опитите за match-ване започват от първия към последния ръкав</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="69ea2a52d4b965dca79eab57350839ede7b71b8f">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> write_html {
+    <span class="tshl-punctuation_bracket">(</span>$w: expr, <span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-punctuation_bracket">(</span>$w: expr, $e: tt<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span>write!<span class="tshl-punctuation_bracket">(</span>$w, <span class="tshl-string">&quot;{}&quot;</span>, $e<span class="tshl-punctuation_bracket">)</span>?<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-punctuation_bracket">(</span>$w: expr, $tag: ident <span class="tshl-punctuation_bracket">[</span> $<span class="tshl-punctuation_bracket">(</span> $inner: tt <span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span> <span class="tshl-punctuation_bracket">]</span> $<span class="tshl-punctuation_bracket">(</span> $rest: tt <span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">)</span> =&gt; {{
+        write!<span class="tshl-punctuation_bracket">(</span>$w, <span class="tshl-string">&quot;&lt;{}&gt;&quot;</span>, stringify!<span class="tshl-punctuation_bracket">(</span>$tag<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>?;
+        write_html!<span class="tshl-punctuation_bracket">(</span>$w, $<span class="tshl-punctuation_bracket">(</span>$inner<span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">)</span>;
+        write!<span class="tshl-punctuation_bracket">(</span>$w, <span class="tshl-string">&quot;&lt;/{}&gt;&quot;</span>, stringify!<span class="tshl-punctuation_bracket">(</span>$tag<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>?;
+        write_html!<span class="tshl-punctuation_bracket">(</span>$w, $<span class="tshl-punctuation_bracket">(</span>$rest<span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">)</span>;
+    }}<span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="69ea2a52d4b965dca79eab57350839ede7b71b8f">#![allow(unused_macros)]
+fn main() {}
+macro_rules! write_html {
+    ($w: expr, ) => (());
+
+    ($w: expr, $e: tt) => (write!($w, "{}", $e)?);
+
+    ($w: expr, $tag: ident [ $( $inner: tt )* ] $( $rest: tt )*) => {{
+        write!($w, "<{}>", stringify!($tag))?;
+        write_html!($w, $($inner)*);
+        write!($w, "</{}>", stringify!($tag))?;
+        write_html!($w, $($rest)*);
+    }};
+}</pre>
+</div><div class="slide">
+<h1 id="рекурсия">Рекурсия</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="23ae63e9624bb71ddf5a55bfe7688a279c300ee7">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>fmt<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Write</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> out = <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-function_macro">write_html</span><span class="tshl-function_macro">!</span> {
+    &amp;<span class="tshl-keyword">mut</span> out,
+    html<span class="tshl-punctuation_bracket">[</span>
+        head<span class="tshl-punctuation_bracket">[</span>title<span class="tshl-punctuation_bracket">[</span><span class="tshl-string">&quot;Macros guide&quot;</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">]</span>
+        body<span class="tshl-punctuation_bracket">[</span>h1<span class="tshl-punctuation_bracket">[</span><span class="tshl-string">&quot;Macros are the best!&quot;</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">]</span>
+    <span class="tshl-punctuation_bracket">]</span>
+}
+
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, out<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">&lt;html&gt;&lt;head&gt;&lt;title&gt;Macros guide&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;Macros are the best!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="23ae63e9624bb71ddf5a55bfe7688a279c300ee7">macro_rules! write_html {
+($w: expr, ) => (());
+
+($w: expr, $e: tt) => (write!($w, "{}", $e)?);
+
+($w: expr, $tag: ident [ $( $inner: tt )* ] $( $rest: tt )*) => {{
+write!($w, "<{}>", stringify!($tag))?;
+write_html!($w, $($inner)*);
+write!($w, "</{}>", stringify!($tag))?;
+write_html!($w, $($rest)*);
+}};
+}
+fn main() -> Result<(), ::std::fmt::Error> {
+use std::fmt::Write;
+
+let mut out = String::new();
+
+write_html! {
+    &mut out,
+    html[
+        head[title["Macros guide"]]
+        body[h1["Macros are the best!"]]
+    ]
+}
+
+println!("{}", out);
+Ok(())
+}</pre>
+</div><div class="slide">
+<h1 id="рекурсия">Рекурсия</h1>
+<p>Може да срещнете legacy алтернатива на <code>?</code>, чрез използване на ръкави</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="b02f50674fb278ca581c3169c2446548e897b805">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> map {
+    { $<span class="tshl-punctuation_bracket">(</span> $key: expr =&gt; $value: expr <span class="tshl-punctuation_bracket">)</span>,<span class="tshl-operator">*</span>, } =&gt; {
+        map!<span class="tshl-punctuation_bracket">(</span> $<span class="tshl-punctuation_bracket">(</span> $key =&gt; $value <span class="tshl-punctuation_bracket">)</span>,<span class="tshl-operator">*</span> <span class="tshl-punctuation_bracket">)</span>;
+    }<span class="tshl-punctuation_delimiter">;</span>
+
+    { $<span class="tshl-punctuation_bracket">(</span> $key: expr =&gt; $value: expr <span class="tshl-punctuation_bracket">)</span>,<span class="tshl-operator">*</span> } =&gt; {
+        {
+            <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> map = ::std::collections::<span class="tshl-constructor">HashMap</span>::new<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>;
+            $<span class="tshl-punctuation_bracket">(</span> map.insert<span class="tshl-punctuation_bracket">(</span>$key, $value<span class="tshl-punctuation_bracket">)</span>; <span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span>
+            map
+        }
+    }<span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="b02f50674fb278ca581c3169c2446548e897b805">#![allow(unused_macros)]
+fn main() {}
+macro_rules! map {
+    { $( $key: expr => $value: expr ),*, } => {
+        map!( $( $key => $value ),* );
+    };
+
+    { $( $key: expr => $value: expr ),* } => {
+        {
+            let mut map = ::std::collections::HashMap::new();
+            $( map.insert($key, $value); )*
+            map
+        }
+    };
+}</pre>
+</div><div class="slide">
+<h1 id="scoping">Scoping</h1>
+<p>Компилатора разгъва макросите в ранна фаза на компилация, затова имат специфична видимост</p>
+</div><div class="slide subslide">
+<h1 id="scoping">Scoping</h1>
+<p>Компилатора разгъва макросите в ранна фаза на компилация, затова имат специфична видимост</p>
+<ul>
+<li>Дефинициите и разгръщанията се случват в едно depth-first lexical-order обхождане на crate-a</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="scoping">Scoping</h1>
+<p>Компилатора разгъва макросите в ранна фаза на компилация, затова имат специфична видимост</p>
+<ul>
+<li>Дефинициите и разгръщанията се случват в едно depth-first lexical-order обхождане на crate-a</li>
+<li>Затова видимостта на макрос е <em>след</em> дефиницията му - в същия scope и в child mods</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="scoping">Scoping</h1>
+<p>Компилатора разгъва макросите в ранна фаза на компилация, затова имат специфична видимост</p>
+<ul>
+<li>Дефинициите и разгръщанията се случват в едно depth-first lexical-order обхождане на crate-a</li>
+<li>Затова видимостта на макрос е <em>след</em> дефиницията му - в същия scope и в child mods</li>
+<li>Използването на макрос от друг модул става чрез <code>#[macro_use]</code> преди мястото, където го ползвате</li>
+</ul>
+</div><div class="slide">
+<h1 id="scoping">Scoping</h1>
+<p>Имаме макроси дефинирани в macros и ще ги използваме в client</p>
+<div class="split-view" markdown="1"><div class="lhs" markdown="1"><p>
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>macro_use<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">mod</span> macros<span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">mod</span> client<span class="tshl-punctuation_delimiter">;</span> <span class="tshl-comment">// ок</span></code></pre>
+                    </div>
+                    
+                </div>
+                </p></div>
+<div class="rhs" markdown="1"><p>
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">mod</span> client<span class="tshl-punctuation_delimiter">;</span> <span class="tshl-comment">// компилационна грешка</span>
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>macro_use<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">mod</span> macros<span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                </p></div></div>
+</div><div class="slide">
+<h1 id="scoping">Scoping</h1>
+<p>При работа на ниво crate</p>
+</div><div class="slide subslide">
+<h1 id="scoping">Scoping</h1>
+<p>При работа на ниво crate</p>
+<ul>
+<li>се използва <code>#[macro_use]</code> за импортиране на всичко или <code>#[macro_use(my_macro, other_macro)]</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="scoping">Scoping</h1>
+<p>При работа на ниво crate</p>
+<ul>
+<li>се използва <code>#[macro_use]</code> за импортиране на всичко или <code>#[macro_use(my_macro, other_macro)]</code></li>
+<li>за да направите макросите достъпни за други crate-ове се използва <code>#[macro_export]</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="scoping">Scoping</h1>
+<p>Имаме макроси дефинирани в macros и ще ги използваме в client</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// crate macros</span>
+
+<span class="tshl-keyword">mod</span> some_module {
+    <span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>macro_export<span class="tshl-punctuation_bracket">]</span></span>
+    <span class="tshl-keyword">macro_rules!</span> hello {
+        <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span>println!<span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Hello!&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// crate client</span>
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>macro_use<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">extern</span> crate macros<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">hello</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="scoping">Scoping</h1>
+<p>Или по-лесният вариант - като нормален import</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// crate macros</span>
+
+<span class="tshl-keyword">mod</span> some_module {
+    <span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>macro_export<span class="tshl-punctuation_bracket">]</span></span>
+    <span class="tshl-keyword">macro_rules!</span> hello {
+        <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span>println!<span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Hello!&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// crate client</span>
+
+<span class="tshl-comment">// notice top-level use</span>
+<span class="tshl-keyword">use</span> macros<span class="tshl-punctuation_delimiter">::</span>hello<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">hello</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="scoping">Scoping</h1>
+<p>Макроси дефинирани в блокове, функции или други подобни конструкции са видими само там</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">macro_rules!</span> map { ... }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="scoping">Scoping</h1>
+<p>Внимавайте с видимостта на типовет, които използвате</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8aab1807f55927f0c9c23c61185da78e6cb53b2e">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> try {
+    <span class="tshl-punctuation_bracket">(</span>$expr:expr<span class="tshl-punctuation_bracket">)</span> =&gt; {
+        <span class="tshl-keyword">match</span> $expr {
+            $crate::result::<span class="tshl-constructor">Result</span>::<span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span>val<span class="tshl-punctuation_bracket">)</span> =&gt; val,
+            $crate::result::<span class="tshl-constructor">Result</span>::<span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span>err<span class="tshl-punctuation_bracket">)</span> =&gt; {
+                <span class="tshl-keyword">return</span> $crate::result::<span class="tshl-constructor">Result</span>::<span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span>$crate::convert::<span class="tshl-constructor">From</span>::from<span class="tshl-punctuation_bracket">(</span>err<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>;
+            }
+        }
+    }<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span>$expr:expr,<span class="tshl-punctuation_bracket">)</span> =&gt; {
+        $crate::try!<span class="tshl-punctuation_bracket">(</span>$expr<span class="tshl-punctuation_bracket">)</span>
+    }<span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">: expected identifier, found reserved keyword `try`</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_8aab1807f55927f0c9c23c61185da78e6cb53b2e.rs:3:14
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">3</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>macro_rules! try {
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>             <span style="font-weight:bold;color:rgb(255,85,85)">^^^</span> <span style="font-weight:bold;color:rgb(255,85,85)">expected identifier, found reserved keyword</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,187,187)">help</span>: you can escape reserved keywords to use them as identifiers
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">3</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>macro_rules! <span style="color:rgb(85,187,85)">r#try</span> {
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>             <span style="color:rgb(85,187,85)">~~~~~</span>
+
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="8aab1807f55927f0c9c23c61185da78e6cb53b2e">#[allow(unused_macros)]
+macro_rules! try {
+    ($expr:expr) => {
+        match $expr {
+            $crate::result::Result::Ok(val) => val,
+            $crate::result::Result::Err(err) => {
+                return $crate::result::Result::Err($crate::convert::From::from(err));
+            }
+        }
+    };
+    ($expr:expr,) => {
+        $crate::try!($expr)
+    };
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="quality-of-life">Quality of life</h1>
+<p>Ако се чудите от къде да видите стандартните атрибуте - <a href="https://doc.rust-lang.org/stable/reference/attributes.html#macro-related-attributes" target="_blank">https://doc.rust-lang.org/stable/reference/attributes.html#macro-related-attributes</a></p>
+</div><div class="slide">
+<h1 id="debugging">Debugging</h1>
+<p>Дебъгването на макроси е сложно, но има някои полезни команди</p>
+</div><div class="slide subslide">
+<h1 id="debugging">Debugging</h1>
+<p>Дебъгването на макроси е сложно, но има някои полезни команди</p>
+<ul>
+<li><code>cargo +nightly rustc --profile=check -- -Zunpretty=expanded</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="debugging">Debugging</h1>
+<p>Дебъгването на макроси е сложно, но има някои полезни команди</p>
+<ul>
+<li><code>cargo +nightly rustc --profile=check -- -Zunpretty=expanded</code></li>
+<li><code>cargo +nightly rustc --profile=check -- -Zunpretty=expanded,hygiene</code> запазва синтактичните scope-ове</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="debugging">Debugging</h1>
+<p>Дебъгването на макроси е сложно, но има някои полезни команди</p>
+<ul>
+<li><code>cargo +nightly rustc --profile=check -- -Zunpretty=expanded</code></li>
+<li><code>cargo +nightly rustc --profile=check -- -Zunpretty=expanded,hygiene</code> запазва синтактичните scope-ове</li>
+</ul>
+<p>Или може да изполваме extension за cargo</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">cargo install cargo-expand
+cargo expand</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="debugging">Debugging</h1>
+<p>Има и удобни, но нестабилни макроси, които се ползват през feature gate на nightly</p>
+</div><div class="slide subslide">
+<h1 id="debugging">Debugging</h1>
+<p>Има и удобни, но нестабилни макроси, които се ползват през feature gate на nightly</p>
+<ul>
+<li><code>log_syntax!(...)</code> - принтира аргументите си при компилация на stdout и се разгръща до нищо</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="debugging">Debugging</h1>
+<p>Има и удобни, но нестабилни макроси, които се ползват през feature gate на nightly</p>
+<ul>
+<li><code>log_syntax!(...)</code> - принтира аргументите си при компилация на stdout и се разгръща до нищо</li>
+<li><code>trace_macros!(true)</code> - включва компилаторни съобщения при разгръщане на макрос</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="debugging">Debugging</h1>
+<p>Има и удобни, но нестабилни макроси, които се ползват през feature gate на nightly</p>
+<ul>
+<li><code>log_syntax!(...)</code> - принтира аргументите си при компилация на stdout и се разгръща до нищо</li>
+<li><code>trace_macros!(true)</code> - включва компилаторни съобщения при разгръщане на макрос</li>
+<li><code>trace_macros!(false)</code> - изключва съобщенията</li>
+</ul>
+</div><div class="slide">
+<h1 id="стандартни-макроси">Стандартни макроси</h1>
+</div><div class="slide subslide">
+<h1 id="стандартни-макроси">Стандартни макроси</h1>
+<ul>
+<li><code>panic!</code> - панира програмата</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="стандартни-макроси">Стандартни макроси</h1>
+<ul>
+<li><code>panic!</code> - панира програмата</li>
+<li><code>vec!</code> - създава вектор от елементи</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="стандартни-макроси">Стандартни макроси</h1>
+<ul>
+<li><code>panic!</code> - панира програмата</li>
+<li><code>vec!</code> - създава вектор от елементи</li>
+<li><code>assert!</code> &amp; <code>assert_eq!</code> - използват се при тестове за проверка на данните</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="стандартни-макроси">Стандартни макроси</h1>
+<ul>
+<li><code>panic!</code> - панира програмата</li>
+<li><code>vec!</code> - създава вектор от елементи</li>
+<li><code>assert!</code> &amp; <code>assert_eq!</code> - използват се при тестове за проверка на данните</li>
+<li><a href="https://doc.rust-lang.org/stable/std/#macros" target="_blank">https://doc.rust-lang.org/stable/std/#macros</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="advanced">Advanced</h1>
+<h3 id="tt-muncher-tokentree-muncher-или-само-token-muncher">TT Muncher (TokenTree Muncher или само Token Muncher)</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="69ea2a52d4b965dca79eab57350839ede7b71b8f">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> write_html {
+    <span class="tshl-punctuation_bracket">(</span>$w: expr, <span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-punctuation_bracket">(</span>$w: expr, $e: tt<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span>write!<span class="tshl-punctuation_bracket">(</span>$w, <span class="tshl-string">&quot;{}&quot;</span>, $e<span class="tshl-punctuation_bracket">)</span>?<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-punctuation_bracket">(</span>$w: expr, $tag: ident <span class="tshl-punctuation_bracket">[</span> $<span class="tshl-punctuation_bracket">(</span> $inner: tt <span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span> <span class="tshl-punctuation_bracket">]</span> $<span class="tshl-punctuation_bracket">(</span> $rest: tt <span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">)</span> =&gt; {{
+        write!<span class="tshl-punctuation_bracket">(</span>$w, <span class="tshl-string">&quot;&lt;{}&gt;&quot;</span>, stringify!<span class="tshl-punctuation_bracket">(</span>$tag<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>?;
+        write_html!<span class="tshl-punctuation_bracket">(</span>$w, $<span class="tshl-punctuation_bracket">(</span>$inner<span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">)</span>;
+        write!<span class="tshl-punctuation_bracket">(</span>$w, <span class="tshl-string">&quot;&lt;/{}&gt;&quot;</span>, stringify!<span class="tshl-punctuation_bracket">(</span>$tag<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>?;
+        write_html!<span class="tshl-punctuation_bracket">(</span>$w, $<span class="tshl-punctuation_bracket">(</span>$rest<span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">)</span>;
+    }}<span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="69ea2a52d4b965dca79eab57350839ede7b71b8f">#![allow(unused_macros)]
+fn main() {}
+macro_rules! write_html {
+    ($w: expr, ) => (());
+
+    ($w: expr, $e: tt) => (write!($w, "{}", $e)?);
+
+    ($w: expr, $tag: ident [ $( $inner: tt )* ] $( $rest: tt )*) => {{
+        write!($w, "<{}>", stringify!($tag))?;
+        write_html!($w, $($inner)*);
+        write!($w, "</{}>", stringify!($tag))?;
+        write_html!($w, $($rest)*);
+    }};
+}</pre>
+</div><div class="slide">
+<h1 id="advanced">Advanced</h1>
+<h3 id="tt-muncher">TT Muncher</h3>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-function_macro">write_html</span><span class="tshl-function_macro">!</span> {
+    &amp;<span class="tshl-keyword">mut</span> out,
+    html<span class="tshl-punctuation_bracket">[</span>
+        head<span class="tshl-punctuation_bracket">[</span>title<span class="tshl-punctuation_bracket">[</span><span class="tshl-string">&quot;Macros guide&quot;</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">]</span>
+        body<span class="tshl-punctuation_bracket">[</span>h1<span class="tshl-punctuation_bracket">[</span><span class="tshl-string">&quot;Macros are the best!&quot;</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">]</span>
+    <span class="tshl-punctuation_bracket">]</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="advanced">Advanced</h1>
+<h3 id="push-down-accumulation">Push-Down Accumulation</h3>
+<p>Макрос, който инициализира масив до 3 елемента</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="0961ca470b119a5bd59cbf39493d283aaca8d996">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> init_array {
+    <span class="tshl-punctuation_bracket">[</span>$e:expr; $n:tt<span class="tshl-punctuation_bracket">]</span> =&gt; {{
+        <span class="tshl-keyword">let</span> e = $e;
+        init_array!<span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-punctuation_bracket">(</span>$n, e.clone<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>
+    }}<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">3</span>, $e:expr<span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-punctuation_bracket">(</span>$<span class="tshl-punctuation_bracket">(</span>$body:tt<span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span> =&gt; { init_array!<span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2</span>, $e<span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-punctuation_bracket">(</span>$<span class="tshl-punctuation_bracket">(</span>$body<span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span> $e,<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span> }<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2</span>, $e:expr<span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-punctuation_bracket">(</span>$<span class="tshl-punctuation_bracket">(</span>$body:tt<span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span> =&gt; { init_array!<span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">1</span>, $e<span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-punctuation_bracket">(</span>$<span class="tshl-punctuation_bracket">(</span>$body<span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span> $e,<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span> }<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">1</span>, $e:expr<span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-punctuation_bracket">(</span>$<span class="tshl-punctuation_bracket">(</span>$body:tt<span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span> =&gt; { init_array!<span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">0</span>, $e<span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-punctuation_bracket">(</span>$<span class="tshl-punctuation_bracket">(</span>$body<span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span> $e,<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span> }<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">0</span>, $_e:expr<span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-punctuation_bracket">(</span>$<span class="tshl-punctuation_bracket">(</span>$body:tt<span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span> =&gt; { init_array!<span class="tshl-punctuation_bracket">(</span>@as_expr <span class="tshl-punctuation_bracket">[</span>$<span class="tshl-punctuation_bracket">(</span>$body<span class="tshl-punctuation_bracket">)</span><span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span> }<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span>@as_expr $e:expr<span class="tshl-punctuation_bracket">)</span> =&gt; { $e }<span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-keyword">let</span> strings: <span class="tshl-punctuation_bracket">[</span><span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">;</span> <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">]</span> = <span class="tshl-function_macro">init_array</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-constructor">String</span>::from<span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;hi!&quot;</span><span class="tshl-punctuation_bracket">)</span>; <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{:?}&quot;</span>, strings<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">["hi!", "hi!", "hi!"]</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="0961ca470b119a5bd59cbf39493d283aaca8d996">macro_rules! init_array {
+    [$e:expr; $n:tt] => {{
+        let e = $e;
+        init_array!(@accum ($n, e.clone()) -> ())
+    }};
+    (@accum (3, $e:expr) -> ($($body:tt)*)) => { init_array!(@accum (2, $e) -> ($($body)* $e,)) };
+    (@accum (2, $e:expr) -> ($($body:tt)*)) => { init_array!(@accum (1, $e) -> ($($body)* $e,)) };
+    (@accum (1, $e:expr) -> ($($body:tt)*)) => { init_array!(@accum (0, $e) -> ($($body)* $e,)) };
+    (@accum (0, $_e:expr) -> ($($body:tt)*)) => { init_array!(@as_expr [$($body)*]) };
+    (@as_expr $e:expr) => { $e };
+}
+
+fn main() {
+let strings: [String; 3] = init_array![String::from("hi!"); 3];
+println!("{:?}", strings);
+}</pre>
+</div><div class="slide">
+<h1 id="advanced">Advanced</h1>
+<h3 id="push-down-accumulation">Push-Down Accumulation</h3>
+<p>А не може ли да опростим нещата до това?</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> init_array {
+    <span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-constant_builtin">0</span>, $_e:expr<span class="tshl-punctuation_bracket">)</span> =&gt; {<span class="tshl-comment">/* empty */</span>}<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-constant_builtin">1</span>, $e:expr<span class="tshl-punctuation_bracket">)</span> =&gt; {$e}<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-constant_builtin">2</span>, $e:expr<span class="tshl-punctuation_bracket">)</span> =&gt; {$e, init_array!<span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-constant_builtin">1</span>, $e<span class="tshl-punctuation_bracket">)</span>}<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-constant_builtin">3</span>, $e:expr<span class="tshl-punctuation_bracket">)</span> =&gt; {$e, init_array!<span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-constant_builtin">2</span>, $e<span class="tshl-punctuation_bracket">)</span>}<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">[</span>$e:expr; $n:tt<span class="tshl-punctuation_bracket">]</span> =&gt; {
+        {
+            <span class="tshl-keyword">let</span> e = $e;
+            <span class="tshl-punctuation_bracket">[</span> init_array!<span class="tshl-punctuation_bracket">(</span>@accum $n, e<span class="tshl-punctuation_bracket">)</span> <span class="tshl-punctuation_bracket">]</span>
+        }
+    }<span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="advanced">Advanced</h1>
+<h3 id="push-down-accumulation">Push-Down Accumulation</h3>
+<p>Не…</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="d7893d0d02408938f95722ad3842b5c665d42a1e">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">macro_rules!</span> init_array {
+    <span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-constant_builtin">0</span>, $_e:expr<span class="tshl-punctuation_bracket">)</span> =&gt; {<span class="tshl-comment">/* empty */</span>}<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-constant_builtin">1</span>, $e:expr<span class="tshl-punctuation_bracket">)</span> =&gt; {$e}<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-constant_builtin">2</span>, $e:expr<span class="tshl-punctuation_bracket">)</span> =&gt; {$e, init_array!<span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-constant_builtin">1</span>, $e<span class="tshl-punctuation_bracket">)</span>}<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-constant_builtin">3</span>, $e:expr<span class="tshl-punctuation_bracket">)</span> =&gt; {$e, init_array!<span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-constant_builtin">2</span>, $e<span class="tshl-punctuation_bracket">)</span>}<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_bracket">[</span>$e:expr; $n:tt<span class="tshl-punctuation_bracket">]</span> =&gt; {
+        {
+            <span class="tshl-keyword">let</span> e = $e;
+            <span class="tshl-punctuation_bracket">[</span> init_array!<span class="tshl-punctuation_bracket">(</span>@accum $n, e<span class="tshl-punctuation_bracket">)</span> <span class="tshl-punctuation_bracket">]</span>
+        }
+    }<span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-keyword">let</span> strings: <span class="tshl-punctuation_bracket">[</span><span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">;</span> <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">]</span> = <span class="tshl-function_macro">init_array</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-constructor">String</span>::from<span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;hi!&quot;</span><span class="tshl-punctuation_bracket">)</span>; <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">: macro expansion ignores token `,` and any following</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_d7893d0d02408938f95722ad3842b5c665d42a1e.rs:5:31
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">5</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    (@accum 3, $e:expr) =&gt; {$e, init_array!(@accum 2, $e)};
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                              <span style="font-weight:bold;color:rgb(255,85,85)">^</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">...</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">9</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>            [ init_array!(@accum $n, e) ]
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>              <span style="font-weight:bold;color:rgb(85,85,255)">--------------------------</span> <span style="font-weight:bold;color:rgb(85,85,255)">help: you might be missing a semicolon here: `;`</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>              <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>              <span style="font-weight:bold;color:rgb(85,85,255)">caused by the macro expansion here</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: the usage of `init_array!` is likely invalid in expression context
+
+<span style="font-weight:bold;color:rgb(255,85,85)">error[E0308]</span><span style="font-weight:bold">: mismatched types</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_d7893d0d02408938f95722ad3842b5c665d42a1e.rs:9:13
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">9</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>            [ init_array!(@accum $n, e) ]
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>            <span style="font-weight:bold;color:rgb(255,85,85)">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span> <span style="font-weight:bold;color:rgb(255,85,85)">expected an array with a fixed size of 3 elements, found one with 1 element</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">...</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">15</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>let strings: [String; 3] = init_array![String::from("hi!"); 3];
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                           <span style="font-weight:bold;color:rgb(85,85,255)">-----------------------------------</span> <span style="font-weight:bold;color:rgb(85,85,255)">in this macro invocation</span>
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+   <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: expected array `<span style="font-weight:bold">[String; 3]</span>`
+              found array `<span style="font-weight:bold">[String; 1]</span>`
+   <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: this error originates in the macro `init_array` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+<span style="font-weight:bold">For more information about this error, try `rustc --explain E0308`.</span>
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to 2 previous errors</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="d7893d0d02408938f95722ad3842b5c665d42a1e">macro_rules! init_array {
+    (@accum 0, $_e:expr) => {/* empty */};
+    (@accum 1, $e:expr) => {$e};
+    (@accum 2, $e:expr) => {$e, init_array!(@accum 1, $e)};
+    (@accum 3, $e:expr) => {$e, init_array!(@accum 2, $e)};
+    [$e:expr; $n:tt] => {
+        {
+            let e = $e;
+            [ init_array!(@accum $n, e) ]
+        }
+    };
+}
+
+fn main() {
+let strings: [String; 3] = init_array![String::from("hi!"); 3];
+}</pre>
+</div><div class="slide">
+<h1 id="advanced">Advanced</h1>
+<h3 id="push-down-accumulation">Push-Down Accumulation</h3>
+<p>…защото това би довело до следното разгъване</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-function_macro">init_array</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-constant_builtin">3</span>, e<span class="tshl-punctuation_bracket">)</span>
+e, <span class="tshl-function_macro">init_array</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-constant_builtin">2</span>, e<span class="tshl-punctuation_bracket">)</span>
+e, e, <span class="tshl-function_macro">init_array</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>@accum <span class="tshl-constant_builtin">1</span>, e<span class="tshl-punctuation_bracket">)</span>
+e, e, e
+<span class="tshl-punctuation_bracket">[</span>e, e, e<span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_delimiter"></span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Тук всяка помощна стъпка ще е невалиден Rust синтаксис и това не е позволено независимо от стъпките</p>
+</div><div class="slide">
+<h1 id="advanced">Advanced</h1>
+<h3 id="push-down-accumulation">Push-Down Accumulation</h3>
+<p>Push-Down ни позволява да правим подобни конструкции чрез акумулиране на токени, без да се налага да имаме валиден синтаксис през цялото време.</p>
+</div><div class="slide">
+<h1 id="advanced">Advanced</h1>
+<h3 id="push-down-accumulation">Push-Down Accumulation</h3>
+<p>Разгъвка на първия пример изглежда така</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-function_macro">init_array</span><span class="tshl-function_macro">!</span> { <span class="tshl-constructor">String</span>:: from <span class="tshl-punctuation_bracket">(</span> <span class="tshl-string">&quot;hi!&quot;</span> <span class="tshl-punctuation_bracket">)</span> ; <span class="tshl-constant_builtin">3</span> }
+<span class="tshl-function_macro">init_array</span><span class="tshl-function_macro">!</span> { @ accum <span class="tshl-punctuation_bracket">(</span> <span class="tshl-constant_builtin">3</span> , e.clone<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> <span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-punctuation_bracket">(</span>  <span class="tshl-punctuation_bracket">)</span> }
+<span class="tshl-function_macro">init_array</span><span class="tshl-function_macro">!</span> { @ accum <span class="tshl-punctuation_bracket">(</span> <span class="tshl-constant_builtin">2</span> , e.clone<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> <span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-punctuation_bracket">(</span> e.clone<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> , <span class="tshl-punctuation_bracket">)</span> }
+<span class="tshl-function_macro">init_array</span><span class="tshl-function_macro">!</span> { @ accum <span class="tshl-punctuation_bracket">(</span> <span class="tshl-constant_builtin">1</span> , e.clone<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> <span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-punctuation_bracket">(</span> e.clone<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> , e.clone<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> , <span class="tshl-punctuation_bracket">)</span> }
+<span class="tshl-function_macro">init_array</span><span class="tshl-function_macro">!</span> { @ accum <span class="tshl-punctuation_bracket">(</span> <span class="tshl-constant_builtin">0</span> , e.clone<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> <span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-punctuation_bracket">(</span> e.clone<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> , e.clone<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> , e.clone<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> , <span class="tshl-punctuation_bracket">)</span> }
+<span class="tshl-function_macro">init_array</span><span class="tshl-function_macro">!</span> { @ as_expr <span class="tshl-punctuation_bracket">[</span> e.clone<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> , e.clone<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> , e.clone<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> , <span class="tshl-punctuation_bracket">]</span> }</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="advanced">Advanced</h1>
+<p>Push-Down Accumulation се използва в комбинация с TT Muncher, за да се парсват произволно сложни граматики</p>
+</div><div class="slide">
+<h1 id="материали">Материали</h1>
+<ul>
+<li><a href="https://danielkeep.github.io/tlborm/book/README.html" target="_blank">The Little Book of Rust Macros</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="въпроси">Въпроси</h1>
+</div>
+    </main>
+</body>
+</html>
