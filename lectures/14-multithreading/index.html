@@ -1,0 +1,2625 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <title>Многонишково програмиране</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="rust,fmi">
+    <link rel="stylesheet" href="resources/codeblock/codeblock.css">
+<link rel="stylesheet" href="resources/frontend/controls.css">
+<link rel="stylesheet" href="resources/global/global.css">
+<link rel="stylesheet" href="resources/global/metadata.css">
+<link rel="stylesheet" href="resources/highlight/hljs-github.css">
+<link rel="stylesheet" href="resources/highlight/style.css">
+<link rel="stylesheet" href="resources/highlight/tshl-github.css">
+<link rel="stylesheet" href="resources/katex/katex.min.css">
+<link rel="stylesheet" href="resources/rustc/rustc.css">
+<link rel="stylesheet" href="resources/splitview/splitview.css">
+<link rel="stylesheet" href="resources/wrapping-pages/wrapping-pages.css">
+<script type="text/javascript" src="resources/codeblock/codeblock.js"></script>
+<script type="text/javascript" src="resources/frontend/controls.js"></script>
+</head>
+<body>
+    <main>
+        <div class="slide">
+<h1 id="многонишково-програмиране">Многонишково програмиране</h1>
+<h3 id="23-ноември-2021">23 ноември 2021</h3>
+</div><div class="slide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>на 25 ноември (четвъртък) няма да има лекция</li>
+</ul>
+</div><div class="slide">
+<h1 id="fearless-concurrency">Fearless concurrency</h1>
+<p><img src="resources/must_be_this_tall.jpg" alt="Must be this tall" /></p>
+</div><div class="slide">
+<h1 id="fearless-concurrency">Fearless concurrency</h1>
+</div><div class="slide subslide">
+<h1 id="fearless-concurrency">Fearless concurrency</h1>
+<ul>
+<li><p>Rust предотвратява data races</p></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="fearless-concurrency">Fearless concurrency</h1>
+<ul>
+<li><p>Rust предотвратява data races</p><ul>
+<li>две нишки достъпват една и съща памет</li>
+<li>поне единия достъп е за писане</li>
+<li>достъпите не са синхронизирани</li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="fearless-concurrency">Fearless concurrency</h1>
+<ul>
+<li><p>Rust предотвратява data races</p><ul>
+<li>две нишки достъпват една и съща памет</li>
+<li>поне единия достъп е за писане</li>
+<li>достъпите не са синхронизирани</li></ul></li>
+<li><p>Rust закодира в типовата система понятието за thread safety</p></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="fearless-concurrency">Fearless concurrency</h1>
+<ul>
+<li><p>Rust предотвратява data races</p><ul>
+<li>две нишки достъпват една и съща памет</li>
+<li>поне единия достъп е за писане</li>
+<li>достъпите не са синхронизирани</li></ul></li>
+<li><p>Rust закодира в типовата система понятието за thread safety</p><ul>
+<li>кои обекти или операции могат да се използват безопасно в паралелен код</li>
+<li>компилационна грешка при нарушаване</li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="fearless-concurrency">Fearless concurrency</h1>
+<ul>
+<li><p>Rust предотвратява data races</p><ul>
+<li>две нишки достъпват една и съща памет</li>
+<li>поне единия достъп е за писане</li>
+<li>достъпите не са синхронизирани</li></ul></li>
+<li><p>Rust закодира в типовата система понятието за thread safety</p><ul>
+<li>кои обекти или операции могат да се използват безопасно в паралелен код</li>
+<li>компилационна грешка при нарушаване</li></ul></li>
+<li><p>Rust не може да предотврати логически бъгове - race conditions, deadlocks и др.</p></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="fearless-concurrency">Fearless concurrency</h1>
+<ul>
+<li><p>Rust предотвратява data races</p><ul>
+<li>две нишки достъпват една и съща памет</li>
+<li>поне единия достъп е за писане</li>
+<li>достъпите не са синхронизирани</li></ul></li>
+<li><p>Rust закодира в типовата система понятието за thread safety</p><ul>
+<li>кои обекти или операции могат да се използват безопасно в паралелен код</li>
+<li>компилационна грешка при нарушаване</li></ul></li>
+<li><p>Rust не може да предотврати логически бъгове - race conditions, deadlocks и др.</p><ul>
+<li>но добри абстракции помагат с това</li></ul></li>
+</ul>
+</div><div class="slide">
+<h1 id="нишки">Нишки</h1>
+<ul>
+<li><code>thread::spawn</code> пуска нова нишка на операционната система</li>
+<li>подадената функция се изпълнява в новата нишка</li>
+<li>когато функцията завърши, нишката се спира</li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="5eed24923f3c089518f6e36dc934dfaed620c372">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span>|| <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;hi from spawned thread&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;hi from main thread&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="5eed24923f3c089518f6e36dc934dfaed620c372">use std::thread;
+
+fn main() {
+    thread::spawn(|| println!("hi from spawned thread"));
+
+    println!("hi from main thread");
+}</pre>
+</div><div class="slide">
+<h1 id="нишки">Нишки</h1>
+<ul>
+<li><p>1:1 multithreading</p></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="нишки">Нишки</h1>
+<ul>
+<li><p>1:1 multithreading</p><ul>
+<li>една нишка в езика отговаря на една нишка на ОС</li>
+<li>"обикновенния" начин за многонишково програмиране</li>
+<li><code>thread::spawn</code> работи така</li>
+<li>в тази лекция ще говорим само за 1:1</li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="нишки">Нишки</h1>
+<ul>
+<li><p>1:1 multithreading</p><ul>
+<li>една нишка в езика отговаря на една нишка на ОС</li>
+<li>"обикновенния" начин за многонишково програмиране</li>
+<li><code>thread::spawn</code> работи така</li>
+<li>в тази лекция ще говорим само за 1:1</li></ul></li>
+<li><p>съществува и друг модел - M:N multithreading</p></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="нишки">Нишки</h1>
+<ul>
+<li><p>1:1 multithreading</p><ul>
+<li>една нишка в езика отговаря на една нишка на ОС</li>
+<li>"обикновенния" начин за многонишково програмиране</li>
+<li><code>thread::spawn</code> работи така</li>
+<li>в тази лекция ще говорим само за 1:1</li></ul></li>
+<li><p>съществува и друг модел - M:N multithreading</p><ul>
+<li>зелени нишки</li>
+<li>M нишки в езика се изпълняват върху N нишки на ОС</li>
+<li>обикновенно M &gt;&gt; N</li>
+<li>изисква специaлна подръжка от езика - runtime</li>
+<li>в Rust се имплементира във външни библиотеки</li>
+<li>ще говорим за това в лекцията за futures и async/await</li></ul></li>
+</ul>
+</div><div class="slide">
+<h1 id="нишки">Нишки</h1>
+<ul>
+<li>програмата приключва, когато главната нишка завърши</li>
+<li>останалите нишки се убиват</li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="49b0ea2478f921c93ce8ce45aa08b098e87a5bed">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span>|| <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;hi from spawned thread&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;hi from main thread&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">hi from main thread</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="49b0ea2478f921c93ce8ce45aa08b098e87a5bed">use std::thread;
+
+fn main() {
+    thread::spawn(|| println!("hi from spawned thread"));
+
+    println!("hi from main thread");
+}</pre>
+</div><div class="slide">
+<h1 id="нишки">Нишки</h1>
+<p>Сигнатурата на <code>std::thread::spawn</code></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">F</span>, <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">f</span>: <span class="tshl-type">F</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">JoinHandle</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span>
+    <span class="tshl-type">F</span>: <span class="tshl-type">FnOnce</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">T</span>,
+    <span class="tshl-type">F</span>: <span class="tshl-type">Send</span> + <span class="tshl-operator">&#39;</span><span class="tshl-label">static</span>,
+    <span class="tshl-type">T</span>: <span class="tshl-type">Send</span> + <span class="tshl-operator">&#39;</span><span class="tshl-label">static</span>,<span class="tshl-punctuation_delimiter"></span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="нишки">Нишки</h1>
+<ul>
+<li><code>spawn</code> връща <code>JoinHandle</code></li>
+<li>можем да използваме <code>join</code> за да изчакаме пуснатите нишки</li>
+<li>когато <code>JoinHandle</code> се drop-не нишката се detach-ва</li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="54b7655c32510fa25a1dbe9e6348223d1f4e53d5">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> handle = thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span>|| <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;hi from spawned thread&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;hi from main thread&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> _ = handle<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">join</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">hi from main thread
+hi from spawned thread</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="54b7655c32510fa25a1dbe9e6348223d1f4e53d5">use std::thread;
+
+fn main() {
+    let handle = thread::spawn(|| println!("hi from spawned thread"));
+
+    println!("hi from main thread");
+    let _ = handle.join();
+}</pre>
+</div><div class="slide">
+<h1 id="нишки">Нишки</h1>
+<ul>
+<li>типа <code>T</code> в <code>JoinHandle&lt;T&gt;</code> е резултата от подадената функция</li>
+<li>обикновенно ще е <code>()</code>, но може да се върне и друго</li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="d80d1e134f099e1afa6503a0560415b68e553e2e">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> handle = thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span>|| {
+        <span class="tshl-comment">// very hard computation ...</span>
+        <span class="tshl-constant_builtin">42</span>
+    }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> answ = handle<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">join</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{:?}&quot;</span>, answ<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">Ok(42)</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="d80d1e134f099e1afa6503a0560415b68e553e2e">use std::thread;
+
+fn main() {
+    let handle = thread::spawn(|| {
+        // very hard computation ...
+        42
+    });
+
+    let answ = handle.join();
+    println!("{:?}", answ);
+}</pre>
+</div><div class="slide">
+<h1 id="panic-в-нишка">Panic в нишка</h1>
+<ul>
+<li><code>panic!</code> в главната нишка спира програмата</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="panic-в-нишка">Panic в нишка</h1>
+<ul>
+<li><code>panic!</code> в главната нишка спира програмата</li>
+<li><code>panic!</code> в друга нишка спира нишката</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="panic-в-нишка">Panic в нишка</h1>
+<ul>
+<li><code>panic!</code> в главната нишка спира програмата</li>
+<li><code>panic!</code> в друга нишка спира нишката</li>
+<li><code>JoinHandle::join</code> връща резултат</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="panic-в-нишка">Panic в нишка</h1>
+<ul>
+<li><code>panic!</code> в главната нишка спира програмата</li>
+<li><code>panic!</code> в друга нишка спира нишката</li>
+<li><code>JoinHandle::join</code> връща резултат</li>
+<li><code>Ok(T)</code> ако функцията е завършила успешно</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="panic-в-нишка">Panic в нишка</h1>
+<ul>
+<li><code>panic!</code> в главната нишка спира програмата</li>
+<li><code>panic!</code> в друга нишка спира нишката</li>
+<li><code>JoinHandle::join</code> връща резултат</li>
+<li><code>Ok(T)</code> ако функцията е завършила успешно</li>
+<li><code>Err(Box&lt;Any&gt;)</code> ако е имало паника</li>
+</ul>
+</div><div class="slide">
+<h1 id="join-в-деструктор">Join в деструктор</h1>
+<ul>
+<li><code>JoinHandle::join</code> приема <code>self</code> по стойност</li>
+<li>следователно не можем да правим това?</li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="0bb11696c80ccacf695fc367afd2d70dc403e61e">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">Wrapper</span> { <span class="tshl-property">handle</span>: <span class="tshl-type">JoinHandle</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">&gt;</span>, }
+
+<span class="tshl-keyword">impl</span> <span class="tshl-type">Drop</span> <span class="tshl-keyword">for</span> <span class="tshl-type">Wrapper</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">drop</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> {
+        <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">handle</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">join</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> handle = thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span>|| <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Изчакай ме&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> wrapper = <span class="tshl-type">Wrapper</span> { handle }<span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0507]</span><span style="font-weight:bold">: cannot move out of `self.handle` which is behind a mutable reference</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_0bb11696c80ccacf695fc367afd2d70dc403e61e.rs:7:9
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">7</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>        self.handle.join().unwrap();
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>        <span style="font-weight:bold;color:rgb(255,85,85)">^^^^^^^^^^^</span> <span style="font-weight:bold;color:rgb(255,85,85)">move occurs because `self.handle` has type `JoinHandle&lt;()&gt;`, which does not implement the `Copy` trait</span>
+
+<span style="font-weight:bold">For more information about this error, try `rustc --explain E0507`.</span>
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="0bb11696c80ccacf695fc367afd2d70dc403e61e">use std::thread::{self, JoinHandle};
+
+struct Wrapper { handle: JoinHandle<()>, }
+
+impl Drop for Wrapper {
+    fn drop(&mut self) {
+        self.handle.join().unwrap();
+    }
+}
+
+fn main() {
+    let handle = thread::spawn(|| println!("Изчакай ме"));
+    let wrapper = Wrapper { handle };
+}</pre>
+</div><div class="slide">
+<h1 id="join-в-деструктор">Join в деструктор</h1>
+<ul>
+<li>няма проблем</li>
+<li>просто добавяме <code>Option</code></li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="139fc262a1eb35775cde4549282c9b52e3115dea">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">Wrapper</span> { <span class="tshl-property">handle</span>: <span class="tshl-type">Option</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">JoinHandle</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span>, }
+
+<span class="tshl-keyword">impl</span> <span class="tshl-type">Drop</span> <span class="tshl-keyword">for</span> <span class="tshl-type">Wrapper</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">drop</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> {
+        <span class="tshl-keyword">if</span> <span class="tshl-keyword">let</span> <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span>handle<span class="tshl-punctuation_bracket">)</span> = <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">handle</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">take</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+            handle<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">join</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        }
+    }
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> handle = thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span>|| <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Изчакай ме&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> wrapper = <span class="tshl-type">Wrapper</span> { <span class="tshl-property">handle</span>: <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span>handle<span class="tshl-punctuation_bracket">)</span> }<span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">Изчакай ме</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="139fc262a1eb35775cde4549282c9b52e3115dea">use std::thread::{self, JoinHandle};
+
+struct Wrapper { handle: Option<JoinHandle<()>>, }
+
+impl Drop for Wrapper {
+    fn drop(&mut self) {
+        if let Some(handle) = self.handle.take() {
+            handle.join().unwrap();
+        }
+    }
+}
+
+fn main() {
+    let handle = thread::spawn(|| println!("Изчакай ме"));
+    let wrapper = Wrapper { handle: Some(handle) };
+}</pre>
+<!--
+    Speaker note: добавянето на Option може да изглежда като хак, но всъщност е напълно нормално, ако го сравним с това какво правят други езици. Например в C++ може да се извика `join` на `&mut std::thread`, защото `std::thread` поддържа вградена "null/empty" стойност.
+    Това, че Rust ни позволява да боравим с "non-null" типове не значи, че не трябва да се използват "nullable" типове. Но като бонус, ако използваме "nullable" стойности, ще бъдем задължени да добавим "not None" проверки на необходимите места.
+-->
+</div><div class="slide">
+<h1 id="споделяне-на-стойности">Споделяне на стойности</h1>
+</div><div class="slide">
+<h1 id="споделяне-на-стойности">Споделяне на стойности</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> nums = <span class="tshl-function_macro">vec</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">0</span>, <span class="tshl-constant_builtin">1</span>, <span class="tshl-constant_builtin">2</span>, <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> handle = thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span>|| {
+        <span class="tshl-keyword">for</span> i <span class="tshl-keyword">in</span> <span class="tshl-operator">&amp;</span>nums {
+            <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;number {}&quot;</span>, i<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        }
+    }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> _ = handle<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">join</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="споделяне-на-стойности">Споделяне на стойности</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="44c598e1dd6669cdea1e15fcdbf808719a029646">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> nums = <span class="tshl-function_macro">vec</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">0</span>, <span class="tshl-constant_builtin">1</span>, <span class="tshl-constant_builtin">2</span>, <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> handle = thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span>|| {
+        <span class="tshl-keyword">for</span> i <span class="tshl-keyword">in</span> <span class="tshl-operator">&amp;</span>nums {
+            <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;number {}&quot;</span>, i<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        }
+    }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> _ = handle<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">join</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0373]</span><span style="font-weight:bold">: closure may outlive the current function, but it borrows `nums`, which is owned by the current function</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_44c598e1dd6669cdea1e15fcdbf808719a029646.rs:6:32
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">6</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    let handle = thread::spawn(|| {
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                               <span style="font-weight:bold;color:rgb(255,85,85)">^^</span> <span style="font-weight:bold;color:rgb(255,85,85)">may outlive borrowed value `nums`</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">7</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>        for i in &amp;nums {
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                  <span style="font-weight:bold;color:rgb(85,85,255)">----</span> <span style="font-weight:bold;color:rgb(85,85,255)">`nums` is borrowed here</span>
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,187,85)">note</span>: function requires argument type to outlive `'static`
+  <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_44c598e1dd6669cdea1e15fcdbf808719a029646.rs:6:18
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">6</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>      let handle = thread::spawn(|| {
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span> <span style="font-weight:bold;color:rgb(85,187,85)">__________________^</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">7</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,187,85)">|</span>         for i in &amp;nums {
+<span style="font-weight:bold;color:rgb(85,85,255)">8</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,187,85)">|</span>             println!("number {}", i);
+<span style="font-weight:bold;color:rgb(85,85,255)">9</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,187,85)">|</span>         }
+<span style="font-weight:bold;color:rgb(85,85,255)">10</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,187,85)">|</span>     });
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,187,85)">|______^</span>
+<span style="font-weight:bold;color:rgb(85,187,187)">help</span>: to force the closure to take ownership of `nums` (and any other referenced variables), use the `move` keyword
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">6</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    let handle = thread::spawn(<span style="color:rgb(85,187,85)">move </span>|| {
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                               <span style="color:rgb(85,187,85)">++++</span>
+
+<span style="font-weight:bold">For more information about this error, try `rustc --explain E0373`.</span>
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="44c598e1dd6669cdea1e15fcdbf808719a029646">use std::thread;
+
+fn main() {
+    let nums = vec![0, 1, 2, 3];
+
+    let handle = thread::spawn(|| {
+        for i in &nums {
+            println!("number {}", i);
+        }
+    });
+
+    let _ = handle.join();
+}</pre>
+</div><div class="slide">
+<h1 id="споделяне-на-стойности">Споделяне на стойности</h1>
+<ul>
+<li>новосъздадената нишка може да надживее функцията в която е извикана</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="споделяне-на-стойности">Споделяне на стойности</h1>
+<ul>
+<li>новосъздадената нишка може да надживее функцията в която е извикана</li>
+<li>затова rust не позволява да подадем референции към локални променливи</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="споделяне-на-стойности">Споделяне на стойности</h1>
+<ul>
+<li>новосъздадената нишка може да надживее функцията в която е извикана</li>
+<li>затова rust не позволява да подадем референции към локални променливи</li>
+<li>това се налага от ограничението на <code>spawn</code>, която приема <code>F: 'static</code></li>
+</ul>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">F</span>, <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">f</span>: <span class="tshl-type">F</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">JoinHandle</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span>
+    <span class="tshl-type">F</span>: <span class="tshl-type">FnOnce</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">T</span>,
+    <span class="tshl-type">F</span>: <span class="tshl-type">Send</span> + <span class="tshl-operator">&#39;</span><span class="tshl-label">static</span>,
+    <span class="tshl-type">T</span>: <span class="tshl-type">Send</span> + <span class="tshl-operator">&#39;</span><span class="tshl-label">static</span><span class="tshl-punctuation_delimiter"></span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="споделяне-на-стойности">Споделяне на стойности</h1>
+<p>Можем да преместим стойността в новата нишка с <code>move</code> closure</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="65b3c0749b12876a7e3d25568740beb1d16d7d5c">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> nums = <span class="tshl-function_macro">vec</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">0</span>, <span class="tshl-constant_builtin">1</span>, <span class="tshl-constant_builtin">2</span>, <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> handle = thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || {
+        <span class="tshl-keyword">for</span> i <span class="tshl-keyword">in</span> <span class="tshl-operator">&amp;</span>nums {
+            <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;number {}&quot;</span>, i<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        }
+    }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> _ = handle<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">join</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">number 0
+number 1
+number 2
+number 3</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="65b3c0749b12876a7e3d25568740beb1d16d7d5c">use std::thread;
+
+fn main() {
+    let nums = vec![0, 1, 2, 3];
+
+    let handle = thread::spawn(move || {
+        for i in &nums {
+            println!("number {}", i);
+        }
+    });
+
+    let _ = handle.join();
+}</pre>
+</div><div class="slide">
+<h1 id="споделяне-между-няколко-нишки">Споделяне между няколко нишки</h1>
+<p>Как бихме споделили стойност между няколко нишки?</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> nums = <span class="tshl-function_macro">vec</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">0</span>, <span class="tshl-constant_builtin">1</span>, <span class="tshl-constant_builtin">2</span>, <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> handles = <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">0</span>..<span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span>|_| {
+            thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || {
+                <span class="tshl-keyword">for</span> i <span class="tshl-keyword">in</span> <span class="tshl-operator">&amp;</span>nums {
+                    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;number {}&quot;</span>, i<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+                }
+            }<span class="tshl-punctuation_bracket">)</span>
+        }<span class="tshl-punctuation_bracket">)</span>
+        <span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">collect</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">_</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">for</span> h <span class="tshl-keyword">in</span> handles {
+        <span class="tshl-keyword">let</span> _ = h<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">join</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="споделяне-между-няколко-нишки">Споделяне между няколко нишки</h1>
+<ul>
+<li>прехвърляне на собствеността няма как да работи</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="споделяне-между-няколко-нишки">Споделяне между няколко нишки</h1>
+<ul>
+<li>прехвърляне на собствеността няма как да работи</li>
+<li>не можем да ползваме референция, защото нишката може да надживее <code>main</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="споделяне-между-няколко-нишки">Споделяне между няколко нишки</h1>
+<ul>
+<li>прехвърляне на собствеността няма как да работи</li>
+<li>не можем да ползваме референция, защото нишката може да надживее <code>main</code></li>
+<li>можем да пробваме с <code>Rc</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="споделяне-между-няколко-нишки">Споделяне между няколко нишки</h1>
+<ul>
+<li>прехвърляне на собствеността няма как да работи</li>
+<li>не можем да ползваме референция, защото нишката може да надживее <code>main</code></li>
+<li>можем да пробваме с <code>Rc</code></li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="6b26de4d2125d19c147e3afab659adbe061f420d">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>rc<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Rc</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> nums_vec = <span class="tshl-function_macro">vec</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">0</span>, <span class="tshl-constant_builtin">1</span>, <span class="tshl-constant_builtin">2</span>, <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> nums_rc = <span class="tshl-type">Rc</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span>nums_vec<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> handles = <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">0</span>..<span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span>
+        <span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span>|_| {
+            <span class="tshl-keyword">let</span> nums_rc = <span class="tshl-type">Rc</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">clone</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span>nums_rc<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+            thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || {
+                <span class="tshl-keyword">for</span> i <span class="tshl-keyword">in</span> <span class="tshl-operator">&amp;</span><span class="tshl-operator">*</span>nums_rc {
+                    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;number {}&quot;</span>, i<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+                }
+            }<span class="tshl-punctuation_bracket">)</span>
+        }<span class="tshl-punctuation_bracket">)</span>
+        <span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">collect</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">_</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">for</span> h <span class="tshl-keyword">in</span> handles {
+        <span class="tshl-keyword">let</span> _ = h<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">join</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0277]</span><span style="font-weight:bold">: `Rc&lt;Vec&lt;i32&gt;&gt;` cannot be sent between threads safely</span>
+   <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_6b26de4d2125d19c147e3afab659adbe061f420d.rs:12:13
+    <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">12</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>              thread::spawn(move || {
+    <span style="font-weight:bold;color:rgb(85,85,255)">| </span> <span style="font-weight:bold;color:rgb(85,85,255)">_____________</span><span style="font-weight:bold;color:rgb(255,85,85)">^^^^^^^^^^^^^</span><span style="font-weight:bold;color:rgb(85,85,255)">_-</span>
+    <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">|</span>             <span style="font-weight:bold;color:rgb(255,85,85)">|</span>
+    <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">|</span>             <span style="font-weight:bold;color:rgb(255,85,85)">`Rc&lt;Vec&lt;i32&gt;&gt;` cannot be sent between threads safely</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">13</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">|</span>                 for i in &amp;*nums_rc {
+<span style="font-weight:bold;color:rgb(85,85,255)">14</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">|</span>                     println!("number {}", i);
+<span style="font-weight:bold;color:rgb(85,85,255)">15</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">|</span>                 }
+<span style="font-weight:bold;color:rgb(85,85,255)">16</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">|</span>             })
+    <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">|_____________-</span> <span style="font-weight:bold;color:rgb(85,85,255)">within this `[closure@src/bin/main_6b26de4d2125d19c147e3afab659adbe061f420d.rs:12:27: 16:14]`</span>
+    <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+    <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">help</span>: within `[closure@src/bin/main_6b26de4d2125d19c147e3afab659adbe061f420d.rs:12:27: 16:14]`, the trait `Send` is not implemented for `Rc&lt;Vec&lt;i32&gt;&gt;`
+    <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: required because it appears within the type `[closure@src/bin/main_6b26de4d2125d19c147e3afab659adbe061f420d.rs:12:27: 16:14]`
+<span style="font-weight:bold;color:rgb(85,187,85)">note</span>: required by a bound in `spawn`
+   <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/mod.rs:625:8
+    <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">625</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    F: Send + 'static,
+    <span style="font-weight:bold;color:rgb(85,85,255)">| </span>       <span style="font-weight:bold;color:rgb(85,187,85)">^^^^</span> <span style="font-weight:bold;color:rgb(85,187,85)">required by this bound in `spawn`</span>
+
+<span style="font-weight:bold">For more information about this error, try `rustc --explain E0277`.</span>
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="6b26de4d2125d19c147e3afab659adbe061f420d">use std::rc::Rc;
+use std::thread;
+
+fn main() {
+    let nums_vec = vec![0, 1, 2, 3];
+    let nums_rc = Rc::new(nums_vec);
+
+    let handles = (0..2)
+        .map(|_| {
+            let nums_rc = Rc::clone(&nums_rc);
+
+            thread::spawn(move || {
+                for i in &*nums_rc {
+                    println!("number {}", i);
+                }
+            })
+        })
+        .collect::<Vec<_>>();
+
+    for h in handles {
+        let _ = h.join();
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<ul>
+<li><code>Rc</code> не може да се използва от няколко нишки едновременно</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<ul>
+<li><code>Rc</code> не може да се използва от няколко нишки едновременно</li>
+<li><code>Rc</code> сочещи към един обект използват споделен брояч на референциите</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<ul>
+<li><code>Rc</code> не може да се използва от няколко нишки едновременно</li>
+<li><code>Rc</code> сочещи към един обект използват споделен брояч на референциите</li>
+<li>този брояч не е синхронизиран</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<ul>
+<li><code>Rc</code> не може да се използва от няколко нишки едновременно</li>
+<li><code>Rc</code> сочещи към един обект използват споделен брояч на референциите</li>
+<li>този брояч не е синхронизиран</li>
+<li>при <code>clone</code> или <code>drop</code> този брояч се модифицира</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<ul>
+<li><code>Rc</code> не може да се използва от няколко нишки едновременно</li>
+<li><code>Rc</code> сочещи към един обект използват споделен брояч на референциите</li>
+<li>този брояч не е синхронизиран</li>
+<li>при <code>clone</code> или <code>drop</code> този брояч се модифицира</li>
+<li>ако <code>clone</code> или <code>drop</code> се извикат едновременно от две нишки - това би било data race</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<ul>
+<li><code>Rc</code> не може да се използва от няколко нишки едновременно</li>
+<li><code>Rc</code> сочещи към един обект използват споделен брояч на референциите</li>
+<li>този брояч не е синхронизиран</li>
+<li>при <code>clone</code> или <code>drop</code> този брояч се модифицира</li>
+<li>ако <code>clone</code> или <code>drop</code> се извикат едновременно от две нишки - това би било data race</li>
+<li>Rust предотвратява това, като не позволява да пращаме <code>Rc</code> до други нишки</li>
+</ul>
+</div><div class="slide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<ul>
+<li>не можем да пращаме <code>Rc</code>, защото <code>Rc</code> не имплементира <code>Send</code></li>
+<li>следователно closuer-а <code>F</code> не имплементира <code>Send</code></li>
+<li>а <code>spawn</code> изисква <code>F: Send</code></li>
+</ul>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">F</span>, <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">f</span>: <span class="tshl-type">F</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">JoinHandle</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span>
+    <span class="tshl-type">F</span>: <span class="tshl-type">FnOnce</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">T</span>,
+    <span class="tshl-type">F</span>: <span class="tshl-type">Send</span> + <span class="tshl-operator">&#39;</span><span class="tshl-label">static</span>,
+    <span class="tshl-type">T</span>: <span class="tshl-type">Send</span> + <span class="tshl-operator">&#39;</span><span class="tshl-label">static</span><span class="tshl-punctuation_delimiter"></span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="send-и-sync">Send и Sync</h1>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<ul>
+<li>Send - позволява прехвърляне на собственост между нишки</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<ul>
+<li>Send - позволява прехвърляне на собственост между нишки</li>
+<li>Sync - позволява споделяне между нишки през референция (<code>&amp;T</code>)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<ul>
+<li>Send - позволява прехвърляне на собственост между нишки</li>
+<li>Sync - позволява споделяне между нишки през референция (<code>&amp;T</code>)</li>
+<li>marker traits</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<ul>
+<li>Send - позволява прехвърляне на собственост между нишки</li>
+<li>Sync - позволява споделяне между нишки през референция (<code>&amp;T</code>)</li>
+<li>marker traits</li>
+<li>имплементирани са за повечето типове</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<ul>
+<li>Send - позволява прехвърляне на собственост между нишки</li>
+<li>Sync - позволява споделяне между нишки през референция (<code>&amp;T</code>)</li>
+<li>marker traits</li>
+<li>имплементирани са за повечето типове</li>
+<li>auto traits</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<ul>
+<li>Send - позволява прехвърляне на собственост между нишки</li>
+<li>Sync - позволява споделяне между нишки през референция (<code>&amp;T</code>)</li>
+<li>marker traits</li>
+<li>имплементирани са за повечето типове</li>
+<li>auto traits</li>
+<li>unsafe traits</li>
+</ul>
+</div><div class="slide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="send">Send</h3>
+<ul>
+<li>позволява прехвърляне на собственост между нишки</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="send">Send</h3>
+<ul>
+<li>позволява прехвърляне на собственост между нишки</li>
+<li>пример за типове, които не са <code>Send</code>:</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="send">Send</h3>
+<ul>
+<li>позволява прехвърляне на собственост между нишки</li>
+<li>пример за типове, които не са <code>Send</code>:<ul>
+<li><code>Rc</code></li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="send">Send</h3>
+<ul>
+<li>позволява прехвърляне на собственост между нишки</li>
+<li>пример за типове, които не са <code>Send</code>:<ul>
+<li><code>Rc</code></li>
+<li><code>*const T</code> и <code>*mut T</code></li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="send">Send</h3>
+<ul>
+<li>позволява прехвърляне на собственост между нишки</li>
+<li>пример за типове, които не са <code>Send</code>:<ul>
+<li><code>Rc</code></li>
+<li><code>*const T</code> и <code>*mut T</code></li>
+<li>thread local типове, напр. <code>rand::rngs::ThreadRng</code></li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="send">Send</h3>
+<ul>
+<li>позволява прехвърляне на собственост между нишки</li>
+<li>пример за типове, които не са <code>Send</code>:<ul>
+<li><code>Rc</code></li>
+<li><code>*const T</code> и <code>*mut T</code></li>
+<li>thread local типове, напр. <code>rand::rngs::ThreadRng</code></li>
+<li>и други</li></ul></li>
+</ul>
+</div><div class="slide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="sync">Sync</h3>
+<ul>
+<li>позволява споделяне на референция <code>&amp;T</code> между нишки</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="sync">Sync</h3>
+<ul>
+<li>позволява споделяне на референция <code>&amp;T</code> между нишки</li>
+<li><code>T: Sync</code> ⟺ <code>&amp;T: Send</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="sync">Sync</h3>
+<ul>
+<li>позволява споделяне на референция <code>&amp;T</code> между нишки</li>
+<li><code>T: Sync</code> ⟺ <code>&amp;T: Send</code></li>
+<li>пример за типове, които не са <code>Sync</code>:</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="sync">Sync</h3>
+<ul>
+<li>позволява споделяне на референция <code>&amp;T</code> между нишки</li>
+<li><code>T: Sync</code> ⟺ <code>&amp;T: Send</code></li>
+<li>пример за типове, които не са <code>Sync</code>:<ul>
+<li><code>Rc</code></li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="sync">Sync</h3>
+<ul>
+<li>позволява споделяне на референция <code>&amp;T</code> между нишки</li>
+<li><code>T: Sync</code> ⟺ <code>&amp;T: Send</code></li>
+<li>пример за типове, които не са <code>Sync</code>:<ul>
+<li><code>Rc</code></li>
+<li><code>Cell</code>, <code>RefCell</code></li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="sync">Sync</h3>
+<ul>
+<li>позволява споделяне на референция <code>&amp;T</code> между нишки</li>
+<li><code>T: Sync</code> ⟺ <code>&amp;T: Send</code></li>
+<li>пример за типове, които не са <code>Sync</code>:<ul>
+<li><code>Rc</code></li>
+<li><code>Cell</code>, <code>RefCell</code></li>
+<li><code>*const T</code> и <code>*mut T</code></li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="sync">Sync</h3>
+<ul>
+<li>позволява споделяне на референция <code>&amp;T</code> между нишки</li>
+<li><code>T: Sync</code> ⟺ <code>&amp;T: Send</code></li>
+<li>пример за типове, които не са <code>Sync</code>:<ul>
+<li><code>Rc</code></li>
+<li><code>Cell</code>, <code>RefCell</code></li>
+<li><code>*const T</code> и <code>*mut T</code></li>
+<li>и други</li></ul></li>
+</ul>
+</div><div class="slide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<p>Това значи ли че <code>Vec&lt;T&gt;</code> е <code>Sync</code>?</p>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<p>Това значи ли че <code>Vec&lt;T&gt;</code> е <code>Sync</code>?</p>
+<ul>
+<li>да, ако <code>T: Sync</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<p>Това значи ли че <code>Vec&lt;T&gt;</code> е <code>Sync</code>?</p>
+<ul>
+<li>да, ако <code>T: Sync</code></li>
+<li>ако нашата нишка има <code>&amp;Vec&lt;_&gt;</code> значи никой не може да модифицира вектора</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<p>Това значи ли че <code>Vec&lt;T&gt;</code> е <code>Sync</code>?</p>
+<ul>
+<li>да, ако <code>T: Sync</code></li>
+<li>ако нашата нишка има <code>&amp;Vec&lt;_&gt;</code> значи никой не може да модифицира вектора</li>
+<li>ако нашата нишка има <code>&amp;mut Vec&lt;_&gt;</code> значи никой друг няма референция до вектора</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<p>Това значи ли че <code>Vec&lt;T&gt;</code> е <code>Sync</code>?</p>
+<ul>
+<li>да, ако <code>T: Sync</code></li>
+<li>ако нашата нишка има <code>&amp;Vec&lt;_&gt;</code> значи никой не може да модифицира вектора</li>
+<li>ако нашата нишка има <code>&amp;mut Vec&lt;_&gt;</code> значи никой друг няма референция до вектора</li>
+<li>типове, които не са <code>Sync</code>, обикновено имат internal mutability без синхронизация</li>
+</ul>
+</div><div class="slide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="аuto-traits">Аuto traits</h3>
+<ul>
+<li>имплементират се автоматично ако всичките полета са съответно <code>Send</code> и <code>Sync</code></li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8f1e1e94e41edc049a6b7a3f97f0801cc27c9e01">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">pub</span> <span class="tshl-keyword">struct</span> <span class="tshl-type">Token</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="8f1e1e94e41edc049a6b7a3f97f0801cc27c9e01">pub struct Token(u32);
+fn main() {}</pre>
+<p><img src="resources/auto_trait_doc.png" alt="Auto trait docs" /></p>
+</div><div class="slide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="unsafe-traits">Unsafe traits</h3>
+<ul>
+<li>unsafe са за ръчна имплементация</li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="4bd49ff47e27a90715c035490ea9a9beb93ae0a0">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">MyBox</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">*</span><span class="tshl-keyword">mut</span> <span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">unsafe</span> <span class="tshl-keyword">impl</span> <span class="tshl-type">Send</span> <span class="tshl-keyword">for</span> <span class="tshl-type">MyBox</span> {}
+<span class="tshl-keyword">unsafe</span> <span class="tshl-keyword">impl</span> <span class="tshl-type">Sync</span> <span class="tshl-keyword">for</span> <span class="tshl-type">MyBox</span> {}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="4bd49ff47e27a90715c035490ea9a9beb93ae0a0">fn main() {}
+struct MyBox(*mut u8);
+
+unsafe impl Send for MyBox {}
+unsafe impl Sync for MyBox {}</pre>
+</div><div class="slide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="деимплементация">Деимплементация</h3>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// Само на nightly</span>
+<span class="tshl-attribute">#!<span class="tshl-punctuation_bracket">[</span>feature<span class="tshl-punctuation_bracket">(</span>optin_builtin_traits<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+
+<span class="tshl-keyword">struct</span> <span class="tshl-type">SpecialToken</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">impl</span> !<span class="tshl-type">Send</span> <span class="tshl-keyword">for</span> <span class="tshl-type">SpecialToken</span> {}
+<span class="tshl-keyword">impl</span> !<span class="tshl-type">Sync</span> <span class="tshl-keyword">for</span> <span class="tshl-type">SpecialToken</span> {}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="деимплементация">Деимплементация</h3>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// Само на nightly</span>
+<span class="tshl-attribute">#!<span class="tshl-punctuation_bracket">[</span>feature<span class="tshl-punctuation_bracket">(</span>optin_builtin_traits<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+
+<span class="tshl-keyword">struct</span> <span class="tshl-type">SpecialToken</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">impl</span> !<span class="tshl-type">Send</span> <span class="tshl-keyword">for</span> <span class="tshl-type">SpecialToken</span> {}
+<span class="tshl-keyword">impl</span> !<span class="tshl-type">Sync</span> <span class="tshl-keyword">for</span> <span class="tshl-type">SpecialToken</span> {}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<ul>
+<li>автоматичната имплементация никога няма да е грешна от само себе си</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="деимплементация">Деимплементация</h3>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// Само на nightly</span>
+<span class="tshl-attribute">#!<span class="tshl-punctuation_bracket">[</span>feature<span class="tshl-punctuation_bracket">(</span>optin_builtin_traits<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+
+<span class="tshl-keyword">struct</span> <span class="tshl-type">SpecialToken</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">impl</span> !<span class="tshl-type">Send</span> <span class="tshl-keyword">for</span> <span class="tshl-type">SpecialToken</span> {}
+<span class="tshl-keyword">impl</span> !<span class="tshl-type">Sync</span> <span class="tshl-keyword">for</span> <span class="tshl-type">SpecialToken</span> {}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<ul>
+<li>автоматичната имплементация никога няма да е грешна от само себе си</li>
+<li>но може да пишем код, който разчита, че определен тип не може да се прехвърля / споделя</li>
+</ul>
+</div><div class="slide">
+<h1 id="send-и-sync">Send и Sync</h1>
+<h3 id="деимплементация">Деимплементация</h3>
+<p>Хак за stable</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="f13572dec112ccdd85d42ba1ec49ed432b3b27ec">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>marker<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">PhantomData</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">struct</span> <span class="tshl-type">SpecialToken</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type_builtin">u8</span>, <span class="tshl-type">PhantomData</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">*</span><span class="tshl-keyword">const</span> <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="f13572dec112ccdd85d42ba1ec49ed432b3b27ec">fn main() {}
+use std::marker::PhantomData;
+
+struct SpecialToken(u8, PhantomData<*const ()>);</pre>
+</div><div class="slide">
+<h1 id="arc">Arc</h1>
+<p>Да се върнем на кода, който не се компилираше</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8f1d186d4cfc4309e094e98b192d752bdba03441">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>rc<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Rc</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> nums = <span class="tshl-type">Rc</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-function_macro">vec</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">0</span>, <span class="tshl-constant_builtin">1</span>, <span class="tshl-constant_builtin">2</span>, <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> handles = <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">0</span>..<span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span>
+        <span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span>|_| {
+            <span class="tshl-keyword">let</span> nums = <span class="tshl-type">Rc</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">clone</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span>nums<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+            thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || {
+                <span class="tshl-keyword">for</span> i <span class="tshl-keyword">in</span> <span class="tshl-operator">&amp;</span><span class="tshl-operator">*</span>nums {
+                    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;number {}&quot;</span>, i<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+                }
+            }<span class="tshl-punctuation_bracket">)</span>
+        }<span class="tshl-punctuation_bracket">)</span>
+        <span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">collect</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">_</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">for</span> h <span class="tshl-keyword">in</span> handles {
+        <span class="tshl-keyword">let</span> _ = h<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">join</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0277]</span><span style="font-weight:bold">: `Rc&lt;Vec&lt;i32&gt;&gt;` cannot be sent between threads safely</span>
+   <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_8f1d186d4cfc4309e094e98b192d752bdba03441.rs:11:13
+    <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">11</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>              thread::spawn(move || {
+    <span style="font-weight:bold;color:rgb(85,85,255)">| </span> <span style="font-weight:bold;color:rgb(85,85,255)">_____________</span><span style="font-weight:bold;color:rgb(255,85,85)">^^^^^^^^^^^^^</span><span style="font-weight:bold;color:rgb(85,85,255)">_-</span>
+    <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">|</span>             <span style="font-weight:bold;color:rgb(255,85,85)">|</span>
+    <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">|</span>             <span style="font-weight:bold;color:rgb(255,85,85)">`Rc&lt;Vec&lt;i32&gt;&gt;` cannot be sent between threads safely</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">12</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">|</span>                 for i in &amp;*nums {
+<span style="font-weight:bold;color:rgb(85,85,255)">13</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">|</span>                     println!("number {}", i);
+<span style="font-weight:bold;color:rgb(85,85,255)">14</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">|</span>                 }
+<span style="font-weight:bold;color:rgb(85,85,255)">15</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">|</span>             })
+    <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,85,255)">|_____________-</span> <span style="font-weight:bold;color:rgb(85,85,255)">within this `[closure@src/bin/main_8f1d186d4cfc4309e094e98b192d752bdba03441.rs:11:27: 15:14]`</span>
+    <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+    <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">help</span>: within `[closure@src/bin/main_8f1d186d4cfc4309e094e98b192d752bdba03441.rs:11:27: 15:14]`, the trait `Send` is not implemented for `Rc&lt;Vec&lt;i32&gt;&gt;`
+    <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: required because it appears within the type `[closure@src/bin/main_8f1d186d4cfc4309e094e98b192d752bdba03441.rs:11:27: 15:14]`
+<span style="font-weight:bold;color:rgb(85,187,85)">note</span>: required by a bound in `spawn`
+   <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/thread/mod.rs:625:8
+    <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">625</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    F: Send + 'static,
+    <span style="font-weight:bold;color:rgb(85,85,255)">| </span>       <span style="font-weight:bold;color:rgb(85,187,85)">^^^^</span> <span style="font-weight:bold;color:rgb(85,187,85)">required by this bound in `spawn`</span>
+
+<span style="font-weight:bold">For more information about this error, try `rustc --explain E0277`.</span>
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="8f1d186d4cfc4309e094e98b192d752bdba03441">use std::rc::Rc;
+use std::thread;
+
+fn main() {
+    let nums = Rc::new(vec![0, 1, 2, 3]);
+
+    let handles = (0..2)
+        .map(|_| {
+            let nums = Rc::clone(&nums);
+
+            thread::spawn(move || {
+                for i in &*nums {
+                    println!("number {}", i);
+                }
+            })
+        })
+        .collect::<Vec<_>>();
+
+    for h in handles {
+        let _ = h.join();
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="arc">Arc</h1>
+<p>Решението е да заменим <code>std::rc::Rc</code> с <code>std::sync::Arc</code></p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="abcff70337e99a3b698bf62556a1f872b622a2b7">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>sync<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Arc</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> nums = <span class="tshl-type">Arc</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-function_macro">vec</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">0</span>, <span class="tshl-constant_builtin">1</span>, <span class="tshl-constant_builtin">2</span>, <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> handles = <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">0</span>..<span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span>
+        <span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span>|_| {
+            <span class="tshl-keyword">let</span> nums = <span class="tshl-type">Arc</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">clone</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span>nums<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+            thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || {
+                <span class="tshl-keyword">for</span> i <span class="tshl-keyword">in</span> <span class="tshl-operator">&amp;</span><span class="tshl-operator">*</span>nums {
+                    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;number {}&quot;</span>, i<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+                }
+            }<span class="tshl-punctuation_bracket">)</span>
+        }<span class="tshl-punctuation_bracket">)</span>
+        <span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">collect</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">_</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">for</span> h <span class="tshl-keyword">in</span> handles {
+        <span class="tshl-keyword">let</span> _ = h<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">join</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">number 0
+number 1
+number 2
+number 3
+number 0
+number 1
+number 2
+number 3</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="abcff70337e99a3b698bf62556a1f872b622a2b7">use std::sync::Arc;
+use std::thread;
+
+fn main() {
+    let nums = Arc::new(vec![0, 1, 2, 3]);
+
+    let handles = (0..2)
+        .map(|_| {
+            let nums = Arc::clone(&nums);
+
+            thread::spawn(move || {
+                for i in &*nums {
+                    println!("number {}", i);
+                }
+            })
+        })
+        .collect::<Vec<_>>();
+
+    for h in handles {
+        let _ = h.join();
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="arc">Arc</h1>
+</div><div class="slide subslide">
+<h1 id="arc">Arc</h1>
+<ul>
+<li>Atomic Reference Counter</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="arc">Arc</h1>
+<ul>
+<li>Atomic Reference Counter</li>
+<li>аналогично на Rc (споделена собственост, позволява само взимане на <code>&amp;T</code> към вътрешността)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="arc">Arc</h1>
+<ul>
+<li>Atomic Reference Counter</li>
+<li>аналогично на Rc (споделена собственост, позволява само взимане на <code>&amp;T</code> към вътрешността)</li>
+<li>но използва атомарни операции за броене на референциите</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="arc">Arc</h1>
+<ul>
+<li>Atomic Reference Counter</li>
+<li>аналогично на Rc (споделена собственост, позволява само взимане на <code>&amp;T</code> към вътрешността)</li>
+<li>но използва атомарни операции за броене на референциите</li>
+<li>може да се използва за споделяне на стойности между нишки, ако <code>T: Send + Sync</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="синхронизация">Синхронизация</h1>
+</div><div class="slide">
+<h1 id="примитиви-за-синхронизация">Примитиви за синхронизация</h1>
+<p>Стандартния пример за грешен многонишков алгоритъм не се компилира</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> v = <span class="tshl-type">Arc</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">0</span>..<span class="tshl-constant_builtin">100</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">collect</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">_</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> sum = <span class="tshl-constant_builtin">0</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">let</span> t1 = {
+    <span class="tshl-keyword">let</span> v = <span class="tshl-type">Arc</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">clone</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span>v<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> sum = <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> sum<span class="tshl-punctuation_delimiter">;</span>
+    thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || <span class="tshl-keyword">for</span> i <span class="tshl-keyword">in</span> <span class="tshl-operator">&amp;</span>v<span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">0</span>..<span class="tshl-constant_builtin">50</span><span class="tshl-punctuation_bracket">]</span> { <span class="tshl-operator">*</span>sum += i<span class="tshl-punctuation_delimiter">;</span> }<span class="tshl-punctuation_bracket">)</span>
+}<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">let</span> t2 = {
+    <span class="tshl-keyword">let</span> v = <span class="tshl-type">Arc</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">clone</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span>v<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> sum = <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> sum<span class="tshl-punctuation_delimiter">;</span>
+    thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || <span class="tshl-keyword">for</span> i <span class="tshl-keyword">in</span> <span class="tshl-operator">&amp;</span>v<span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">51</span>..<span class="tshl-constant_builtin">100</span><span class="tshl-punctuation_bracket">]</span> { <span class="tshl-operator">*</span>sum += i<span class="tshl-punctuation_delimiter">;</span> }<span class="tshl-punctuation_bracket">)</span>
+}<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">let</span> _ = t1<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">join</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">let</span> _ = t2<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">join</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;sum: {}&quot;</span>, sum<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="примитиви-за-синхронизация">Примитиви за синхронизация</h1>
+<p>Защо не се компилира? Какъв може да е типа на <code>sum</code>?</p>
+</div><div class="slide subslide">
+<h1 id="примитиви-за-синхронизация">Примитиви за синхронизация</h1>
+<p>Защо не се компилира? Какъв може да е типа на <code>sum</code>?</p>
+<ul>
+<li><code>&amp;mut i32</code> - не можем да имаме два пъти <code>&amp;mut</code>, а и <code>spawn</code> очаква <code>'static</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="примитиви-за-синхронизация">Примитиви за синхронизация</h1>
+<p>Защо не се компилира? Какъв може да е типа на <code>sum</code>?</p>
+<ul>
+<li><code>&amp;mut i32</code> - не можем да имаме два пъти <code>&amp;mut</code>, а и <code>spawn</code> очаква <code>'static</code></li>
+<li><code>Arc&lt;i32&gt;</code> - нямаме как да модифицираме съдържанието</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="примитиви-за-синхронизация">Примитиви за синхронизация</h1>
+<p>Защо не се компилира? Какъв може да е типа на <code>sum</code>?</p>
+<ul>
+<li><code>&amp;mut i32</code> - не можем да имаме два пъти <code>&amp;mut</code>, а и <code>spawn</code> очаква <code>'static</code></li>
+<li><code>Arc&lt;i32&gt;</code> - нямаме как да модифицираме съдържанието</li>
+<li><code>Arc&lt;Cell&lt;i32&gt;&gt;</code>, <code>Arc&lt;RefCell&lt;i32&gt;&gt;</code> - <code>Cell</code> и <code>RefCell</code> не са <code>Sync</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="примитиви-за-синхронизация">Примитиви за синхронизация</h1>
+<p>Можем да го накараме да работи</p>
+</div><div class="slide subslide">
+<h1 id="примитиви-за-синхронизация">Примитиви за синхронизация</h1>
+<p>Можем да го накараме да работи</p>
+<ul>
+<li>мутекс</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="примитиви-за-синхронизация">Примитиви за синхронизация</h1>
+<p>Можем да го накараме да работи</p>
+<ul>
+<li>мутекс</li>
+<li>атомарни числа</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="примитиви-за-синхронизация">Примитиви за синхронизация</h1>
+<p>Можем да го накараме да работи</p>
+<ul>
+<li>мутекс</li>
+<li>атомарни числа</li>
+<li>да връщаме резултат от нишката</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="примитиви-за-синхронизация">Примитиви за синхронизация</h1>
+<p>Можем да го накараме да работи</p>
+<ul>
+<li>мутекс</li>
+<li>атомарни числа</li>
+<li>да връщаме резултат от нишката</li>
+<li>…</li>
+</ul>
+</div><div class="slide">
+<h1 id="примитиви-за-синхронизация">Примитиви за синхронизация</h1>
+<h3 id="модула-stdsync">Модула std::sync</h3>
+<ul>
+<li><a href="https://doc.rust-lang.org/stable/std/sync/index.html" target="_blank">std::sync</a></li>
+<li><code>Arc</code></li>
+<li><code>Mutex</code>, <code>RwLock</code></li>
+<li><code>Condvar</code>, <code>Barrier</code></li>
+<li><code>atomic</code></li>
+<li><code>mpsc</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="mutex">Mutex</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="12d6bee7b66f847acd87b91ac65ad6766c2b2747">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>sync<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Mutex</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-comment">// мутекса опакова стойността, която предпазва</span>
+    <span class="tshl-keyword">let</span> mutex = <span class="tshl-type">Mutex</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">10</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    {
+        <span class="tshl-comment">// заключваме мутекса</span>
+        <span class="tshl-comment">// `lock()` връща &quot;умен указател&quot; с deref до `&amp;T` и `&amp;mut T`</span>
+        <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> lock = mutex<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">lock</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        <span class="tshl-operator">*</span>lock += <span class="tshl-constant_builtin">32</span><span class="tshl-punctuation_delimiter">;</span>
+
+        <span class="tshl-comment">// мутекса се отключва когато `lock` се деалокира</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="12d6bee7b66f847acd87b91ac65ad6766c2b2747">use std::sync::Mutex;
+
+fn main() {
+    // мутекса опакова стойността, която предпазва
+    let mutex = Mutex::new(10);
+
+    {
+        // заключваме мутекса
+        // `lock()` връща "умен указател" с deref до `&T` и `&mut T`
+        let mut lock = mutex.lock().unwrap();
+        *lock += 32;
+
+        // мутекса се отключва когато `lock` се деалокира
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="mutex">Mutex</h1>
+<ul>
+<li>mutual exclusion</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<ul>
+<li>mutual exclusion</li>
+<li>използва се за да ни даде ексклузивен достъп до някакъв общ ресурс</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<ul>
+<li>mutual exclusion</li>
+<li>използва се за да ни даде ексклузивен достъп до някакъв общ ресурс</li>
+<li>scope-а за който имаме ексклузивен достъп се нарича критична секция</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<ul>
+<li>mutual exclusion</li>
+<li>използва се за да ни даде ексклузивен достъп до някакъв общ ресурс</li>
+<li>scope-а за който имаме ексклузивен достъп се нарича критична секция</li>
+<li>работи по следния начин</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<ul>
+<li>mutual exclusion</li>
+<li>използва се за да ни даде ексклузивен достъп до някакъв общ ресурс</li>
+<li>scope-а за който имаме ексклузивен достъп се нарича критична секция</li>
+<li>работи по следния начин<ul>
+<li>съдържа флаг - дали мутекса е заключен или свободен</li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<ul>
+<li>mutual exclusion</li>
+<li>използва се за да ни даде ексклузивен достъп до някакъв общ ресурс</li>
+<li>scope-а за който имаме ексклузивен достъп се нарича критична секция</li>
+<li>работи по следния начин<ul>
+<li>съдържа флаг - дали мутекса е заключен или свободен</li>
+<li>ако мутекса е отключен и извикаме <code>lock</code> - заключваме го</li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<ul>
+<li>mutual exclusion</li>
+<li>използва се за да ни даде ексклузивен достъп до някакъв общ ресурс</li>
+<li>scope-а за който имаме ексклузивен достъп се нарича критична секция</li>
+<li>работи по следния начин<ul>
+<li>съдържа флаг - дали мутекса е заключен или свободен</li>
+<li>ако мутекса е отключен и извикаме <code>lock</code> - заключваме го</li>
+<li>ако мутекса е заключен и извикаме <code>lock</code> - нишката ни се спира</li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<ul>
+<li>mutual exclusion</li>
+<li>използва се за да ни даде ексклузивен достъп до някакъв общ ресурс</li>
+<li>scope-а за който имаме ексклузивен достъп се нарича критична секция</li>
+<li>работи по следния начин<ul>
+<li>съдържа флаг - дали мутекса е заключен или свободен</li>
+<li>ако мутекса е отключен и извикаме <code>lock</code> - заключваме го</li>
+<li>ако мутекса е заключен и извикаме <code>lock</code> - нишката ни се спира</li>
+<li>операционната система ще я събуди когато мутекса е свободен</li></ul></li>
+</ul>
+</div><div class="slide">
+<h1 id="мutex">Мutex</h1>
+<p>Обикновенно мутекса се възприема като примитива която определя критична секция</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="cc language-c hljs">lock(my_mutex);
+<span class="hljs-comment">// начало на критичната секция</span>
+
+do_stuff(shared_data);
+
+<span class="hljs-comment">// край на критичната секция</span>
+unlock(my_mutex);</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>В Ръст това не би било удобно, защото не дава достатъчна информация на компилатора как ползваме данните.<br />
+Затова <code>Mutex</code> е generic и опакова данните.</p>
+</div><div class="slide">
+<h1 id="mutex">Mutex</h1>
+<ul>
+<li><code>Mutex&lt;T&gt;</code> опакова данни от тип <code>T</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<ul>
+<li><code>Mutex&lt;T&gt;</code> опакова данни от тип <code>T</code></li>
+<li>ако искаме мутекс без данни може да се използва <code>Mutex&lt;()&gt;</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<ul>
+<li><code>Mutex&lt;T&gt;</code> опакова данни от тип <code>T</code></li>
+<li>ако искаме мутекс без данни може да се използва <code>Mutex&lt;()&gt;</code></li>
+<li><code>mutex.lock()</code> връща <code>Result&lt;MutexGuard&lt;'a, T&gt;, PoisonError&gt;</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<ul>
+<li><code>Mutex&lt;T&gt;</code> опакова данни от тип <code>T</code></li>
+<li>ако искаме мутекс без данни може да се използва <code>Mutex&lt;()&gt;</code></li>
+<li><code>mutex.lock()</code> връща <code>Result&lt;MutexGuard&lt;'a, T&gt;, PoisonError&gt;</code></li>
+<li><code>mutex.lock().unwrap()</code> връща <code>MutexGuard&lt;'a, T&gt;</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<ul>
+<li><code>Mutex&lt;T&gt;</code> опакова данни от тип <code>T</code></li>
+<li>ако искаме мутекс без данни може да се използва <code>Mutex&lt;()&gt;</code></li>
+<li><code>mutex.lock()</code> връща <code>Result&lt;MutexGuard&lt;'a, T&gt;, PoisonError&gt;</code></li>
+<li><code>mutex.lock().unwrap()</code> връща <code>MutexGuard&lt;'a, T&gt;</code></li>
+<li><code>MutexGuard</code> има <code>Deref</code> до <code>&amp;T</code> и <code>&amp;mut T</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<ul>
+<li><code>Mutex&lt;T&gt;</code> опакова данни от тип <code>T</code></li>
+<li>ако искаме мутекс без данни може да се използва <code>Mutex&lt;()&gt;</code></li>
+<li><code>mutex.lock()</code> връща <code>Result&lt;MutexGuard&lt;'a, T&gt;, PoisonError&gt;</code></li>
+<li><code>mutex.lock().unwrap()</code> връща <code>MutexGuard&lt;'a, T&gt;</code></li>
+<li><code>MutexGuard</code> има <code>Deref</code> до <code>&amp;T</code> и <code>&amp;mut T</code></li>
+<li>единствения начин да достъпим данните е през <code>MutexGuard</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="mutex">Mutex</h1>
+<h3 id="panic">Panic</h3>
+<ul>
+<li><code>mutex.lock()</code> връща <code>Result&lt;MutexGuard&lt;'a, T&gt;, PoisonError&gt;</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<h3 id="panic">Panic</h3>
+<ul>
+<li><code>mutex.lock()</code> връща <code>Result&lt;MutexGuard&lt;'a, T&gt;, PoisonError&gt;</code></li>
+<li>ако нишка е заключила мутекс и влезе в <code>panic!</code> по това време, може данните да са останали в (логически) невалидно състояние</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<h3 id="panic">Panic</h3>
+<ul>
+<li><code>mutex.lock()</code> връща <code>Result&lt;MutexGuard&lt;'a, T&gt;, PoisonError&gt;</code></li>
+<li>ако нишка е заключила мутекс и влезе в <code>panic!</code> по това време, може данните да са останали в (логически) невалидно състояние</li>
+<li>мутекса се зачита за отровен</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<h3 id="panic">Panic</h3>
+<ul>
+<li><code>mutex.lock()</code> връща <code>Result&lt;MutexGuard&lt;'a, T&gt;, PoisonError&gt;</code></li>
+<li>ако нишка е заключила мутекс и влезе в <code>panic!</code> по това време, може данните да са останали в (логически) невалидно състояние</li>
+<li>мутекса се зачита за отровен</li>
+<li>от <code>PoisonError</code> може да се извади <code>MutexGuard</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex">Mutex</h1>
+<h3 id="panic">Panic</h3>
+<ul>
+<li><code>mutex.lock()</code> връща <code>Result&lt;MutexGuard&lt;'a, T&gt;, PoisonError&gt;</code></li>
+<li>ако нишка е заключила мутекс и влезе в <code>panic!</code> по това време, може данните да са останали в (логически) невалидно състояние</li>
+<li>мутекса се зачита за отровен</li>
+<li>от <code>PoisonError</code> може да се извади <code>MutexGuard</code></li>
+<li>често срещано е резултата от <code>lock</code> просто да се <code>unwrap</code>-не</li>
+</ul>
+</div><div class="slide">
+<h1 id="rwlock">RwLock</h1>
+<ul>
+<li>Reader-writer lock</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="rwlock">RwLock</h1>
+<ul>
+<li>Reader-writer lock</li>
+<li>позволява четене от много места</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="rwlock">RwLock</h1>
+<ul>
+<li>Reader-writer lock</li>
+<li>позволява четене от много места</li>
+<li>или писане от едно място</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="rwlock">RwLock</h1>
+<ul>
+<li>Reader-writer lock</li>
+<li>позволява четене от много места</li>
+<li>или писане от едно място</li>
+<li>подобно на <code>RefCell</code>, но в многонишков контекст</li>
+</ul>
+</div><div class="slide">
+<h1 id="mutex-или-rwlock">Mutex или RwLock</h1>
+<ul>
+<li>обикновенно <code>Mutex</code> е по-доброто решение</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex-или-rwlock">Mutex или RwLock</h1>
+<ul>
+<li>обикновенно <code>Mutex</code> е по-доброто решение</li>
+<li><code>Mutex</code> е по-бърз и по-лек от <code>RwLock</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex-или-rwlock">Mutex или RwLock</h1>
+<ul>
+<li>обикновенно <code>Mutex</code> е по-доброто решение</li>
+<li><code>Mutex</code> е по-бърз и по-лек от <code>RwLock</code></li>
+<li><code>Mutex</code> налага дисциплина да държим критичните секции възможно най-кратки</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex-или-rwlock">Mutex или RwLock</h1>
+<ul>
+<li>обикновенно <code>Mutex</code> е по-доброто решение</li>
+<li><code>Mutex</code> е по-бърз и по-лек от <code>RwLock</code></li>
+<li><code>Mutex</code> налага дисциплина да държим критичните секции възможно най-кратки</li>
+<li><code>Mutex&lt;Arc&lt;State&gt;&gt;</code> или <a href="https://docs.rs/arc-swap/" target="_blank">ArcSwap<State></a> понякога е добра алтернатива на <code>RwLock&lt;State&gt;</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="mutex-или-rwlock">Mutex или RwLock</h1>
+<ul>
+<li>обикновенно <code>Mutex</code> е по-доброто решение</li>
+<li><code>Mutex</code> е по-бърз и по-лек от <code>RwLock</code></li>
+<li><code>Mutex</code> налага дисциплина да държим критичните секции възможно най-кратки</li>
+<li><code>Mutex&lt;Arc&lt;State&gt;&gt;</code> или <a href="https://docs.rs/arc-swap/" target="_blank">ArcSwap<State></a> понякога е добра алтернатива на <code>RwLock&lt;State&gt;</code></li>
+<li><code>RwLock</code> може да се използва да опаковаме стари C++ библиотеки</li>
+</ul>
+</div><div class="slide">
+<h1 id="arc--mutex">Arc + Mutex</h1>
+<p>Подобно на <code>Rc&lt;RefCell&lt;T&gt;&gt;</code>, може често да виждате <code>Arc&lt;Mutex&lt;T&gt;&gt;</code> или <code>Arc&lt;RwLock&lt;T&gt;&gt;</code></p>
+</div><div class="slide">
+<h1 id="други-примитиви">Други примитиви</h1>
+<ul>
+<li>разгледайте документацията на <a href="https://doc.rust-lang.org/stable/std/sync/index.html" target="_blank">std::sync</a></li>
+<li><code>Condvar</code></li>
+<li><code>Once</code></li>
+<li><code>Barrier</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="атомарни-числа">Атомарни числа</h1>
+<ul>
+<li><code>AtomicBool</code>, <code>AtomicUsize</code>, <code>AtomicIsize</code>, <code>AtomicPtr</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="атомарни-числа">Атомарни числа</h1>
+<ul>
+<li><code>AtomicBool</code>, <code>AtomicUsize</code>, <code>AtomicIsize</code>, <code>AtomicPtr</code></li>
+<li><code>AtomicU8</code>, <code>AtomicU16</code>, …</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="атомарни-числа">Атомарни числа</h1>
+<ul>
+<li><code>AtomicBool</code>, <code>AtomicUsize</code>, <code>AtomicIsize</code>, <code>AtomicPtr</code></li>
+<li><code>AtomicU8</code>, <code>AtomicU16</code>, …</li>
+<li>имплементират се чрез специални инструкции на процесора</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="атомарни-числа">Атомарни числа</h1>
+<ul>
+<li><code>AtomicBool</code>, <code>AtomicUsize</code>, <code>AtomicIsize</code>, <code>AtomicPtr</code></li>
+<li><code>AtomicU8</code>, <code>AtomicU16</code>, …</li>
+<li>имплементират се чрез специални инструкции на процесора</li>
+<li>удобни са за създаване на различни броячи и подобни</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="атомарни-числа">Атомарни числа</h1>
+<ul>
+<li><code>AtomicBool</code>, <code>AtomicUsize</code>, <code>AtomicIsize</code>, <code>AtomicPtr</code></li>
+<li><code>AtomicU8</code>, <code>AtomicU16</code>, …</li>
+<li>имплементират се чрез специални инструкции на процесора</li>
+<li>удобни са за създаване на различни броячи и подобни</li>
+<li>стоят в основата на много алгоритми</li>
+</ul>
+</div><div class="slide">
+<h1 id="атомарни-числа">Атомарни числа</h1>
+<ul>
+<li>препоръчително да се използват пред <code>Mutex&lt;{integer}&gt;</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="атомарни-числа">Атомарни числа</h1>
+<ul>
+<li>препоръчително да се използват пред <code>Mutex&lt;{integer}&gt;</code></li>
+<li>интерфейса наподобява <code>Cell&lt;{integer}&gt;</code>, но са <code>Send + Sync</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="атомарни-числа">Атомарни числа</h1>
+<ul>
+<li>препоръчително да се използват пред <code>Mutex&lt;{integer}&gt;</code></li>
+<li>интерфейса наподобява <code>Cell&lt;{integer}&gt;</code>, но са <code>Send + Sync</code></li>
+<li>т.е. модифицират се през <code>&amp;T</code> и връщат копие на числото</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="атомарни-числа">Атомарни числа</h1>
+<ul>
+<li>препоръчително да се използват пред <code>Mutex&lt;{integer}&gt;</code></li>
+<li>интерфейса наподобява <code>Cell&lt;{integer}&gt;</code>, но са <code>Send + Sync</code></li>
+<li>т.е. модифицират се през <code>&amp;T</code> и връщат копие на числото</li>
+<li>аритметични операции: <code>fetch_add</code>, <code>fetch_xor</code>, …</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="атомарни-числа">Атомарни числа</h1>
+<ul>
+<li>препоръчително да се използват пред <code>Mutex&lt;{integer}&gt;</code></li>
+<li>интерфейса наподобява <code>Cell&lt;{integer}&gt;</code>, но са <code>Send + Sync</code></li>
+<li>т.е. модифицират се през <code>&amp;T</code> и връщат копие на числото</li>
+<li>аритметични операции: <code>fetch_add</code>, <code>fetch_xor</code>, …</li>
+<li>oперации по паметта: <code>load</code>, <code>store</code>, <code>compare_and_swap</code>, …</li>
+</ul>
+</div><div class="slide">
+<h1 id="канали">Канали</h1>
+<p><img src="resources/mpsc.png" alt="MPSC" /></p>
+</div><div class="slide">
+<h1 id="канали">Канали</h1>
+<blockquote>
+  <p>Don't communicate by sharing memory,<br />
+  share memory by communicating</p>
+</blockquote>
+</div><div class="slide">
+<h1 id="канали-в-стандартната-библиотека">Канали в стандартната библиотека</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="01490e86de92c447cbb07292c7ee892cb1bc8bc5">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>sync<span class="tshl-punctuation_delimiter">::</span>mpsc<span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> <span class="tshl-punctuation_bracket">(</span>sender, receiver<span class="tshl-punctuation_bracket">)</span> = mpsc<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">channel</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || {
+        sender<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">send</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">10</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;received {}&quot;</span>, receiver.recv<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>.unwrap<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">received 10</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="01490e86de92c447cbb07292c7ee892cb1bc8bc5">use std::sync::mpsc;
+use std::thread;
+
+fn main() {
+    let (sender, receiver) = mpsc::channel();
+
+    thread::spawn(move || {
+        sender.send(10).unwrap();
+    });
+
+    println!("received {}", receiver.recv().unwrap());
+}</pre>
+</div><div class="slide">
+<h1 id="типове-канали">Типове канали</h1>
+<h3 id="неограничен-канал">Неограничен канал</h3>
+</div><div class="slide subslide">
+<h1 id="типове-канали">Типове канали</h1>
+<h3 id="неограничен-канал">Неограничен канал</h3>
+<ul>
+<li>unbounded / infinitely buffered / "asynchronous"</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="типове-канали">Типове канали</h1>
+<h3 id="неограничен-канал">Неограничен канал</h3>
+<ul>
+<li>unbounded / infinitely buffered / "asynchronous"</li>
+<li><code>std::sync::mpsc::channel()</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="типове-канали">Типове канали</h1>
+<h3 id="неограничен-канал">Неограничен канал</h3>
+<ul>
+<li>unbounded / infinitely buffered / "asynchronous"</li>
+<li><code>std::sync::mpsc::channel()</code></li>
+<li><code>(Sender, Receiver)</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="типове-канали">Типове канали</h1>
+<h3 id="неограничен-канал">Неограничен канал</h3>
+<ul>
+<li>unbounded / infinitely buffered / "asynchronous"</li>
+<li><code>std::sync::mpsc::channel()</code></li>
+<li><code>(Sender, Receiver)</code></li>
+<li>изпращане на съобщение никога не блокира</li>
+</ul>
+</div><div class="slide">
+<h1 id="типове-канали">Типове канали</h1>
+<h3 id="неограничен-канал">Неограничен канал</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="fe77691a88bcc3ff5cf8546e2661369eee2e87c3">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> <span class="tshl-punctuation_bracket">(</span>sender, receiver<span class="tshl-punctuation_bracket">)</span> = mpsc<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">channel</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || {
+    sender<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">send</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    sender<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">send</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    sender<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">send</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-function_macro">assert_eq</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>receiver.recv<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>.unwrap<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-function_macro">assert_eq</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>receiver.recv<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>.unwrap<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-function_macro">assert_eq</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>receiver.recv<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>.unwrap<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="fe77691a88bcc3ff5cf8546e2661369eee2e87c3">use std::sync::mpsc;
+use std::thread;
+fn main() {
+let (sender, receiver) = mpsc::channel();
+
+thread::spawn(move || {
+    sender.send(1).unwrap();
+    sender.send(2).unwrap();
+    sender.send(3).unwrap();
+});
+
+assert_eq!(receiver.recv().unwrap(), 1);
+assert_eq!(receiver.recv().unwrap(), 2);
+assert_eq!(receiver.recv().unwrap(), 3);
+}</pre>
+</div><div class="slide">
+<h1 id="типове-канали">Типове канали</h1>
+<h3 id="oграничен-канал">Oграничен канал</h3>
+<ul>
+<li>bounded / "synchronous"</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="типове-канали">Типове канали</h1>
+<h3 id="oграничен-канал">Oграничен канал</h3>
+<ul>
+<li>bounded / "synchronous"</li>
+<li><code>std::sync::mpsc::sync_channel(k)</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="типове-канали">Типове канали</h1>
+<h3 id="oграничен-канал">Oграничен канал</h3>
+<ul>
+<li>bounded / "synchronous"</li>
+<li><code>std::sync::mpsc::sync_channel(k)</code></li>
+<li><code>(SyncSender, Receiver)</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="типове-канали">Типове канали</h1>
+<h3 id="oграничен-канал">Oграничен канал</h3>
+<ul>
+<li>bounded / "synchronous"</li>
+<li><code>std::sync::mpsc::sync_channel(k)</code></li>
+<li><code>(SyncSender, Receiver)</code></li>
+<li>има буфер за <code>k</code> съобщения</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="типове-канали">Типове канали</h1>
+<h3 id="oграничен-канал">Oграничен канал</h3>
+<ul>
+<li>bounded / "synchronous"</li>
+<li><code>std::sync::mpsc::sync_channel(k)</code></li>
+<li><code>(SyncSender, Receiver)</code></li>
+<li>има буфер за <code>k</code> съобщения</li>
+<li>изпращане на съобщения ще блокира ако буфера е пълен</li>
+</ul>
+</div><div class="slide">
+<h1 id="типове-канали">Типове канали</h1>
+<h3 id="ограничен-канал">Ограничен канал</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="e9a251a424ee95419d4a6bfa7614da36d13cd2f6">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> <span class="tshl-punctuation_bracket">(</span>sender, receiver<span class="tshl-punctuation_bracket">)</span> = mpsc<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">sync_channel</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || {
+    <span class="tshl-comment">// записва съобщението и връща веднага</span>
+    sender<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">send</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-comment">// ще блокира докато главната нишка не извика `receiver.recv()`</span>
+    sender<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">send</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-function_macro">assert_eq</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>receiver.recv<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>.unwrap<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-function_macro">assert_eq</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>receiver.recv<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>.unwrap<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="e9a251a424ee95419d4a6bfa7614da36d13cd2f6">use std::sync::mpsc;
+use std::thread;
+fn main() {
+let (sender, receiver) = mpsc::sync_channel(1);
+
+thread::spawn(move || {
+    // записва съобщението и връща веднага
+    sender.send(1).unwrap();
+
+    // ще блокира докато главната нишка не извика `receiver.recv()`
+    sender.send(2).unwrap();
+});
+
+assert_eq!(receiver.recv().unwrap(), 1);
+assert_eq!(receiver.recv().unwrap(), 2);
+}</pre>
+</div><div class="slide">
+<h1 id="множество-изпращачи">Множество изпращачи</h1>
+<p>Изпращащата част може да се клонира</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="93100fb3d10e767afd632817ed5db900b68d0814">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> <span class="tshl-punctuation_bracket">(</span>sender, receiver<span class="tshl-punctuation_bracket">)</span> = mpsc<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">channel</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">let</span> sender2 = sender<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">clone</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || {
+    sender<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">send</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    sender<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">send</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || {
+    sender2<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">send</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    sender2<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">send</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">4</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{} {} {} {}&quot;</span>,
+    receiver.recv<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>.unwrap<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, receiver.recv<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>.unwrap<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>,
+    receiver.recv<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>.unwrap<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, receiver.recv<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>.unwrap<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">1 2 3 4</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="93100fb3d10e767afd632817ed5db900b68d0814">use std::sync::mpsc;
+use std::thread;
+fn main() {
+let (sender, receiver) = mpsc::channel();
+let sender2 = sender.clone();
+
+thread::spawn(move || {
+    sender.send(1).unwrap();
+    sender.send(2).unwrap();
+});
+
+thread::spawn(move || {
+    sender2.send(3).unwrap();
+    sender2.send(4).unwrap();
+});
+
+println!("{} {} {} {}",
+    receiver.recv().unwrap(), receiver.recv().unwrap(),
+    receiver.recv().unwrap(), receiver.recv().unwrap());
+}</pre>
+</div><div class="slide">
+<h1 id="sender">Sender</h1>
+<h3 id="методи">Методи</h3>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// изпраща `t`</span>
+<span class="tshl-comment">// връща грешка ако получателят е бил унищожен</span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">send</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">t</span>: <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-type">SendError</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_delimiter"></span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="sender">Sender</h1>
+<h3 id="методи">Методи</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="5cebeb4890a50af6032c3c3fa65ae69661757fc8">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> <span class="tshl-punctuation_bracket">(</span>sender, receiver<span class="tshl-punctuation_bracket">)</span> = mpsc<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">channel</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-function_macro">assert_eq</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>sender.send<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">12</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-comment">// унищожаваме получателя</span>
+<span class="tshl-comment">// съобщението `12` никога няма да бъде получено</span>
+mem<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">drop</span><span class="tshl-punctuation_bracket">(</span>receiver<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-comment">// грешка - получателя е унищожен</span>
+<span class="tshl-comment">// можем да си върнем съобщението `23` от грешката</span>
+<span class="tshl-function_macro">assert_eq</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>sender.send<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">23</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">SendError</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">23</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="5cebeb4890a50af6032c3c3fa65ae69661757fc8">use std::mem;
+use std::sync::mpsc::{self, SendError};
+fn main() {
+let (sender, receiver) = mpsc::channel();
+
+assert_eq!(sender.send(12), Ok(()));
+
+// унищожаваме получателя
+// съобщението `12` никога няма да бъде получено
+mem::drop(receiver);
+
+// грешка - получателя е унищожен
+// можем да си върнем съобщението `23` от грешката
+assert_eq!(sender.send(23), Err(SendError(23)));
+}</pre>
+</div><div class="slide">
+<h1 id="syncsender">SyncSender</h1>
+<h3 id="методи">Методи</h3>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// блокира ако буфера е пълен</span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">send</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">t</span>: <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-type">SendError</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span>
+
+<span class="tshl-comment">// връща грешка ако буфера е пълен или получателят е бил унищожен</span><span class="tshl-punctuation_delimiter"></span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">try_send</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">t</span>: <span class="tshl-type">T</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-type">TrySendError</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_delimiter"></span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="syncsender">SyncSender</h1>
+<h3 id="методи">Методи</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="044d60385821608bc9fe100a48b36069d7ad6a92">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> <span class="tshl-punctuation_bracket">(</span>sender, receiver<span class="tshl-punctuation_bracket">)</span> = mpsc<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">sync_channel</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-function_macro">assert_eq</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>sender.try_send<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">12</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-function_macro">assert_eq</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>sender.try_send<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">23</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">TrySendError</span>::<span class="tshl-constructor">Full</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">23</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+mem<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">drop</span><span class="tshl-punctuation_bracket">(</span>receiver<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-function_macro">assert_eq</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>sender.try_send<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">23</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">TrySendError</span>::<span class="tshl-constructor">Disconnected</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">23</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="044d60385821608bc9fe100a48b36069d7ad6a92">use std::mem;
+use std::sync::mpsc::{self, TrySendError};
+fn main() {
+let (sender, receiver) = mpsc::sync_channel(1);
+
+assert_eq!(sender.try_send(12), Ok(()));
+assert_eq!(sender.try_send(23), Err(TrySendError::Full(23)));
+
+mem::drop(receiver);
+
+assert_eq!(sender.try_send(23), Err(TrySendError::Disconnected(23)));
+}</pre>
+</div><div class="slide">
+<h1 id="множество-получатели">Множество получатели</h1>
+</div><div class="slide subslide">
+<h1 id="множество-получатели">Множество получатели</h1>
+<ul>
+<li>не може - каналите са multi-producer, single-consumer</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="множество-получатели">Множество получатели</h1>
+<ul>
+<li>не може - каналите са multi-producer, single-consumer</li>
+<li><code>Receiver</code> не може да се клонира</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="множество-получатели">Множество получатели</h1>
+<ul>
+<li>не може - каналите са multi-producer, single-consumer</li>
+<li><code>Receiver</code> не може да се клонира</li>
+<li><code>Receiver</code> e <code>Send</code>, но не е <code>Sync</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="receiver">Receiver</h1>
+<h3 id="методи">Методи</h3>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// блокира докато не получи съобщение</span>
+<span class="tshl-comment">// връща грешка ако всички изпращачи са унищожени</span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">recv</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span>, <span class="tshl-type">RecvError</span><span class="tshl-punctuation_bracket">&gt;</span>
+
+<span class="tshl-comment">// не блокира</span>
+<span class="tshl-comment">// връща грешка ако всички изпращачи са унищожени или няма съобщение в опашката</span><span class="tshl-punctuation_delimiter"></span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">try_recv</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span>, <span class="tshl-type">TryRecvError</span><span class="tshl-punctuation_bracket">&gt;</span>
+
+<span class="tshl-comment">// блокира за определено време</span>
+<span class="tshl-comment">// връща грешка ако всички изпращачи са унищожени или е изтекло времето</span><span class="tshl-punctuation_delimiter"></span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">recv_timeout</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">timeout</span>: <span class="tshl-type">Duration</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span>, <span class="tshl-type">RecvTimeoutError</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_delimiter"></span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="receiver">Receiver</h1>
+<h3 id="методи">Методи</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="b31014c6d65bcf26b74f5382371fb10bdf5043df">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> <span class="tshl-punctuation_bracket">(</span>sender, receiver<span class="tshl-punctuation_bracket">)</span> = mpsc<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">channel</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || {
+    <span class="tshl-keyword">for</span> i <span class="tshl-keyword">in</span> <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">0</span>..<span class="tshl-constant_builtin">50</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">rev</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+        sender<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">send</span><span class="tshl-punctuation_bracket">(</span>i<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }
+}<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">while</span> <span class="tshl-keyword">let</span> <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span>msg<span class="tshl-punctuation_bracket">)</span> = receiver<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">recv</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;received {}&quot;</span>, msg<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="b31014c6d65bcf26b74f5382371fb10bdf5043df">use std::sync::mpsc;
+use std::thread;
+fn main() {
+let (sender, receiver) = mpsc::channel();
+
+thread::spawn(move || {
+    for i in (0..50).rev() {
+        sender.send(i).unwrap();
+    }
+});
+
+while let Ok(msg) = receiver.recv() {
+    println!("received {}", msg);
+}
+}</pre>
+</div><div class="slide">
+<h1 id="receiver">Receiver</h1>
+<h3 id="итератори">Итератори</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="d8ffb060db42bd9b0a0036941abe3239fe8eef63">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> <span class="tshl-punctuation_bracket">(</span>sender, receiver<span class="tshl-punctuation_bracket">)</span> = mpsc<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">channel</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || {
+    <span class="tshl-keyword">for</span> i <span class="tshl-keyword">in</span> <span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">0</span>..<span class="tshl-constant_builtin">50</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">rev</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+        sender<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">send</span><span class="tshl-punctuation_bracket">(</span>i<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }
+}<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">for</span> msg <span class="tshl-keyword">in</span> receiver<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">iter</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;received {}&quot;</span>, msg<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="d8ffb060db42bd9b0a0036941abe3239fe8eef63">use std::sync::mpsc;
+use std::thread;
+fn main() {
+let (sender, receiver) = mpsc::channel();
+
+thread::spawn(move || {
+    for i in (0..50).rev() {
+        sender.send(i).unwrap();
+    }
+});
+
+for msg in receiver.iter() {
+    println!("received {}", msg);
+}
+}</pre>
+</div><div class="slide">
+<h1 id="външни-библиотеки">Външни библиотеки</h1>
+<h3 id="crossbeam-channel">Crossbeam channel</h3>
+<ul>
+<li><a href="https://crates.io/crates/crossbeam-channel" target="_blank">https://crates.io/crates/crossbeam-channel</a></li>
+<li><a href="https://docs.rs/crossbeam-channel/" target="_blank">https://docs.rs/crossbeam-channel/</a></li>
+<li>multi-producer multi-consumer (mpmc) channel</li>
+<li>с опция за select по няколко канала</li>
+</ul>
+</div><div class="slide">
+<h1 id="външни-библиотеки">Външни библиотеки</h1>
+<h3 id="crossbeam">Crossbeam</h3>
+<ul>
+<li><a href="https://crates.io/crates/crossbeam" target="_blank">https://crates.io/crates/crossbeam</a></li>
+<li><a href="https://docs.rs/crossbeam/" target="_blank">https://docs.rs/crossbeam/</a></li>
+<li>колекция от алгоритми и структури от данни</li>
+<li>lock-free структури от данни - опашка, стек, deque</li>
+<li>crossbeam_channel</li>
+<li>scoped threads</li>
+<li>и доста utilities</li>
+</ul>
+</div><div class="slide">
+<h1 id="външни-библиотеки">Външни библиотеки</h1>
+<h3 id="parking-lot">Parking lot</h3>
+<ul>
+<li><a href="https://crates.io/crates/parking_lot" target="_blank">https://crates.io/crates/parking_lot</a></li>
+<li><a href="https://docs.rs/parking_lot" target="_blank">https://docs.rs/parking_lot</a></li>
+<li>алтернативна имплементация на <code>Mutex</code>, <code>RwLock</code>, <code>Condvar</code>, <code>Once</code></li>
+<li>по-малки и по-бързи от <code>std</code></li>
+<li>вижте README-то в github</li>
+</ul>
+</div><div class="slide">
+<h1 id="външни-библиотеки">Външни библиотеки</h1>
+<h3 id="rayon">Rayon</h3>
+<ul>
+<li><a href="https://crates.io/crates/rayon" target="_blank">https://crates.io/crates/rayon</a></li>
+<li><a href="https://docs.rs/rayon/" target="_blank">https://docs.rs/rayon/</a></li>
+<li>библиотека за паралелизъм по данни</li>
+<li>threadpool</li>
+<li>parallel iterators</li>
+<li>split/join</li>
+</ul>
+</div><div class="slide">
+<h1 id="въпроси">Въпроси</h1>
+</div>
+    </main>
+</body>
+</html>
