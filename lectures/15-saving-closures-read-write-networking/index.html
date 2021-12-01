@@ -1,0 +1,1936 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <title>Запазване на анонимни функции, Read, Write, Networking</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="rust,fmi">
+    <link rel="stylesheet" href="resources/codeblock/codeblock.css">
+<link rel="stylesheet" href="resources/frontend/controls.css">
+<link rel="stylesheet" href="resources/global/global.css">
+<link rel="stylesheet" href="resources/global/metadata.css">
+<link rel="stylesheet" href="resources/highlight/hljs-github.css">
+<link rel="stylesheet" href="resources/highlight/style.css">
+<link rel="stylesheet" href="resources/highlight/tshl-github.css">
+<link rel="stylesheet" href="resources/katex/katex.min.css">
+<link rel="stylesheet" href="resources/rustc/rustc.css">
+<link rel="stylesheet" href="resources/splitview/splitview.css">
+<link rel="stylesheet" href="resources/wrapping-pages/wrapping-pages.css">
+<script type="text/javascript" src="resources/codeblock/codeblock.js"></script>
+<script type="text/javascript" src="resources/frontend/controls.js"></script>
+</head>
+<body>
+    <main>
+        <div class="slide">
+<h1 id="запазване-на-анонимни-функции-read-write-networking">Запазване на анонимни функции, Read, Write, Networking</h1>
+<h3 id="30-ноември-2021">30 ноември 2021</h3>
+</div><div class="slide">
+<h1 id="saving-closures">Saving closures</h1>
+<p>Да си направим адаптер за итератор, който работи подобно на<br />
+адаптера връщан от <code>Iterator::map()</code></p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="799b2b4c8ce39b12e5082bb8319f556b0ace5e9c">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">Map</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">I</span>, <span class="tshl-type">F</span>, <span class="tshl-type">B</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span>
+    <span class="tshl-type">I</span>: <span class="tshl-type">Iterator</span>,
+    <span class="tshl-type">F</span>: <span class="tshl-type">FnMut</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">I</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Item</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">B</span>
+{
+    <span class="tshl-property">iter</span>: <span class="tshl-type">I</span>,
+    <span class="tshl-property">f</span>: <span class="tshl-type">F</span>,
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="799b2b4c8ce39b12e5082bb8319f556b0ace5e9c">fn main() {}
+struct Map<I, F, B> where
+    I: Iterator,
+    F: FnMut(I::Item) -> B
+{
+    iter: I,
+    f: F,
+}</pre>
+</div><div class="slide">
+<h1 id="saving-closures">Saving closures</h1>
+<p>Имплементираме <code>Iterator</code></p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="f2631b0852363e2b66d040daae389b2f6aaae9ed">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">impl</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">I</span>, <span class="tshl-type">F</span>, <span class="tshl-type">B</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-type">Iterator</span> <span class="tshl-keyword">for</span> <span class="tshl-type">Map</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">I</span>, <span class="tshl-type">F</span>, <span class="tshl-type">B</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span>
+    <span class="tshl-type">I</span>: <span class="tshl-type">Iterator</span>,
+    <span class="tshl-type">F</span>: <span class="tshl-type">FnMut</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">I</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Item</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">B</span>
+{
+    <span class="tshl-keyword">type</span> <span class="tshl-type">Item</span> = <span class="tshl-type">B</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">next</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Option</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Item</span><span class="tshl-punctuation_bracket">&gt;</span> {
+        <span class="tshl-keyword">match</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">iter</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">next</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+            <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span>item<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">f</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">(</span>item<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>,
+            <span class="tshl-constructor">None</span> =&gt; <span class="tshl-constructor">None</span>,
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="f2631b0852363e2b66d040daae389b2f6aaae9ed">struct Map<I, F, B> where I: Iterator, F: FnMut(I::Item) -> B {
+iter: I,
+f: F,
+}
+fn main() {}
+impl<I, F, B> Iterator for Map<I, F, B> where
+    I: Iterator,
+    F: FnMut(I::Item) -> B
+{
+    type Item = B;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.iter.next() {
+            Some(item) => Some((self.f)(item)),
+            None => None,
+        }
+    }
+}</pre>
+</div><div class="slide subslide">
+<h1 id="saving-closures">Saving closures</h1>
+<p>Имплементираме <code>Iterator</code></p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="f2631b0852363e2b66d040daae389b2f6aaae9ed">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">impl</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">I</span>, <span class="tshl-type">F</span>, <span class="tshl-type">B</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-type">Iterator</span> <span class="tshl-keyword">for</span> <span class="tshl-type">Map</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">I</span>, <span class="tshl-type">F</span>, <span class="tshl-type">B</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span>
+    <span class="tshl-type">I</span>: <span class="tshl-type">Iterator</span>,
+    <span class="tshl-type">F</span>: <span class="tshl-type">FnMut</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">I</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Item</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">B</span>
+{
+    <span class="tshl-keyword">type</span> <span class="tshl-type">Item</span> = <span class="tshl-type">B</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">next</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Option</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Item</span><span class="tshl-punctuation_bracket">&gt;</span> {
+        <span class="tshl-keyword">match</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">iter</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">next</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+            <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span>item<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">f</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">(</span>item<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>,
+            <span class="tshl-constructor">None</span> =&gt; <span class="tshl-constructor">None</span>,
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="f2631b0852363e2b66d040daae389b2f6aaae9ed">struct Map<I, F, B> where I: Iterator, F: FnMut(I::Item) -> B {
+iter: I,
+f: F,
+}
+fn main() {}
+impl<I, F, B> Iterator for Map<I, F, B> where
+    I: Iterator,
+    F: FnMut(I::Item) -> B
+{
+    type Item = B;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.iter.next() {
+            Some(item) => Some((self.f)(item)),
+            None => None,
+        }
+    }
+}</pre>
+<p>Забележете скобите около <code>self.f</code></p>
+</div><div class="slide">
+<h1 id="saving-closures">Saving closures</h1>
+<p>Малко улеснение</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="18f4bf47473312f347b7526d38ce44afcb5370d3">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">impl</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">I</span>, <span class="tshl-type">F</span>, <span class="tshl-type">B</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-type">Iterator</span> <span class="tshl-keyword">for</span> <span class="tshl-type">Map</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">I</span>, <span class="tshl-type">F</span>, <span class="tshl-type">B</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span>
+    <span class="tshl-type">I</span>: <span class="tshl-type">Iterator</span>,
+    <span class="tshl-type">F</span>: <span class="tshl-type">FnMut</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">I</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Item</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">B</span>
+{
+    <span class="tshl-keyword">type</span> <span class="tshl-type">Item</span> = <span class="tshl-type">B</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">next</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Option</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Item</span><span class="tshl-punctuation_bracket">&gt;</span> {
+        <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">iter</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">next</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">map</span><span class="tshl-punctuation_bracket">(</span>|x| <span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">f</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">(</span>x<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="18f4bf47473312f347b7526d38ce44afcb5370d3">struct Map<I, F, B> where I: Iterator, F: FnMut(I::Item) -> B {
+iter: I,
+f: F,
+}
+fn main() {}
+impl<I, F, B> Iterator for Map<I, F, B> where
+    I: Iterator,
+    F: FnMut(I::Item) -> B
+{
+    type Item = B;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next().map(|x| (self.f)(x))
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="saving-closures">Saving closures</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="c8bd875063106ea0b5b8f3ce4593143d8c84113f">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// vec![1, 2, 3].into_iter().map(|x| x * 3)</span>
+
+<span class="tshl-keyword">let</span> map = <span class="tshl-type">Map</span> {
+    <span class="tshl-property">iter</span>: <span class="tshl-function_macro">vec</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">1</span>, <span class="tshl-constant_builtin">2</span>, <span class="tshl-constant_builtin">3</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">into_iter</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>,
+    <span class="tshl-property">f</span>: |x| x <span class="tshl-operator">*</span> <span class="tshl-constant_builtin">3</span>,
+}<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">let</span> v = map<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">collect</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">_</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{:?}&quot;</span>, v<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">[3, 6, 9]</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="c8bd875063106ea0b5b8f3ce4593143d8c84113f">struct Map<I, F, B> where I: Iterator, F: FnMut(I::Item) -> B {
+iter: I,
+f: F,
+}
+impl<I, F, B> Iterator for Map<I, F, B> where
+I: Iterator,
+F: FnMut(I::Item) -> B
+{
+type Item = B;
+fn next(&mut self) -> Option<Self::Item> {
+self.iter.next().map(|x| (self.f)(x))
+}
+}
+fn main() {
+// vec![1, 2, 3].into_iter().map(|x| x * 3)
+
+let map = Map {
+    iter: vec![1, 2, 3].into_iter(),
+    f: |x| x * 3,
+};
+
+let v = map.collect::<Vec<_>>();
+println!("{:?}", v);
+}</pre>
+</div><div class="slide">
+<h1 id="returning-closures">Returning closures</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">get_incrementer</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; ??? {
+    |x| x + <span class="tshl-constant_builtin">1</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="returning-closures">Returning closures</h1>
+<p>Да проверим какъв е типът на closure-а</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> _: <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> = |x| x + <span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="returning-closures">Returning closures</h1>
+<p>Да проверим какъв е типът на closure-а</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="f4ff4185076e43830fdfe11463e56a301ab6f9e8">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> _: <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> = |x| x + <span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0308]</span><span style="font-weight:bold">: mismatched types</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_f4ff4185076e43830fdfe11463e56a301ab6f9e8.rs:2:13
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">2</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>let _: () = |x| x + 1;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>       <span style="font-weight:bold;color:rgb(85,85,255)">--</span>   <span style="font-weight:bold;color:rgb(255,85,85)">^^^^^^^^^</span> <span style="font-weight:bold;color:rgb(255,85,85)">expected `()`, found closure</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>       <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>       <span style="font-weight:bold;color:rgb(85,85,255)">expected due to this</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: expected unit type `<span style="font-weight:bold">()</span>`
+               found closure `<span style="font-weight:bold">[closure@src/bin/main_f4ff4185076e43830fdfe11463e56a301ab6f9e8.rs:2:13: 2:22]</span>`
+
+<span style="font-weight:bold">For more information about this error, try `rustc --explain E0308`.</span>
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="f4ff4185076e43830fdfe11463e56a301ab6f9e8">fn main() {
+let _: () = |x| x + 1;
+}</pre>
+<p>Тип генериран от компилатора, това не ни е полезно</p>
+</div><div class="slide">
+<h1 id="returning-closures">Returning closures</h1>
+<h3 id="вариант-1">Вариант 1</h3>
+<p>Ако closure не прихваща променливи, той може автоматично да се сведе до указател към функция</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="9d1b8f7744bf6a2ae580b5bebbf514f666edbc39">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">get_incrementer</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-keyword">fn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type_builtin">i32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i32</span> {
+    |x| x + <span class="tshl-constant_builtin">1</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="9d1b8f7744bf6a2ae580b5bebbf514f666edbc39">fn main() {}
+fn get_incrementer() -> fn(i32) -> i32 {
+    |x| x + 1
+}</pre>
+</div><div class="slide">
+<h1 id="returning-closures">Returning closures</h1>
+<h3 id="вариант-2">Вариант 2</h3>
+<p>Често се налага да прихванем променливи</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">curry</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; ??? {
+    |b| a + b
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="returning-closures">Returning closures</h1>
+<h3 id="вариант-2">Вариант 2</h3>
+<p>Можем да използваме Trait objects</p>
+<div class="split-view" markdown="1"><div class="lhs" markdown="1"><p>
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="b9df3623b254b8454ff41edffd90010f81f80e29">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">F</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-property">closure</span>: <span class="tshl-operator">&amp;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span> <span class="tshl-keyword">dyn</span> <span class="tshl-type">Fn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                </p>
+<p><pre class="rustc-source" data-sha="b9df3623b254b8454ff41edffd90010f81f80e29">fn main() {}
+struct F<'a> {
+    closure: &'a dyn Fn()
+}</pre></p></div>
+<div class="rhs" markdown="1"><p>
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="c79873f7470a708847df30ed5870c981d0200d00">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">F</span> {
+    <span class="tshl-property">closure</span>: <span class="tshl-type">Box</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-keyword">dyn</span> <span class="tshl-type">Fn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">&gt;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                </p>
+<p><pre class="rustc-source" data-sha="c79873f7470a708847df30ed5870c981d0200d00">fn main() {}
+struct F {
+    closure: Box<dyn Fn()>
+}</pre></p></div></div>
+</div><div class="slide">
+<h1 id="returning-closures">Returning closures</h1>
+<h3 id="вариант-2">Вариант 2</h3>
+<p>Така дали ще е добре?</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">curry</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Box</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-keyword">dyn</span> <span class="tshl-type">Fn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-type">Box</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span>|b| a + b<span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="returning-closures">Returning closures</h1>
+<h3 id="вариант-2">Вариант 2</h3>
+<p>Така дали ще е добре?</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="c3074d2dcf287ba7bd8e52e50983e379c8e9c09b">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">curry</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Box</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-keyword">dyn</span> <span class="tshl-type">Fn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-type">Box</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span>|b| a + b<span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0373]</span><span style="font-weight:bold">: closure may outlive the current function, but it borrows `a`, which is owned by the current function</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_c3074d2dcf287ba7bd8e52e50983e379c8e9c09b.rs:4:14
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">4</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    Box::new(|b| a + b)
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>             <span style="font-weight:bold;color:rgb(255,85,85)">^^^</span> <span style="font-weight:bold;color:rgb(85,85,255)">-</span> <span style="font-weight:bold;color:rgb(85,85,255)">`a` is borrowed here</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>             <span style="font-weight:bold;color:rgb(255,85,85)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>             <span style="font-weight:bold;color:rgb(255,85,85)">may outlive borrowed value `a`</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,187,85)">note</span>: closure is returned here
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_c3074d2dcf287ba7bd8e52e50983e379c8e9c09b.rs:4:5
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">4</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    Box::new(|b| a + b)
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    <span style="font-weight:bold;color:rgb(85,187,85)">^^^^^^^^^^^^^^^^^^^</span>
+<span style="font-weight:bold;color:rgb(85,187,187)">help</span>: to force the closure to take ownership of `a` (and any other referenced variables), use the `move` keyword
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">4</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    Box::new(<span style="color:rgb(85,187,85)">move </span>|b| a + b)
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>             <span style="color:rgb(85,187,85)">++++</span>
+
+<span style="font-weight:bold">For more information about this error, try `rustc --explain E0373`.</span>
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="c3074d2dcf287ba7bd8e52e50983e379c8e9c09b">fn main() {}
+fn curry(a: u32) -> Box<dyn Fn(u32) -> u32> {
+    Box::new(|b| a + b)
+}</pre>
+</div><div class="slide">
+<h1 id="returning-closures">Returning closures</h1>
+<h3 id="вариант-2">Вариант 2</h3>
+<p>move</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="2c5b6364e03fec19aeb895876b803b5941f30506">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">curry</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Box</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-keyword">dyn</span> <span class="tshl-type">Fn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-type">Box</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> |b| a + b<span class="tshl-punctuation_bracket">)</span>
+}
+
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, curry<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">3</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="2c5b6364e03fec19aeb895876b803b5941f30506">fn curry(a: u32) -> Box<dyn Fn(u32) -> u32> {
+    Box::new(move |b| a + b)
+}
+
+fn main() {
+println!("{}", curry(1)(2));
+}</pre>
+</div><div class="slide">
+<h1 id="closures--lifetimes">Closures &amp; lifetimes</h1>
+<p>А какво става, ако искаме да прихванем референция?</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="1fc5deed1c334e9a9574d1cbc23849d5468c176e">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">curry</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-operator">&amp;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span> <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Box</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-keyword">dyn</span> <span class="tshl-type">Fn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-type">Box</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> |b| a + b<span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0759]</span><span style="font-weight:bold">: `a` has lifetime `'a` but it needs to satisfy a `'static` lifetime requirement</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_1fc5deed1c334e9a9574d1cbc23849d5468c176e.rs:3:14
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">2</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>fn curry&lt;'a&gt;(a: &amp;'a u32) -&gt; Box&lt;dyn Fn(&amp;u32) -&gt; u32&gt; {
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                <span style="font-weight:bold;color:rgb(85,85,255)">-------</span> <span style="font-weight:bold;color:rgb(85,85,255)">this data with lifetime `'a`...</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">3</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    Box::new(move |b| a + b)
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>             <span style="font-weight:bold;color:rgb(255,85,85)">^^^^^^^^^^^^^^</span> <span style="font-weight:bold;color:rgb(255,85,85)">...is captured here, requiring it to live as long as `'static`</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,187,187)">help</span>: to declare that the trait object captures data from argument `a`, you can add an explicit `'a` lifetime bound
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">2</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>fn curry&lt;'a&gt;(a: &amp;'a u32) -&gt; Box&lt;dyn Fn(&amp;u32) -&gt; u32<span style="color:rgb(85,187,85)"> + 'a</span>&gt; {
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                                                    <span style="color:rgb(85,187,85)">++++</span>
+
+<span style="font-weight:bold">For more information about this error, try `rustc --explain E0759`.</span>
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="1fc5deed1c334e9a9574d1cbc23849d5468c176e">fn main() {}
+fn curry<'a>(a: &'a u32) -> Box<dyn Fn(&u32) -> u32> {
+    Box::new(move |b| a + b)
+}</pre>
+</div><div class="slide">
+<h1 id="closures--lifetimes">Closures &amp; lifetimes</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">State</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">b</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-property">a</span>: <span class="tshl-operator">&amp;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">b</span> <span class="tshl-type_builtin">u32</span>
+}
+
+<span class="tshl-comment">// impl Fn, FnMut, FnOnce for State</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">curry</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-operator">&amp;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span> <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Box</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">State</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">let</span> state = <span class="tshl-type">State</span> { a }<span class="tshl-punctuation_delimiter">;</span>    <span class="tshl-comment">// State&lt;&#39;a&gt;</span>
+    <span class="tshl-type">Box</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span>state<span class="tshl-punctuation_bracket">)</span>             <span class="tshl-comment">// очаква &#39;static</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="closures--lifetimes">Closures &amp; lifetimes</h1>
+<h3 id="lifetime-на-структура">Lifetime на структура</h3>
+<p>Какво означава обект (който не е референция) да има 'static lifetime?</p>
+<p>Lifetime-а показва максимално ограничение до което може да живее някаква стойност</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="dd4396e553a27e354a2d70571ab1e5828d6940f9">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">Foo</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span><span class="tshl-punctuation_bracket">&gt;</span> { <span class="tshl-property">a</span>: <span class="tshl-operator">&amp;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span> <span class="tshl-type_builtin">i32</span> }
+
+{
+    <span class="tshl-keyword">let</span> a = <span class="tshl-constant_builtin">10</span><span class="tshl-punctuation_delimiter">;</span>                     <span class="tshl-comment">// ---+- &#39;a</span>
+                                    <span class="tshl-comment">//    |</span>
+    <span class="tshl-keyword">let</span> foo = <span class="tshl-type">Foo</span> { <span class="tshl-property">a</span>: <span class="tshl-operator">&amp;</span>a }<span class="tshl-punctuation_delimiter">;</span>        <span class="tshl-comment">// ---+- foo: &#39;a</span>
+                                    <span class="tshl-comment">//    |</span>
+}                                   <span class="tshl-comment">// &lt;--+</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="dd4396e553a27e354a2d70571ab1e5828d6940f9">fn main() {
+struct Foo<'a> { a: &'a i32 }
+
+{
+    let a = 10;                     // ---+- 'a
+                                    //    |
+    let foo = Foo { a: &a };        // ---+- foo: 'a
+                                    //    |
+}                                   // <--+
+}</pre>
+</div><div class="slide">
+<h1 id="closures--lifetimes">Closures &amp; lifetimes</h1>
+<h3 id="lifetime-на-структура">Lifetime на структура</h3>
+<p>Когато обект не държи референции няма такова ограничение</p>
+<p>Затова се приема че обекта има 'static lifetime</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8b9367eeef127555694bba7288c6358e8d8fc145">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">Foo</span> { <span class="tshl-property">a</span>: <span class="tshl-type_builtin">i32</span> }
+
+{
+    <span class="tshl-keyword">let</span> a = <span class="tshl-constant_builtin">10</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> foo = <span class="tshl-type">Foo</span> { <span class="tshl-property">a</span>: a }<span class="tshl-punctuation_delimiter">;</span>         <span class="tshl-comment">// foo: &#39;static</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="8b9367eeef127555694bba7288c6358e8d8fc145">fn main() {
+struct Foo { a: i32 }
+
+{
+    let a = 10;
+
+    let foo = Foo { a: a };         // foo: 'static
+}
+}</pre>
+</div><div class="slide">
+<h1 id="closures--lifetimes">Closures &amp; lifetimes</h1>
+<p>По подразбиране се очаква trait object-а да няма lifetime ограничение, т.е да е 'static</p>
+<p><code>Box&lt;dyn Fn(&amp;u32) -&gt; u32&gt;</code> <-> <code>Box&lt;dyn Fn(&amp;u32) -&gt; u32 + 'static&gt;</code>;</p>
+<p>Ако имаме ограничение трябва да го укажем изрично</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8412315366816e28e0aec3b584e2be5fcfb0ace0">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">curry</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-operator">&amp;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">a</span> <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Box</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-keyword">dyn</span> <span class="tshl-type">Fn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u32</span> + <span class="tshl-operator">&#39;</span><span class="tshl-label">a</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-type">Box</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> |b| a + b<span class="tshl-punctuation_bracket">)</span>
+}
+
+<span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, curry<span class="tshl-punctuation_bracket">(</span>&amp;<span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">(</span>&amp;<span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">3</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="8412315366816e28e0aec3b584e2be5fcfb0ace0">fn curry<'a>(a: &'a u32) -> Box<dyn Fn(&u32) -> u32 + 'a> {
+    Box::new(move |b| a + b)
+}
+
+fn main() {
+println!("{}", curry(&1)(&2));
+}</pre>
+</div><div class="slide">
+<h1 id="promise-demo">Promise Demo</h1>
+<p>Ще опитаме да си имплементираме Promise в Rust</p>
+</div><div class="slide">
+<h1 id="promise-demo">Promise Demo</h1>
+</div><div class="slide subslide">
+<h1 id="promise-demo">Promise Demo</h1>
+<p>JavaScript API</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="jsjs language-js hljs"><span class="hljs-keyword">const</span> promise = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
+    setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        resolve(<span class="hljs-string">'foo'</span>);
+    }, <span class="hljs-number">300</span>);
+});
+
+promise.then(<span class="hljs-function"><span class="hljs-params">value</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(value));
+promise.catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(error));</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide subslide">
+<h1 id="promise-demo">Promise Demo</h1>
+<p>JavaScript API</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="jsjs language-js hljs"><span class="hljs-keyword">const</span> promise = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
+    setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        resolve(<span class="hljs-string">'foo'</span>);
+    }, <span class="hljs-number">300</span>);
+});
+
+promise.then(<span class="hljs-function"><span class="hljs-params">value</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(value));
+promise.catch(<span class="hljs-function"><span class="hljs-params">error</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(error));</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Важно е да знаете, че в JS кодът се изпълнява на една нишка, затова някои неща изглеждат доста лесни<br />
+Ще видим какво се случва, ако искаме да използваме нишки в нашата имплементация</p>
+</div><div class="slide">
+<h1 id="promise-demo">Promise Demo</h1>
+<p>Ако искате да си разгледате сорса: <a href="https://github.com/d3lio/simple-promise" target="_blank">https://github.com/d3lio/simple-promise</a></p>
+</div><div class="slide">
+<h1 id="read--write">Read &amp; Write</h1>
+<p>Има стандартни типажи, които ни помагат за четене и писане</p>
+</div><div class="slide">
+<h1 id="read--write">Read &amp; Write</h1>
+<h3 id="stdioread"><code>std::io::Read</code></h3>
+<p>Един от тях е <code>Read</code></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">pub</span> <span class="tshl-keyword">trait</span> <span class="tshl-type">Read</span> {
+    <span class="tshl-comment">// Required:</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">read</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">buf</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-punctuation_bracket">[</span><span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span> -&gt; io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">usize</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-comment">// Provided:</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">read_to_end</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">buf</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">)</span> -&gt; io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">usize</span><span class="tshl-punctuation_bracket">&gt;</span> { ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span> }
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">read_to_string</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">buf</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">String</span><span class="tshl-punctuation_bracket">)</span> -&gt; io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">usize</span><span class="tshl-punctuation_bracket">&gt;</span> { ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span> }
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">read_exact</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">buf</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-punctuation_bracket">[</span><span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span> -&gt; io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">&gt;</span> { ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span> }
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">by_ref</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Self</span> <span class="tshl-keyword">where</span> <span class="tshl-type">Self</span>: <span class="tshl-type">Sized</span> { ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span> }
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">bytes</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Bytes</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span> <span class="tshl-type">Self</span>: <span class="tshl-type">Sized</span> { ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span> }
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">chain</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">R</span>: <span class="tshl-type">Read</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">next</span>: <span class="tshl-type">R</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Chain</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Self</span>, <span class="tshl-type">R</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span> <span class="tshl-type">Self</span>: <span class="tshl-type">Sized</span> { ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span> }
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">take</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">limit</span>: <span class="tshl-type_builtin">u64</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Take</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span> <span class="tshl-type">Self</span>: <span class="tshl-type">Sized</span> { ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span> }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="read--write">Read &amp; Write</h1>
+<h3 id="бележка">Бележка:</h3>
+<p>В модула <code>std::io</code> има следната дефиниция:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">type</span> <span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> = <span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span>, <span class="tshl-type">Error</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Този синтаксис дефинира type alias ("тип-синоним"). Типа <code>std::io::Result&lt;T&gt;</code> е еквивалентен на <code>Result&lt;T, std::io::Error&gt;</code>.</p>
+<p>Това се използва за улеснение, и спокойно може да use-нем <code>std::io</code> и да адресираме <code>io::Result&lt;usize&gt;</code> без да указваме типа за грешка -- той вече е конкретизиран в alias-а.</p>
+</div><div class="slide">
+<h1 id="read">Read</h1>
+<p>Имплементира се за някои очаквани структури и слайсове от байтове</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">impl</span> <span class="tshl-constructor">Read</span> <span class="tshl-keyword">for</span> <span class="tshl-constructor">File</span>
+<span class="tshl-keyword">impl</span> <span class="tshl-constructor">Read</span> <span class="tshl-keyword">for</span> <span class="tshl-type">Stdin</span>
+<span class="tshl-keyword">impl</span> <span class="tshl-constructor">Read</span> <span class="tshl-keyword">for</span> <span class="tshl-type">TcpStream</span>
+<span class="tshl-keyword">impl</span>&lt;<span class="tshl-operator">&#39;</span><span class="tshl-label">_</span>&gt; <span class="tshl-constructor">Read</span> <span class="tshl-keyword">for</span> <span class="tshl-operator">&amp;</span><span class="tshl-operator">&#39;</span><span class="tshl-label">_</span> <span class="tshl-punctuation_bracket">[</span><span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">]</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="read">Read</h1>
+<p>Четене от <code>File</code></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+</div>
+                        <pre><code class="rsrs language-rs hljs"><span class="hljs-keyword">use</span> std::io;
+<span class="hljs-keyword">use</span> std::io::prelude::*;
+<span class="hljs-keyword">use</span> std::fs::File;
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() -&gt; io::<span class="hljs-built_in">Result</span>&lt;()&gt; {
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> f = File::open(<span class="hljs-string">"foo.txt"</span>)?;
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> buffer = [<span class="hljs-number">0</span>; <span class="hljs-number">10</span>];
+
+    <span class="hljs-comment">// Може да прочетем само 10 байта</span>
+    f.read(&amp;<span class="hljs-keyword">mut</span> buffer)?;
+
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> buffer = <span class="hljs-built_in">Vec</span>::new();
+    <span class="hljs-comment">// Може да прочетем целия файл</span>
+    f.read_to_end(&amp;<span class="hljs-keyword">mut</span> buffer)?;
+
+    <span class="hljs-comment">// Или директно да четем в String</span>
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> buffer = <span class="hljs-built_in">String</span>::new();
+    f.read_to_string(&amp;<span class="hljs-keyword">mut</span> buffer)?;
+
+    <span class="hljs-literal">Ok</span>(())
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="read">Read</h1>
+<p>Четене от <code>Stdin</code></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>io<span class="tshl-punctuation_delimiter">::</span>{<span class="tshl-keyword">self</span>, <span class="tshl-constructor">Read</span>}<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> buffer = <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">stdin</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">read_to_string</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> buffer<span class="tshl-punctuation_bracket">)</span>?<span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="read--write">Read &amp; Write</h1>
+<h3 id="stdiowrite"><code>std::io::Write</code></h3>
+<p>За писане се използва <code>Write</code></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">pub</span> <span class="tshl-keyword">trait</span> <span class="tshl-type">Write</span> {
+    <span class="tshl-comment">// Required:</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">write</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">buf</span>: <span class="tshl-operator">&amp;</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span> -&gt; io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">usize</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">flush</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-comment">// Provided:</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">write_all</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">buf</span>: <span class="tshl-operator">&amp;</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span> -&gt; io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">&gt;</span> { ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span> }
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">write_fmt</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">fmt</span>: <span class="tshl-type">Arguments</span><span class="tshl-punctuation_bracket">)</span> -&gt; io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">&gt;</span> { ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span> }
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">by_ref</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Self</span> <span class="tshl-keyword">where</span> <span class="tshl-type">Self</span>: <span class="tshl-type">Sized</span> { ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span> }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="write">Write</h1>
+<p>Както <code>Read</code>,  се имплементира за очаквани структури, но и за вектор</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">impl</span> <span class="tshl-constructor">Write</span> <span class="tshl-keyword">for</span> <span class="tshl-constructor">File</span>
+<span class="tshl-keyword">impl</span> <span class="tshl-constructor">Write</span> <span class="tshl-keyword">for</span> <span class="tshl-type">Stdout</span>
+<span class="tshl-keyword">impl</span> <span class="tshl-constructor">Write</span> <span class="tshl-keyword">for</span> <span class="tshl-type">Stderr</span>
+<span class="tshl-keyword">impl</span> <span class="tshl-constructor">Write</span> <span class="tshl-keyword">for</span> <span class="tshl-type">TcpStream</span>
+<span class="tshl-keyword">impl</span> <span class="tshl-type">Write</span> <span class="tshl-keyword">for</span> <span class="tshl-constructor">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">&gt;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="write">Write</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>fs<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">File</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Write</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> f = <span class="tshl-type">File</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">create</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;foo.txt&quot;</span><span class="tshl-punctuation_bracket">)</span>?<span class="tshl-punctuation_delimiter">;</span>
+f<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">write_all</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">b&quot;Hello, world!&quot;</span><span class="tshl-punctuation_bracket">)</span>?<span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="read--write">Read &amp; Write</h1>
+<p>Като цяло са интуитивни, но не винаги ефективни когато правим много, но малки операции</p>
+</div><div class="slide">
+<h1 id="bufreader--bufwriter">BufReader &amp; BufWriter</h1>
+</div><div class="slide subslide">
+<h1 id="bufreader--bufwriter">BufReader &amp; BufWriter</h1>
+<ul>
+<li>Затова са създадени <code>BufReader</code> и <code>BufWriter</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="bufreader--bufwriter">BufReader &amp; BufWriter</h1>
+<ul>
+<li>Затова са създадени <code>BufReader</code> и <code>BufWriter</code></li>
+<li>Използват се да буферират операциите, както подсказват имената им</li>
+</ul>
+</div><div class="slide">
+<h1 id="bufreader--bufwriter">BufReader &amp; BufWriter</h1>
+<h3 id="stdiobufreader"><code>std::io::BufReader</code></h3>
+<p><code>BufReader</code> е wrapper за структури, които имплементират <code>Read</code></p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="8014b339751a604a7c404d99bac3844662582b8a">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>io<span class="tshl-punctuation_delimiter">::</span>prelude<span class="tshl-punctuation_delimiter">::</span><span class="tshl-operator">*</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">BufReader</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>fs<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">File</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, std<span class="tshl-punctuation_delimiter">::</span>io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Error</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">let</span> f = <span class="tshl-type">File</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">open</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;log.txt&quot;</span><span class="tshl-punctuation_bracket">)</span>?<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> reader = <span class="tshl-type">BufReader</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span>f<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> line = <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> len = reader<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">read_line</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> line<span class="tshl-punctuation_bracket">)</span>?<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;First line is {} bytes long&quot;</span>, len<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs">First line is 10 bytes long</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="8014b339751a604a7c404d99bac3844662582b8a">use std::io::prelude::*;
+use std::io::BufReader;
+use std::fs::File;
+
+fn main() -> Result<(), std::io::Error> {
+std::fs::write("log.txt", b"Some stuff").unwrap();
+    let f = File::open("log.txt")?;
+    let mut reader = BufReader::new(f);
+
+    let mut line = String::new();
+    let len = reader.read_line(&mut line)?;
+    println!("First line is {} bytes long", len);
+    Ok(())
+}</pre>
+</div><div class="slide">
+<h1 id="bufreader--bufwriter">BufReader &amp; BufWriter</h1>
+<h3 id="stdiobufread"><code>std::io::BufRead</code></h3>
+<p>Тук се появява нов метод <code>read_line</code>:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">pub</span> <span class="tshl-keyword">trait</span> <span class="tshl-type">BufRead</span>: <span class="tshl-type">Read</span> {
+    <span class="tshl-comment">// Required:</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">fill_buf</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&amp;</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">consume</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">amt</span>: <span class="tshl-type_builtin">usize</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-comment">// Provided:</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">read_until</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">byte</span>: <span class="tshl-type_builtin">u8</span>, <span class="tshl-variable_parameter">buf</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">)</span> -&gt; io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">usize</span><span class="tshl-punctuation_bracket">&gt;</span> { ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span> }
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">read_line</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">buf</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">String</span><span class="tshl-punctuation_bracket">)</span> -&gt; io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">usize</span><span class="tshl-punctuation_bracket">&gt;</span> { ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span> }
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">split</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">byte</span>: <span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Split</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span> <span class="tshl-type">Self</span>: <span class="tshl-type">Sized</span> { ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span> }
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">lines</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Lines</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span> <span class="tshl-type">Self</span>: <span class="tshl-type">Sized</span> { ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span> }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="bufreader--bufwriter">BufReader &amp; BufWriter</h1>
+<h3 id="bufwriter">BufWriter</h3>
+<p>Подобно, <code>BufWriter</code> е wrapper за структури, които имплементират <code>Write</code></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>io<span class="tshl-punctuation_delimiter">::</span>prelude<span class="tshl-punctuation_delimiter">::</span><span class="tshl-operator">*</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">BufWriter</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>net<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">TcpStream</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> stream = <span class="tshl-type">BufWriter</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">TcpStream</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">connect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;127.0.0.1:34254&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">for</span> i <span class="tshl-keyword">in</span> <span class="tshl-constant_builtin">1</span>..<span class="tshl-constant_builtin">10</span> {
+    stream<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">write</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-punctuation_bracket">[</span>i<span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}
+stream<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">flush</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>В този пример чрез <code>BufWriter</code> превръщаме 10 system calls в 1</p>
+</div><div class="slide">
+<h1 id="bufreader--bufwriter">BufReader &amp; BufWriter</h1>
+<h3 id="bufwrite">BufWrite</h3>
+<p>Няма <code>BufWrite</code> :(</p>
+</div><div class="slide">
+<h1 id="bufreader--bufwriter">BufReader &amp; BufWriter</h1>
+<ul>
+<li><code>Read</code>: Trait, който е имплементиран за файлове, сокети, и т.н., за четене на брой байтове.</li>
+<li><code>BufReader</code>: Структура, която обвива нещо, което е <code>Read</code>, която <strong>също e</strong> <code>Read</code> и която имплементира <code>BufRead</code>.</li>
+<li><code>BufRead</code>: Trait за структури като <code>BufReader</code>, които четат чрез буфер.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="bufreader--bufwriter">BufReader &amp; BufWriter</h1>
+<ul>
+<li><code>Read</code>: Trait, който е имплементиран за файлове, сокети, и т.н., за четене на брой байтове.</li>
+<li><code>BufReader</code>: Структура, която обвива нещо, което е <code>Read</code>, която <strong>също e</strong> <code>Read</code> и която имплементира <code>BufRead</code>.</li>
+<li><code>BufRead</code>: Trait за структури като <code>BufReader</code>, които четат чрез буфер.<br />
+<hr></li>
+<li><code>Write</code>: Trait, който е имплементиран за файлове, сокети, и т.н., за писане на брой байтове.</li>
+<li><code>BufWriter</code>: Структура, която обвива нещо, което е <code>Write</code>, която <strong>също e</strong> <code>Write</code> и която позволява буферирано писане</li>
+<li><code>BufWrite</code>: Не съществува :/.</li>
+</ul>
+</div><div class="slide">
+<h1 id="read--write">Read &amp; Write</h1>
+<p><code>Write</code> може да се използва и за тестване чрез <code>mock</code></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">write_u8</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">W</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">writer</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">W</span>, <span class="tshl-variable_parameter">data</span>: <span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">)</span> -&gt; io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Result</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">usize</span><span class="tshl-punctuation_bracket">&gt;</span>
+<span class="tshl-keyword">where</span> <span class="tshl-type">W</span>: <span class="tshl-type">Write</span> {
+    <span class="tshl-comment">// Do cool stuff with `writer`</span>
+}
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>test<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">test_write_u8</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> mock: <span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">&gt;</span> = <span class="tshl-type">Vec</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-function">write_u8</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> mock, <span class="tshl-constant_builtin">42</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-function_macro">assert_eq</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>mock.len<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">assert_eq</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>mock<span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">0</span><span class="tshl-punctuation_bracket">]</span>, <span class="tshl-constant_builtin">42</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="networking">Networking</h1>
+<p>Стандартната библиотека имплементира networking примитиви в модула std::net</p>
+</div><div class="slide">
+<h1 id="udp">UDP</h1>
+<h3 id="udpsocket">UdpSocket</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="863d97aebeb95993be64e2fa534d7dd1d6650e08">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>net<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">UdpSocket</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-comment">// Сокетът се затваря на края на scope-a</span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> socket = <span class="tshl-type">UdpSocket</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">bind</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;127.0.0.1:34254&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-comment">// Получава една дейтаграма от сокета. Ако буферът е прекалено малък за съобщението,</span>
+    <span class="tshl-comment">// то ще бъде орязано.</span>
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> buf = <span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">0</span><span class="tshl-punctuation_delimiter">;</span> <span class="tshl-constant_builtin">10</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> <span class="tshl-punctuation_bracket">(</span>amt, src<span class="tshl-punctuation_bracket">)</span> = socket<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">recv_from</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> buf<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-comment">// Редекларира `buf` като слайс от получените данни и ги праща в обратен ред.</span>
+    <span class="tshl-keyword">let</span> buf = <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> buf<span class="tshl-punctuation_bracket">[</span>..amt<span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_delimiter">;</span>
+    buf<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">reverse</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    socket<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">send_to</span><span class="tshl-punctuation_bracket">(</span>buf, <span class="tshl-operator">&amp;</span>src<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="863d97aebeb95993be64e2fa534d7dd1d6650e08">use std::net::UdpSocket;
+
+// Сокетът се затваря на края на scope-a
+fn main() {
+    let mut socket = UdpSocket::bind("127.0.0.1:34254").unwrap();
+
+    // Получава една дейтаграма от сокета. Ако буферът е прекалено малък за съобщението,
+    // то ще бъде орязано.
+    let mut buf = [0; 10];
+    let (amt, src) = socket.recv_from(&mut buf).unwrap();
+
+    // Редекларира `buf` като слайс от получените данни и ги праща в обратен ред.
+    let buf = &mut buf[..amt];
+    buf.reverse();
+    socket.send_to(buf, &src).unwrap();
+}</pre>
+</div><div class="slide">
+<h1 id="tcp">TCP</h1>
+<h3 id="tcpstream">TcpStream</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="d1c492dbc434602e71f86c81b00fd971673bfc64">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>io<span class="tshl-punctuation_delimiter">::</span>prelude<span class="tshl-punctuation_delimiter">::</span><span class="tshl-operator">*</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>net<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">TcpStream</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-comment">// Стриймът се затваря на края на scope-a</span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> stream = <span class="tshl-type">TcpStream</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">connect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;127.0.0.1:34254&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> _ = stream<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">write</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> _ = stream<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">read</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">0</span><span class="tshl-punctuation_delimiter">;</span> <span class="tshl-constant_builtin">128</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="d1c492dbc434602e71f86c81b00fd971673bfc64">use std::io::prelude::*;
+use std::net::TcpStream;
+
+// Стриймът се затваря на края на scope-a
+fn main() {
+    let mut stream = TcpStream::connect("127.0.0.1:34254").unwrap();
+
+    let _ = stream.write(&[1]);
+    let _ = stream.read(&mut [0; 128]);
+}</pre>
+</div><div class="slide">
+<h1 id="tcp">TCP</h1>
+<h3 id="tcplistener">TcpListener</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="ffcdd522d36516c4a95b350545048a52bc20d69b">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>net<span class="tshl-punctuation_delimiter">::</span>{<span class="tshl-constructor">TcpListener</span>, <span class="tshl-constructor">TcpStream</span>}<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">handle_client</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">stream</span>: <span class="tshl-type">TcpStream</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-comment">// ...</span>
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> listener = <span class="tshl-type">TcpListener</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">bind</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;127.0.0.1:80&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-comment">// приема конекции и ги обработва</span>
+    <span class="tshl-keyword">for</span> stream <span class="tshl-keyword">in</span> listener<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">incoming</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+        <span class="tshl-function">handle_client</span><span class="tshl-punctuation_bracket">(</span>stream<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="ffcdd522d36516c4a95b350545048a52bc20d69b">use std::net::{TcpListener, TcpStream};
+
+fn handle_client(stream: TcpStream) {
+    // ...
+}
+
+fn main() {
+    let listener = TcpListener::bind("127.0.0.1:80").unwrap();
+
+    // приема конекции и ги обработва
+    for stream in listener.incoming() {
+        handle_client(stream.unwrap());
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="tcp">TCP</h1>
+<h3 id="simple-chat">Simple chat</h3>
+<p>Ще разгледаме опростена чат система за чат за демонстрация на нишки, канали и TCP</p>
+<p>Пълният код може да се разгледа в Github - <a href="https://github.com/d3lio/simple-chat" target="_blank">https://github.com/d3lio/simple-chat</a></p>
+</div><div class="slide">
+<h1 id="tcp">TCP</h1>
+<h3 id="simple-chat">Simple chat</h3>
+<p>Какво няма да обхванем:</p>
+</div><div class="slide subslide">
+<h1 id="tcp">TCP</h1>
+<h3 id="simple-chat">Simple chat</h3>
+<p>Какво няма да обхванем:</p>
+<ul>
+<li>Няма да се занимаваме със целия error handling</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="tcp">TCP</h1>
+<h3 id="simple-chat">Simple chat</h3>
+<p>Какво няма да обхванем:</p>
+<ul>
+<li>Няма да се занимаваме със целия error handling</li>
+<li>Няма да използваме най-оптималните подходи, все пак е опростена система</li>
+</ul>
+</div><div class="slide">
+<h1 id="simple-chat">Simple chat</h1>
+<h3 id="server">Server</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="d1423ac8fd06da896997a0d435553abf7c1089d3">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>net<span class="tshl-punctuation_delimiter">::</span>{<span class="tshl-constructor">TcpListener</span>, <span class="tshl-constructor">TcpStream</span>}<span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>sync<span class="tshl-punctuation_delimiter">::</span>mpsc<span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>time<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Duration</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">const</span> <span class="tshl-constructor">LOCALHOST</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type_builtin">str</span> = <span class="tshl-string">&quot;127.0.0.1:1234&quot;</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">const</span> <span class="tshl-constructor">MESSAGE_SIZE</span>: <span class="tshl-type_builtin">usize</span> = <span class="tshl-constant_builtin">32</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> server = <span class="tshl-type">TcpListener</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">bind</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">LOCALHOST</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">expect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Listener failed to bind&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    server<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">set_nonblocking</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">true</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">expect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Failed to initialize nonblocking&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-comment">// Stores client sockets</span>
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> clients = <span class="tshl-type">Vec</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">TcpStream</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> <span class="tshl-punctuation_bracket">(</span>sx, rx<span class="tshl-punctuation_bracket">)</span> = mpsc<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">channel</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">String</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">loop</span> {
+        <span class="tshl-comment">/* accept */</span>
+        <span class="tshl-comment">/* broadcast */</span>
+        thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">sleep</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">Duration</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from_millis</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">100</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="d1423ac8fd06da896997a0d435553abf7c1089d3">use std::net::{TcpListener, TcpStream};
+use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+
+const LOCALHOST: &str = "127.0.0.1:1234";
+const MESSAGE_SIZE: usize = 32;
+
+fn main() {
+    let server = TcpListener::bind(LOCALHOST).expect("Listener failed to bind");
+    server.set_nonblocking(true).expect("Failed to initialize nonblocking");
+
+    // Stores client sockets
+    let mut clients = Vec::<TcpStream>::new();
+    let (sx, rx) = mpsc::channel::<String>();
+
+    loop {
+        /* accept */
+        /* broadcast */
+        thread::sleep(Duration::from_millis(100));
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="server">Server</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="537f174f37f5d572dc6bbcf645fc85e3e2afb022">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+<span class="line-number">50</span>
+<span class="line-number">51</span>
+<span class="line-number">52</span>
+<span class="line-number">53</span>
+<span class="line-number">54</span>
+<span class="line-number">55</span>
+<span class="line-number">56</span>
+<span class="line-number">57</span>
+<span class="line-number">58</span>
+<span class="line-number">59</span>
+<span class="line-number">60</span>
+<span class="line-number">61</span>
+<span class="line-number">62</span>
+<span class="line-number">63</span>
+<span class="line-number">64</span>
+<span class="line-number">65</span>
+<span class="line-number">66</span>
+<span class="line-number">67</span>
+<span class="line-number">68</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>io<span class="tshl-punctuation_delimiter">::</span>{<span class="tshl-constructor">ErrorKind</span>, <span class="tshl-constructor">Read</span>, <span class="tshl-constructor">Write</span>}<span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>net<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">TcpListener</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>sync<span class="tshl-punctuation_delimiter">::</span>mpsc<span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>time<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Duration</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">sleep</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">sleep</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">Duration</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from_millis</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">100</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-keyword">const</span> <span class="tshl-constructor">LOCALHOST</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type_builtin">str</span> = <span class="tshl-string">&quot;127.0.0.1:1234&quot;</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">const</span> <span class="tshl-constructor">MESSAGE_SIZE</span>: <span class="tshl-type_builtin">usize</span> = <span class="tshl-constant_builtin">32</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> server = <span class="tshl-type">TcpListener</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">bind</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">LOCALHOST</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">expect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Listener failed to bind&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    server<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">set_nonblocking</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">true</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">expect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Failed to initialize nonblocking&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> clients = <span class="tshl-type">Vec</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> <span class="tshl-punctuation_bracket">(</span>sx, rx<span class="tshl-punctuation_bracket">)</span> = mpsc<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">channel</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">String</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">loop</span> {
+        <span class="tshl-comment">// Try to accept a client</span>
+        <span class="tshl-keyword">if</span> <span class="tshl-keyword">let</span> <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">mut</span> socket, addr<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span> = server<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">accept</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+            <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Client {} connected&quot;</span>, addr<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+            <span class="tshl-keyword">let</span> sx = sx<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">clone</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+            clients<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">push</span><span class="tshl-punctuation_bracket">(</span>socket<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">try_clone</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">expect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Failed to clone client&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+            thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || <span class="tshl-keyword">loop</span> {
+                <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> buf = <span class="tshl-function_macro">vec</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">0</span>; <span class="tshl-constructor">MESSAGE_SIZE</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_delimiter">;</span>
+
+                <span class="tshl-comment">// Try to receive message from client</span>
+                <span class="tshl-keyword">match</span> socket<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">read_exact</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> buf<span class="tshl-punctuation_bracket">)</span> {
+                    <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span>_<span class="tshl-punctuation_bracket">)</span> =&gt; {
+                        <span class="tshl-keyword">let</span> msg = buf<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">into_iter</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">take_while</span><span class="tshl-punctuation_bracket">(</span>|<span class="tshl-operator">&amp;</span>x| x != <span class="tshl-constant_builtin">0</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">collect</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">_</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+                        <span class="tshl-keyword">let</span> msg = <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from_utf8</span><span class="tshl-punctuation_bracket">(</span>msg<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">expect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Invalid utf8 message&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+                        <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}: {:?}&quot;</span>, addr, msg<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+                        sx<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">send</span><span class="tshl-punctuation_bracket">(</span>msg<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">expect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Send to master channel failed&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+                    },
+                    <span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">ref</span> err<span class="tshl-punctuation_bracket">)</span> <span class="tshl-keyword">if</span> err<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">kind</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> == <span class="tshl-type">ErrorKind</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">WouldBlock</span> =&gt; <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>,
+                    <span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span>_<span class="tshl-punctuation_bracket">)</span> =&gt; {
+                        <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Closing connection with: {}&quot;</span>, addr<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+                        <span class="tshl-keyword">break</span><span class="tshl-punctuation_delimiter">;</span>
+                    }
+                }
+
+                <span class="tshl-function">sleep</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+            }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        }
+
+        <span class="tshl-keyword">if</span> <span class="tshl-keyword">let</span> <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span>msg<span class="tshl-punctuation_bracket">)</span> = rx<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">try_recv</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+            <span class="tshl-comment">// Try to send message from master channel</span>
+            clients = clients<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">into_iter</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">filter_map</span><span class="tshl-punctuation_bracket">(</span>|<span class="tshl-keyword">mut</span> client| {
+                <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> buf = msg<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">clone</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">into_bytes</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+                buf<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">resize</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">MESSAGE_SIZE</span>, <span class="tshl-constant_builtin">0</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+                <span class="tshl-keyword">match</span> client<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">write_all</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span>buf<span class="tshl-punctuation_bracket">)</span> {
+                    <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span>_<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span>client<span class="tshl-punctuation_bracket">)</span>,
+                    _ =&gt; <span class="tshl-constructor">None</span>,
+                }
+            }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">collect</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">_</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        }
+
+        <span class="tshl-function">sleep</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="537f174f37f5d572dc6bbcf645fc85e3e2afb022">use std::io::{ErrorKind, Read, Write};
+use std::net::TcpListener;
+use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+
+fn sleep() {
+    thread::sleep(Duration::from_millis(100));
+}
+
+const LOCALHOST: &str = "127.0.0.1:1234";
+const MESSAGE_SIZE: usize = 32;
+
+fn main() {
+    let server = TcpListener::bind(LOCALHOST).expect("Listener failed to bind");
+    server.set_nonblocking(true).expect("Failed to initialize nonblocking");
+
+    let mut clients = Vec::new();
+    let (sx, rx) = mpsc::channel::<String>();
+
+    loop {
+        // Try to accept a client
+        if let Ok((mut socket, addr)) = server.accept() {
+            println!("Client {} connected", addr);
+
+            let sx = sx.clone();
+
+            clients.push(socket.try_clone().expect("Failed to clone client"));
+
+            thread::spawn(move || loop {
+                let mut buf = vec![0; MESSAGE_SIZE];
+
+                // Try to receive message from client
+                match socket.read_exact(&mut buf) {
+                    Ok(_) => {
+                        let msg = buf.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
+                        let msg = String::from_utf8(msg).expect("Invalid utf8 message");
+
+                        println!("{}: {:?}", addr, msg);
+                        sx.send(msg).expect("Send to master channel failed");
+                    },
+                    Err(ref err) if err.kind() == ErrorKind::WouldBlock => (),
+                    Err(_) => {
+                        println!("Closing connection with: {}", addr);
+                        break;
+                    }
+                }
+
+                sleep();
+            });
+        }
+
+        if let Ok(msg) = rx.try_recv() {
+            // Try to send message from master channel
+            clients = clients.into_iter().filter_map(|mut client| {
+                let mut buf = msg.clone().into_bytes();
+                buf.resize(MESSAGE_SIZE, 0);
+
+                match client.write_all(&buf) {
+                    Ok(_) => Some(client),
+                    _ => None,
+                }
+            }).collect::<Vec<_>>();
+        }
+
+        sleep();
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="simple-chat">Simple chat</h1>
+<h3 id="client">Client</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="927e6c4b84182ce11efbe768677eefdf2a7a8e7b">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>net<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">TcpStream</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>sync<span class="tshl-punctuation_delimiter">::</span>mpsc<span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>time<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Duration</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">const</span> <span class="tshl-constructor">LOCALHOST</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type_builtin">str</span> = <span class="tshl-string">&quot;127.0.0.1:1234&quot;</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">const</span> <span class="tshl-constructor">MESSAGE_SIZE</span>: <span class="tshl-type_builtin">usize</span> = <span class="tshl-constant_builtin">32</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> client = <span class="tshl-type">TcpStream</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">connect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">LOCALHOST</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">expect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Stream failed to connect&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    client<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">set_nonblocking</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">true</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">expect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Failed to initialize nonblocking&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> <span class="tshl-punctuation_bracket">(</span>sx, rx<span class="tshl-punctuation_bracket">)</span> = mpsc<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">channel</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">String</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || <span class="tshl-keyword">loop</span> {
+        <span class="tshl-comment">/* try recv */</span>
+        <span class="tshl-comment">/* try send */</span>
+        thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">sleep</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">Duration</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from_millis</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">100</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-comment">/* repl */</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="927e6c4b84182ce11efbe768677eefdf2a7a8e7b">use std::net::TcpStream;
+use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+
+const LOCALHOST: &str = "127.0.0.1:1234";
+const MESSAGE_SIZE: usize = 32;
+
+fn main() {
+    let mut client = TcpStream::connect(LOCALHOST).expect("Stream failed to connect");
+    client.set_nonblocking(true).expect("Failed to initialize nonblocking");
+
+    let (sx, rx) = mpsc::channel::<String>();
+
+    thread::spawn(move || loop {
+        /* try recv */
+        /* try send */
+        thread::sleep(Duration::from_millis(100));
+    });
+
+    /* repl */
+}</pre>
+</div><div class="slide">
+<h1 id="client">Client</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="6f1da369909ec5402814cb384b891188c1385fd3">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+<span class="line-number">50</span>
+<span class="line-number">51</span>
+<span class="line-number">52</span>
+<span class="line-number">53</span>
+<span class="line-number">54</span>
+<span class="line-number">55</span>
+<span class="line-number">56</span>
+<span class="line-number">57</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>io<span class="tshl-punctuation_delimiter">::</span>{<span class="tshl-keyword">self</span>, <span class="tshl-constructor">ErrorKind</span>, <span class="tshl-constructor">Read</span>, <span class="tshl-constructor">Write</span>}<span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>net<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">TcpStream</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>sync<span class="tshl-punctuation_delimiter">::</span>mpsc<span class="tshl-punctuation_delimiter">::</span>{<span class="tshl-keyword">self</span>, <span class="tshl-constructor">TryRecvError</span>}<span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>thread<span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>time<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Duration</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">const</span> <span class="tshl-constructor">LOCALHOST</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type_builtin">str</span> = <span class="tshl-string">&quot;127.0.0.1:1234&quot;</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">const</span> <span class="tshl-constructor">MESSAGE_SIZE</span>: <span class="tshl-type_builtin">usize</span> = <span class="tshl-constant_builtin">32</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> client = <span class="tshl-type">TcpStream</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">connect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">LOCALHOST</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">expect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Stream failed to connect&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    client<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">set_nonblocking</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">true</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">expect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Failed to initialize nonblocking&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> <span class="tshl-punctuation_bracket">(</span>sx, rx<span class="tshl-punctuation_bracket">)</span> = mpsc<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">channel</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">String</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">spawn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> || <span class="tshl-keyword">loop</span> {
+        <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> buf = <span class="tshl-function_macro">vec</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-constant_builtin">0</span>; <span class="tshl-constructor">MESSAGE_SIZE</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_delimiter">;</span>
+
+        <span class="tshl-comment">// Try to receive message from server</span>
+        <span class="tshl-keyword">match</span> client<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">read_exact</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> buf<span class="tshl-punctuation_bracket">)</span> {
+            <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span>_<span class="tshl-punctuation_bracket">)</span> =&gt; {
+                <span class="tshl-keyword">let</span> msg = buf<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">into_iter</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">take_while</span><span class="tshl-punctuation_bracket">(</span>|<span class="tshl-operator">&amp;</span>x| x != <span class="tshl-constant_builtin">0</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">collect</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">_</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+                <span class="tshl-keyword">let</span> msg = <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from_utf8</span><span class="tshl-punctuation_bracket">(</span>msg<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">expect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Invalid utf8 message&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+                <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;message recv {:?}&quot;</span>, msg<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+            },
+            <span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">ref</span> err<span class="tshl-punctuation_bracket">)</span> <span class="tshl-keyword">if</span> err<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">kind</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> == <span class="tshl-type">ErrorKind</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">WouldBlock</span> =&gt; <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>,
+            <span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span>_<span class="tshl-punctuation_bracket">)</span> =&gt; {
+                <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Connection with the server closed&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+                <span class="tshl-keyword">break</span><span class="tshl-punctuation_delimiter">;</span>
+            }
+        }
+
+        <span class="tshl-comment">// Try to send message from repl</span>
+        <span class="tshl-keyword">match</span> rx<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">try_recv</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+            <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span>msg<span class="tshl-punctuation_bracket">)</span> =&gt; {
+                <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> buf = msg<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">clone</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">into_bytes</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+                buf<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">resize</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">MESSAGE_SIZE</span>, <span class="tshl-constant_builtin">0</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+                client<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">write_all</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span>buf<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">expect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Writing to socket failed&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+                <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;message sent {:?}&quot;</span>, msg<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+            },
+            <span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">TryRecvError</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Empty</span><span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>,
+            <span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">TryRecvError</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Disconnected</span><span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-keyword">break</span>
+        }
+
+        thread<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">sleep</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">Duration</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from_millis</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">100</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;repl&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">loop</span> {
+        <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> buf = <span class="tshl-type">String</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        io<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">stdin</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">read_line</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> buf<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">expect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Reading from stdin failed&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        <span class="tshl-keyword">let</span> msg = buf<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">trim</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">to_string</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+        <span class="tshl-keyword">if</span> msg == <span class="tshl-string">&quot;:q&quot;</span> || sx<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">send</span><span class="tshl-punctuation_bracket">(</span>msg<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">is_err</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> { <span class="tshl-keyword">break</span> }
+    }
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;bye!&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="6f1da369909ec5402814cb384b891188c1385fd3">use std::io::{self, ErrorKind, Read, Write};
+use std::net::TcpStream;
+use std::sync::mpsc::{self, TryRecvError};
+use std::thread;
+use std::time::Duration;
+
+const LOCALHOST: &str = "127.0.0.1:1234";
+const MESSAGE_SIZE: usize = 32;
+
+fn main() {
+    let mut client = TcpStream::connect(LOCALHOST).expect("Stream failed to connect");
+    client.set_nonblocking(true).expect("Failed to initialize nonblocking");
+
+    let (sx, rx) = mpsc::channel::<String>();
+
+    thread::spawn(move || loop {
+        let mut buf = vec![0; MESSAGE_SIZE];
+
+        // Try to receive message from server
+        match client.read_exact(&mut buf) {
+            Ok(_) => {
+                let msg = buf.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
+                let msg = String::from_utf8(msg).expect("Invalid utf8 message");
+                println!("message recv {:?}", msg);
+            },
+            Err(ref err) if err.kind() == ErrorKind::WouldBlock => (),
+            Err(_) => {
+                println!("Connection with the server closed");
+                break;
+            }
+        }
+
+        // Try to send message from repl
+        match rx.try_recv() {
+            Ok(msg) => {
+                let mut buf = msg.clone().into_bytes();
+                buf.resize(MESSAGE_SIZE, 0);
+                client.write_all(&buf).expect("Writing to socket failed");
+                println!("message sent {:?}", msg);
+            },
+            Err(TryRecvError::Empty) => (),
+            Err(TryRecvError::Disconnected) => break
+        }
+
+        thread::sleep(Duration::from_millis(100));
+    });
+
+    println!("repl");
+    loop {
+        let mut buf = String::new();
+        io::stdin().read_line(&mut buf).expect("Reading from stdin failed");
+        let msg = buf.trim().to_string();
+
+        if msg == ":q" || sx.send(msg).is_err() { break }
+    }
+    println!("bye!");
+}</pre>
+</div><div class="slide">
+<h1 id="въпроси">Въпроси</h1>
+</div>
+    </main>
+</body>
+</html>
