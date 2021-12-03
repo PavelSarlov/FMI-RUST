@@ -1,0 +1,40 @@
+body {
+    margin: 0px;
+}
+
+h1, h2, h3, h4, h5 {
+    margin-top: 0px;
+}
+
+div.slide {
+    display: none;
+    flex-direction: column;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+img {
+    display: flex;
+    margin: 0 auto;
+    max-width: 100%;
+}
+
+table {
+    margin-bottom: 1rem;
+    border-collapse: collapse;
+    width: 100%;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 0.5rem 1rem;
+    border: 1px solid #333333;
+}
+
+th {
+    background: #dddddd;
+}
+
+td {
+    background: #f8f8f8;
+}
