@@ -1,0 +1,817 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <title>Async/.await</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="rust,fmi">
+    <link rel="stylesheet" href="resources/codeblock/codeblock.css">
+<link rel="stylesheet" href="resources/frontend/controls.css">
+<link rel="stylesheet" href="resources/global/global.css">
+<link rel="stylesheet" href="resources/global/metadata.css">
+<link rel="stylesheet" href="resources/highlight/hljs-github.css">
+<link rel="stylesheet" href="resources/highlight/style.css">
+<link rel="stylesheet" href="resources/highlight/tshl-github.css">
+<link rel="stylesheet" href="resources/katex/katex.min.css">
+<link rel="stylesheet" href="resources/rustc/rustc.css">
+<link rel="stylesheet" href="resources/splitview/splitview.css">
+<link rel="stylesheet" href="resources/wrapping-pages/wrapping-pages.css">
+<script type="text/javascript" src="resources/codeblock/codeblock.js"></script>
+<script type="text/javascript" src="resources/frontend/controls.js"></script>
+</head>
+<body>
+    <main>
+        <div class="slide">
+<h1 id="asyncawait">Async/.await</h1>
+<h3 id="14-декември-2021">14 декември 2021</h3>
+</div><div class="slide">
+<h1 id="паралелизъм-и-конкурентност">Паралелизъм и конкурентност</h1>
+<p><img src="resources/parallel_concurrent.svg" alt="" /></p>
+</div><div class="slide">
+<h1 id="кога-искаме-паралелизъм">Кога искаме паралелизъм?</h1>
+<ul>
+<li>малко на брой задачи</li>
+<li>тежки от към процесорно време</li>
+</ul>
+</div><div class="slide">
+<h1 id="кога-искаме-конкурентност">Кога искаме конкурентност?</h1>
+<ul>
+<li>потенциално много на брой задачи</li>
+<li>леки от към процесорно време</li>
+<li>дълъг период на изчакване</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="кога-искаме-конкурентност">Кога искаме конкурентност?</h1>
+<ul>
+<li>потенциално много на брой задачи</li>
+<li>леки от към процесорно време</li>
+<li>дълъг период на изчакване</li>
+<li>основно I/O операции</li>
+<li>напр. http заявки, заявки до бази данни</li>
+</ul>
+</div><div class="slide">
+<h1 id="модели-за-конкурентност">Модели за конкурентност</h1>
+<h3 id="kernel-space">Kernel space</h3>
+<ul>
+<li>нишки на операционната система</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="модели-за-конкурентност">Модели за конкурентност</h1>
+<h3 id="kernel-space">Kernel space</h3>
+<ul>
+<li>нишки на операционната система</li>
+<li>паралелизъм и конкурентност</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="модели-за-конкурентност">Модели за конкурентност</h1>
+<h3 id="kernel-space">Kernel space</h3>
+<ul>
+<li>нишки на операционната система</li>
+<li>паралелизъм и конкурентност</li>
+<li>предоставени са ни наготово от операционната система</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="модели-за-конкурентност">Модели за конкурентност</h1>
+<h3 id="kernel-space">Kernel space</h3>
+<ul>
+<li>нишки на операционната система</li>
+<li>паралелизъм и конкурентност</li>
+<li>предоставени са ни наготово от операционната система</li>
+<li>но не скалират добре (за стотици или хиляди задачи)</li>
+</ul>
+</div><div class="slide">
+<h1 id="модели-за-конкурентност">Модели за конкурентност</h1>
+<h3 id="user-space">User space</h3>
+<ul>
+<li>event-driven с callback функции</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="модели-за-конкурентност">Модели за конкурентност</h1>
+<h3 id="user-space">User space</h3>
+<ul>
+<li>event-driven с callback функции</li>
+<li>корутини, зелени нишки</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="модели-за-конкурентност">Модели за конкурентност</h1>
+<h3 id="user-space">User space</h3>
+<ul>
+<li>event-driven с callback функции</li>
+<li>корутини, зелени нишки</li>
+<li>машини на състоянията</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="модели-за-конкурентност">Модели за конкурентност</h1>
+<h3 id="user-space">User space</h3>
+<ul>
+<li>event-driven с callback функции</li>
+<li>корутини, зелени нишки</li>
+<li>машини на състоянията</li>
+<li>актьори</li>
+</ul>
+</div><div class="slide">
+<h1 id="асинхронно-програмиране">Асинхронно програмиране</h1>
+<ul>
+<li>модел за програмиране</li>
+<li>позволява изпълнение на много задачи конкурентно</li>
+<li>запазва вида на кода - кода изглежда като обикновенен синхронен код</li>
+</ul>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">async <span class="tshl-keyword">fn</span> <span class="tshl-function">get_two_sites_async</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-comment">// Create two different &quot;futures&quot; which, when run to completion,</span>
+    <span class="tshl-comment">// will asynchronously download the webpages.</span>
+    <span class="tshl-keyword">let</span> future_one = <span class="tshl-function">download_async</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;https://www.foo.com&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> future_two = <span class="tshl-function">download_async</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;https://www.bar.com&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-comment">// Run both futures to completion at the same time.</span>
+    <span class="tshl-function_macro">join</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>future_one, future_two<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="асинхронно-програмиране-в-rust">Асинхронно програмиране в Rust</h1>
+<ul>
+<li>от rust 1.39 (ноември 2019)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="асинхронно-програмиране-в-rust">Асинхронно програмиране в Rust</h1>
+<ul>
+<li>от rust 1.39 (ноември 2019)</li>
+<li>Ръст предоставя async/await синтаксиса</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="асинхронно-програмиране-в-rust">Асинхронно програмиране в Rust</h1>
+<ul>
+<li>от rust 1.39 (ноември 2019)</li>
+<li>Ръст предоставя async/await синтаксиса</li>
+<li>Ръст предоставя фундаменталните типове и trait-ове</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="асинхронно-програмиране-в-rust">Асинхронно програмиране в Rust</h1>
+<ul>
+<li>от rust 1.39 (ноември 2019)</li>
+<li>Ръст предоставя async/await синтаксиса</li>
+<li>Ръст предоставя фундаменталните типове и trait-ове</li>
+<li>библиотеката <code>futures</code> предоставя множество полезни функции и макроси</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="асинхронно-програмиране-в-rust">Асинхронно програмиране в Rust</h1>
+<ul>
+<li>от rust 1.39 (ноември 2019)</li>
+<li>Ръст предоставя async/await синтаксиса</li>
+<li>Ръст предоставя фундаменталните типове и trait-ове</li>
+<li>библиотеката <code>futures</code> предоставя множество полезни функции и макроси</li>
+<li>за изпълнение на асинхронен код е необходим async runtime, който се предоставя от библиотеки като <code>tokio</code> или <code>async_std</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="асинхронно-програмиране-в-rust">Асинхронно програмиране в Rust</h1>
+<p>Библиотечни функции:</p>
+<ul>
+<li>използват се типовете от <code>std</code> и <code>futures</code></li>
+<li>обикновенно работят с всеки async runtime</li>
+</ul>
+<p>Изпълними програми:</p>
+<ul>
+<li>трябва да се избере точно един async runtime</li>
+</ul>
+</div><div class="slide">
+<h1 id="asyncawait-в-rust">Async/.await в Rust</h1>
+<h3 id="async-функции">async функции</h3>
+<ul>
+<li>в превод <code>async fn(...) -&gt; T</code> ⇒ <code>fn(...) -&gt; impl Future&lt;Output = T&gt;</code></li>
+<li><code>five()</code> е от тип <code>impl Future&lt;Output = u8&gt;</code></li>
+<li><code>five().await</code> е от тип <code>u8</code></li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="9f9cd6d2ca60fc3abbf77f02004205f3982716f1">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// връща анонимен тип, който имплементира trait-а `Future&lt;Output = u8&gt;`</span>
+async <span class="tshl-keyword">fn</span> <span class="tshl-function">five</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u8</span> {
+    <span class="tshl-constant_builtin">5</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="9f9cd6d2ca60fc3abbf77f02004205f3982716f1">#![allow(dead_code)]
+// връща анонимен тип, който имплементира trait-а `Future<Output = u8>`
+async fn five() -> u8 {
+    5
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="asyncawait-в-rust">Async/.await в Rust</h1>
+<h3 id="async-блокове">async блокове</h3>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="18663e2d600521dfc52ab082532c6df08fcd8510">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>future<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Future</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">ten</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-keyword">impl</span> <span class="tshl-type">Future</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Output</span> = <span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-comment">// връща анонимен тип, който имплементира trait-а `Future&lt;Output = u8&gt;`</span>
+    async {
+        <span class="tshl-keyword">let</span> x: <span class="tshl-type_builtin">u8</span> = <span class="tshl-function">five</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span>await<span class="tshl-punctuation_delimiter">;</span>
+        x + <span class="tshl-constant_builtin">5</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="18663e2d600521dfc52ab082532c6df08fcd8510">#![allow(dead_code)]
+use std::future::Future;
+
+fn ten() -> impl Future<Output = u8> {
+    // връща анонимен тип, който имплементира trait-а `Future<Output = u8>`
+    async {
+        let x: u8 = five().await;
+        x + 5
+    }
+}
+async fn five() -> u8 { 5 }
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="asyncawait-в-rust">Async/.await в Rust</h1>
+<h3 id="await">.await</h3>
+<ul>
+<li><code>.await</code> е постфиксен оператор</li>
+<li><code>.await</code> може да се използва само в <code>async fn</code> или <code>async {}</code></li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="c247aff303b227bd4f1fa2405d3f7ad357520e11">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">async <span class="tshl-keyword">fn</span> <span class="tshl-function">five</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u8</span> {
+    <span class="tshl-constant_builtin">5</span>
+}
+
+async <span class="tshl-keyword">fn</span> <span class="tshl-function">ten</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u8</span> {
+    <span class="tshl-function">five</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span>await + <span class="tshl-constant_builtin">5</span>
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> x = <span class="tshl-function">ten</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span>await<span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0728]</span><span style="font-weight:bold">: `await` is only allowed inside `async` functions and blocks</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_c247aff303b227bd4f1fa2405d3f7ad357520e11.rs:10:13
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">9</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>fn main() {
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>   <span style="font-weight:bold;color:rgb(85,85,255)">----</span> <span style="font-weight:bold;color:rgb(85,85,255)">this is not `async`</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">10</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    let x = ten().await;
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>            <span style="font-weight:bold;color:rgb(255,85,85)">^^^^^^^^^^^</span> <span style="font-weight:bold;color:rgb(255,85,85)">only allowed inside `async` functions and blocks</span>
+
+<span style="font-weight:bold">For more information about this error, try `rustc --explain E0728`.</span>
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="c247aff303b227bd4f1fa2405d3f7ad357520e11">async fn five() -> u8 {
+    5
+}
+
+async fn ten() -> u8 {
+    five().await + 5
+}
+
+fn main() {
+    let x = ten().await;
+}</pre>
+</div><div class="slide">
+<h1 id="asyncawait-в-rust">Async/.await в Rust</h1>
+<h3 id="await">.await</h3>
+<ul>
+<li><code>.await</code> е постфиксен оператор</li>
+<li><code>.await</code> може да се използва само в <code>async fn</code> или <code>async {}</code></li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="7cd976b31e65663853f8a128ce8f3a6cd35a12b4">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">async <span class="tshl-keyword">fn</span> <span class="tshl-function">five</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u8</span> {
+    <span class="tshl-constant_builtin">5</span>
+}
+
+async <span class="tshl-keyword">fn</span> <span class="tshl-function">ten</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u8</span> {
+    <span class="tshl-function">five</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span>await + <span class="tshl-constant_builtin">5</span>
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> x = <span class="tshl-punctuation_delimiter">::</span>futures<span class="tshl-punctuation_delimiter">::</span>executor<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">block_on</span><span class="tshl-punctuation_bracket">(</span>async {
+        <span class="tshl-function">ten</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span>await
+    }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="7cd976b31e65663853f8a128ce8f3a6cd35a12b4">async fn five() -> u8 {
+    5
+}
+
+async fn ten() -> u8 {
+    five().await + 5
+}
+
+fn main() {
+    let x = ::futures::executor::block_on(async {
+        ten().await
+    });
+}</pre>
+</div><div class="slide">
+<h1 id="trait-future">Trait Future</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="1f25738a186053cacb5495945dcf1430f1f0f791">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">pub</span> <span class="tshl-keyword">trait</span> <span class="tshl-type">Future</span> {
+    <span class="tshl-keyword">type</span> <span class="tshl-type">Output</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">poll</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span>: <span class="tshl-type">Pin</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Self</span><span class="tshl-punctuation_bracket">&gt;</span>, <span class="tshl-variable_parameter">cx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">Poll</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-constructor">Self</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Output</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">enum</span> <span class="tshl-type">Poll</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-constructor">Ready</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">)</span>,
+    <span class="tshl-constructor">Pending</span>,
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="1f25738a186053cacb5495945dcf1430f1f0f791">use std::task::Context;
+use std::pin::Pin;
+
+pub trait Future {
+    type Output;
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output>;
+}
+
+pub enum Poll<T> {
+    Ready(T),
+    Pending,
+}
+
+fn main() {}</pre>
+<ul>
+<li>тип, който имплементира <code>Future</code>, съдържа всичката информация нужна за изпълнението на асинхронна операция</li>
+<li>игнорирайте <code>Pin</code> и <code>Context</code> засега</li>
+</ul>
+</div><div class="slide">
+<h1 id="trait-future">Trait Future</h1>
+<ul>
+<li>future-а е само структура</li>
+<li>по само себе си не прави нищо (той е мързелив)</li>
+<li>за да започне работа трябва някой да му извика <code>poll</code></li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="23e0df283cd208334f0cad987d8bbee0232120b9">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">async <span class="tshl-keyword">fn</span> <span class="tshl-function">foo</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;foo&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-keyword">let</span> foo_future = <span class="tshl-function">foo</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="23e0df283cd208334f0cad987d8bbee0232120b9">#![allow(unused_variables)]
+fn main() {
+async fn foo() {
+    println!("foo");
+}
+
+let foo_future = foo();
+}</pre>
+</div><div class="slide">
+<h1 id="изпълнение-на-future">Изпълнение на future</h1>
+<p>Future може да се изпълни</p>
+<ul>
+<li>като му се извика <code>.await</code> в <code>async</code> блок или функция</li>
+<li>като се подаде на executor</li>
+</ul>
+</div><div class="slide">
+<h1 id="изпълнение-на-future">Изпълнение на future</h1>
+<p>Futures извършват прогрес, когато някой executor им извика <code>poll</code></p>
+<div class="split-view" markdown="1"><div class="lhs" markdown="1"><p>
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="ca5b2d5795396da88a406ad3f87f892452657647">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> fut1 = <span class="tshl-function">async_func1</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_delimiter">::</span>futures<span class="tshl-punctuation_delimiter">::</span>executor<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">block_on</span><span class="tshl-punctuation_bracket">(</span>fut1<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+async <span class="tshl-keyword">fn</span> <span class="tshl-function">async_func1</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i32</span> {
+    <span class="tshl-keyword">let</span> fut2 = <span class="tshl-function">another_async_func</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> x = fut2<span class="tshl-punctuation_delimiter">.</span>await<span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> y = <span class="tshl-function">regular_func</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> fut3 = <span class="tshl-function">make_call_to_db</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> z = fut3<span class="tshl-punctuation_delimiter">.</span>await<span class="tshl-punctuation_delimiter">;</span>
+
+    x + y
+}</code></pre>
+                    </div>
+                    
+                </div>
+                </p>
+<p><pre class="rustc-source" data-sha="ca5b2d5795396da88a406ad3f87f892452657647">fn main() {
+    let fut1 = async_func1();
+    ::futures::executor::block_on(fut1);
+}
+
+async fn async_func1() -> i32 {
+    let fut2 = another_async_func();
+    let x = fut2.await;
+
+    let y = regular_func();
+
+    let fut3 = make_call_to_db();
+    let z = fut3.await;
+
+    x + y
+}
+async fn another_async_func() -> i32 { 0 }
+async fn make_call_to_db() -> i32 { 0 }
+fn regular_func() -> i32 { 0 }</pre></p></div>
+<div class="rhs" markdown="1"><p><img src="resources/async_await_stack_frame.svg"></p></div></div>
+</div><div class="slide">
+<h1 id="изпълнение-на-future">Изпълнение на future</h1>
+<p>За да могат да се прекъсват, всички нужни локални променливи се запомнят във future-а.</p>
+<div class="split-view" markdown="1"><div class="lhs" markdown="1"><p>
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="ca5b2d5795396da88a406ad3f87f892452657647">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> fut1 = <span class="tshl-function">async_func1</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-punctuation_delimiter">::</span>futures<span class="tshl-punctuation_delimiter">::</span>executor<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">block_on</span><span class="tshl-punctuation_bracket">(</span>fut1<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+async <span class="tshl-keyword">fn</span> <span class="tshl-function">async_func1</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i32</span> {
+    <span class="tshl-keyword">let</span> fut2 = <span class="tshl-function">another_async_func</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> x = fut2<span class="tshl-punctuation_delimiter">.</span>await<span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> y = <span class="tshl-function">regular_func</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">let</span> fut3 = <span class="tshl-function">make_call_to_db</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> z = fut3<span class="tshl-punctuation_delimiter">.</span>await<span class="tshl-punctuation_delimiter">;</span>
+
+    x + y
+}</code></pre>
+                    </div>
+                    
+                </div>
+                </p>
+<p><pre class="rustc-source" data-sha="ca5b2d5795396da88a406ad3f87f892452657647">fn main() {
+    let fut1 = async_func1();
+    ::futures::executor::block_on(fut1);
+}
+
+async fn async_func1() -> i32 {
+    let fut2 = another_async_func();
+    let x = fut2.await;
+
+    let y = regular_func();
+
+    let fut3 = make_call_to_db();
+    let z = fut3.await;
+
+    x + y
+}
+async fn another_async_func() -> i32 { 0 }
+async fn make_call_to_db() -> i32 { 0 }
+fn regular_func() -> i32 { 0 }</pre></p></div>
+<div class="rhs" markdown="1"><p>
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">enum</span> <span class="tshl-type">Fut1</span> {
+    <span class="tshl-constructor">AtAwait1</span> { <span class="tshl-property">fut2</span>: <span class="tshl-type">Fut2</span> },
+    <span class="tshl-constructor">AtAwait2</span> { <span class="tshl-property">x</span>: <span class="tshl-type_builtin">i32</span>, <span class="tshl-property">y</span>: <span class="tshl-type_builtin">i32</span>, <span class="tshl-property">fut3</span>: <span class="tshl-type">Fut3</span> },
+    <span class="tshl-constructor">Done</span>,
+}</code></pre>
+                    </div>
+                    
+                </div>
+                </p></div></div>
+</div><div class="slide">
+<h1 id="futures-екосистемата">Futures екосистемата</h1>
+<ul>
+<li>преди да бъдат добавени към <code>std</code> futures съществуваха в rust екосистемата като библиотеката <a href="https://docs.rs/futures" target="_blank">futures</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="futures-екосистемата">Futures екосистемата</h1>
+<ul>
+<li>преди да бъдат добавени към <code>std</code> futures съществуваха в rust екосистемата като библиотеката <a href="https://docs.rs/futures" target="_blank">futures</a></li>
+<li>в стандартната библиотека са стабилизирани част от <code>futures 0.3</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="futures-екосистемата">Futures екосистемата</h1>
+<ul>
+<li>преди да бъдат добавени към <code>std</code> futures съществуваха в rust екосистемата като библиотеката <a href="https://docs.rs/futures" target="_blank">futures</a></li>
+<li>в стандартната библиотека са стабилизирани част от <code>futures 0.3</code></li>
+<li>но има още неща, които не са добавени<ul>
+<li>композиране на futures</li>
+<li><code>Stream</code> и <code>Sink</code> traits</li>
+<li><code>AsyncRead</code> и <code>AsyncWrite</code> traits</li>
+<li><code>select!</code>, <code>join!</code></li>
+<li><code>block_on</code></li>
+<li>и други полезни неща</li></ul></li>
+</ul>
+</div><div class="slide">
+<h1 id="futures-екосистемата">Futures екосистемата</h1>
+<ul>
+<li>за да използвате async/await трябва да си изберете executor</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="futures-екосистемата">Futures екосистемата</h1>
+<ul>
+<li>за да използвате async/await трябва да си изберете executor</li>
+<li><a href="https://docs.rs/tokio" target="_blank">https://docs.rs/tokio</a> - framework за създаване на програми, работещи с мрежата</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="futures-екосистемата">Futures екосистемата</h1>
+<ul>
+<li>за да използвате async/await трябва да си изберете executor</li>
+<li><a href="https://docs.rs/tokio" target="_blank">https://docs.rs/tokio</a> - framework за създаване на програми, работещи с мрежата</li>
+<li><a href="https://docs.rs/async-std" target="_blank">https://docs.rs/async-std</a> - огледално копие на стандартната библиотека, но всички блокиращи функции са заменени с асинхронни</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="futures-екосистемата">Futures екосистемата</h1>
+<ul>
+<li>за да използвате async/await трябва да си изберете executor</li>
+<li><a href="https://docs.rs/tokio" target="_blank">https://docs.rs/tokio</a> - framework за създаване на програми, работещи с мрежата</li>
+<li><a href="https://docs.rs/async-std" target="_blank">https://docs.rs/async-std</a> - огледално копие на стандартната библиотека, но всички блокиращи функции са заменени с асинхронни</li>
+<li><a href="https://docs.rs/smol" target="_blank">https://docs.rs/smol</a> - малък, прост executor</li>
+</ul>
+</div><div class="slide">
+<h1 id="futures-екосистемата">Futures екосистемата</h1>
+<h3 id="съвместимост">Съвместимост</h3>
+<ul>
+<li>Не всички async библиотеки са съвместими една с друга!</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="futures-екосистемата">Futures екосистемата</h1>
+<h3 id="съвместимост">Съвместимост</h3>
+<ul>
+<li>Не всички async библиотеки са съвместими една с друга!</li>
+<li>Асинхроннен вход/изход, таймери и подобни (и всички библиотеки които надграждат над това) обикновенно могат да работят само на определен executor</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="futures-екосистемата">Futures екосистемата</h1>
+<h3 id="съвместимост">Съвместимост</h3>
+<ul>
+<li>Не всички async библиотеки са съвместими една с друга!</li>
+<li>Асинхроннен вход/изход, таймери и подобни (и всички библиотеки които надграждат над това) обикновенно могат да работят само на определен executor</li>
+<li>Всякакъв друг асинхронен код, като комбинатори, синхронизационни примитиви и подобни обикновенно могат да работят на произволен executor</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="futures-екосистемата">Futures екосистемата</h1>
+<h3 id="съвместимост">Съвместимост</h3>
+<ul>
+<li>Не всички async библиотеки са съвместими една с друга!</li>
+<li>Асинхроннен вход/изход, таймери и подобни (и всички библиотеки които надграждат над това) обикновенно могат да работят само на определен executor</li>
+<li>Всякакъв друг асинхронен код, като комбинатори, синхронизационни примитиви и подобни обикновенно могат да работят на произволен executor</li>
+<li><a href="https://rust-lang.github.io/async-book/08_ecosystem/00_chapter.html" target="_blank">https://rust-lang.github.io/async-book/08_ecosystem/00_chapter.html</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="малък-демо-проект">Малък демо проект</h1>
+<p>Web crawler, който събира и напечатва линкове към блогове от <a href="https://this-week-in-rust.org" target="_blank">https://this-week-in-rust.org</a></p>
+<p>Използвани библиотеки</p>
+<ul>
+<li><a href="https://docs.rs/reqwest" target="_blank">reqwest</a> - асинхронни http рекуести</li>
+<li><a href="https://docs.rs/scraper" target="_blank">scraper</a> - парсене на html и търсене на елементи чрез css селектори</li>
+<li><a href="https://docs.rs/tokio/0.2.24/tokio" target="_blank">tokio</a> v0.2 - async executor</li>
+</ul>
+<p><a href="https://github.com/nikolads/rust_async_demo" target="_blank">https://github.com/nikolads/rust_async_demo</a></p>
+</div><div class="slide">
+<h1 id="подводни-камъни">Подводни камъни</h1>
+<h3 id="блокиращи-операции">Блокиращи операции</h3>
+<ul>
+<li>когато ползваме async е важно да нямаме блокиращи операции</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="подводни-камъни">Подводни камъни</h1>
+<h3 id="блокиращи-операции">Блокиращи операции</h3>
+<ul>
+<li>когато ползваме async е важно да нямаме блокиращи операции</li>
+<li>блокиращите операции блокират текущата нишка</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="подводни-камъни">Подводни камъни</h1>
+<h3 id="блокиращи-операции">Блокиращи операции</h3>
+<ul>
+<li>когато ползваме async е важно да нямаме блокиращи операции</li>
+<li>блокиращите операции блокират текущата нишка</li>
+<li>async executor-ите ползват ограничено количество нишки за изпълнение на задачи</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="подводни-камъни">Подводни камъни</h1>
+<h3 id="блокиращи-операции">Блокиращи операции</h3>
+<ul>
+<li>когато ползваме async е важно да нямаме блокиращи операции</li>
+<li>блокиращите операции блокират текущата нишка</li>
+<li>async executor-ите ползват ограничено количество нишки за изпълнение на задачи</li>
+<li>в резултат можем лесно да си забавим или тотално забием програмата</li>
+</ul>
+</div><div class="slide">
+<h1 id="подводни-камъни">Подводни камъни</h1>
+<h3 id="примитиви-за-синхронизация">Примитиви за синхронизация</h3>
+<ul>
+<li>примитивите в <code>std::sync</code> блокират текущата нишка</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="подводни-камъни">Подводни камъни</h1>
+<h3 id="примитиви-за-синхронизация">Примитиви за синхронизация</h3>
+<ul>
+<li>примитивите в <code>std::sync</code> блокират текущата нишка</li>
+<li>вместо това трябва да се използват async версии, които блокират само текущата задача</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="подводни-камъни">Подводни камъни</h1>
+<h3 id="примитиви-за-синхронизация">Примитиви за синхронизация</h3>
+<ul>
+<li>примитивите в <code>std::sync</code> блокират текущата нишка</li>
+<li>вместо това трябва да се използват async версии, които блокират само текущата задача</li>
+<li><code>async_std::sync</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="подводни-камъни">Подводни камъни</h1>
+<h3 id="примитиви-за-синхронизация">Примитиви за синхронизация</h3>
+<ul>
+<li>примитивите в <code>std::sync</code> блокират текущата нишка</li>
+<li>вместо това трябва да се използват async версии, които блокират само текущата задача</li>
+<li><code>async_std::sync</code></li>
+<li><code>tokio::sync</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="подводни-камъни">Подводни камъни</h1>
+<h3 id="тежки-операции">Тежки операции</h3>
+<ul>
+<li>други блокиращи операции, като<ul>
+<li>тежки изчисления</li>
+<li>блокиращ код, който не може да се промени</li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="подводни-камъни">Подводни камъни</h1>
+<h3 id="тежки-операции">Тежки операции</h3>
+<ul>
+<li>други блокиращи операции, като<ul>
+<li>тежки изчисления</li>
+<li>блокиращ код, който не може да се промени</li></ul></li>
+<li>трябва да се изпълняват на отделна ОС нишка</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="подводни-камъни">Подводни камъни</h1>
+<h3 id="тежки-операции">Тежки операции</h3>
+<ul>
+<li>други блокиращи операции, като<ul>
+<li>тежки изчисления</li>
+<li>блокиращ код, който не може да се промени</li></ul></li>
+<li>трябва да се изпълняват на отделна ОС нишка</li>
+<li>може да се пуска нова нишка за всяка операция</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="подводни-камъни">Подводни камъни</h1>
+<h3 id="тежки-операции">Тежки операции</h3>
+<ul>
+<li>други блокиращи операции, като<ul>
+<li>тежки изчисления</li>
+<li>блокиращ код, който не може да се промени</li></ul></li>
+<li>трябва да се изпълняват на отделна ОС нишка</li>
+<li>може да се пуска нова нишка за всяка операция</li>
+<li>или да се използва thread pool</li>
+</ul>
+</div><div class="slide">
+<h1 id="допълнителни-материали">Допълнителни материали</h1>
+<ul>
+<li><a href="https://rust-lang.github.io/async-book/" target="_blank">https://rust-lang.github.io/async-book/</a> - официалната async/await книга</li>
+<li><a href="https://book.async.rs/" target="_blank">https://book.async.rs/</a> - книгата за async std, имат добър туториал за имплементация на чат сървър</li>
+<li><a href="https://www.youtube.com/watch?v=L7X0vpAU-sU" target="_blank">https://www.youtube.com/watch?v=L7X0vpAU-sU</a> - презентация за async-std</li>
+</ul>
+</div><div class="slide">
+<h1 id="въпроси">Въпроси</h1>
+</div>
+    </main>
+</body>
+</html>
