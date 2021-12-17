@@ -1,0 +1,686 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <title>Правене на игри с GGEZ</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="rust,fmi">
+    <link rel="stylesheet" href="resources/codeblock/codeblock.css">
+<link rel="stylesheet" href="resources/frontend/controls.css">
+<link rel="stylesheet" href="resources/global/global.css">
+<link rel="stylesheet" href="resources/global/metadata.css">
+<link rel="stylesheet" href="resources/highlight/hljs-github.css">
+<link rel="stylesheet" href="resources/highlight/style.css">
+<link rel="stylesheet" href="resources/highlight/tshl-github.css">
+<link rel="stylesheet" href="resources/katex/katex.min.css">
+<link rel="stylesheet" href="resources/rustc/rustc.css">
+<link rel="stylesheet" href="resources/splitview/splitview.css">
+<link rel="stylesheet" href="resources/wrapping-pages/wrapping-pages.css">
+<script type="text/javascript" src="resources/codeblock/codeblock.js"></script>
+<script type="text/javascript" src="resources/frontend/controls.js"></script>
+</head>
+<body>
+    <main>
+        <div class="slide">
+<h1 id="правене-на-игри-с-ggez">Правене на игри с GGEZ</h1>
+<h3 id="16-декември-2021">16 декември 2021</h3>
+</div><div class="slide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Домашно 3: Вторник</li>
+<li>Инструкции за проектите: <a href="https://fmi.rust-lang.bg/guides/projects" target="_blank">https://fmi.rust-lang.bg/guides/projects</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="rust-shooter">Rust-shooter</h1>
+<p>Пълен код: <a href="https://github.com/AndrewRadev/rust-shooter" target="_blank">https://github.com/AndrewRadev/rust-shooter</a></p>
+<p><img src="resources/shooter.png" height="500px" /></p>
+</div><div class="slide">
+<h1 id="инсталация-на-ggez">Инсталация на ggez</h1>
+<p>Стабилната версия в момента е 0.7.0 и изглежда като да работи без проблеми.</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code>[dependencies]
+ggez = "0.7.0"</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Ако случайно ударите на бъгове, винаги има опцията да изберете конкретна git ревизия или branch:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code>[dependencies]
+ggez = { git = "https://github.com/ggez/ggez", rev = "50918f133785e1ee585c022d94a0176ea0e73887" }
+ggez = { git = "https://github.com/ggez/ggez", branch = "devel" }</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="инсталиране-от-път">Инсталиране от път</h1>
+<p>Допълнително, ако някой ден се озовете в ситуация, в която искате да оправите бъг локално и да ползвате тази версия, можете да си инсталирате пакет от локален път:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code>[dependencies]
+ggez = { path = "/home/andrew/src/ggez" }</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="скелет-на-играта">Скелет на играта</h1>
+<p>Фреймуърка очаква да дефинирате ваш тип, който да имплементира трейта <code>ggez::event::EventHandler</code>:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">MainState</span> { <span class="tshl-comment">/* ... */</span> }
+
+<span class="tshl-keyword">impl</span> event<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">EventHandler</span> <span class="tshl-keyword">for</span> <span class="tshl-type">MainState</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">update</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">GameResult</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">&gt;</span> {
+        <span class="tshl-comment">// Променяме състоянието на играта</span>
+        <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>
+    }
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">draw</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">GameResult</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">&gt;</span> {
+        <span class="tshl-keyword">let</span> dark_blue = graphics<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Color</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from_rgb</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">26</span>, <span class="tshl-constant_builtin">51</span>, <span class="tshl-constant_builtin">77</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        graphics<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">clear</span><span class="tshl-punctuation_bracket">(</span>ctx, dark_blue<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        <span class="tshl-comment">// Рисуваме неща</span>
+        graphics<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">present</span><span class="tshl-punctuation_bracket">(</span>ctx<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="скелет-на-играта">Скелет на играта</h1>
+<p>В <code>main</code> функцията създаваме инстанция на нашия тип и "контекст" (за рисуване/звуци) с конфигурация, и стартираме event loop-а:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-comment">// Конфигурация:</span>
+    <span class="tshl-keyword">let</span> conf = <span class="tshl-type">Conf</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span>
+        <span class="tshl-function_method">window_mode</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">WindowMode</span> {
+            <span class="tshl-property">min_width</span>: <span class="tshl-constant_builtin">1024.0</span>,
+            <span class="tshl-property">min_height</span>: <span class="tshl-constant_builtin">768.0</span>,
+            ..<span class="tshl-type">Default</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">default</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+        }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-comment">// Контекст и event loop</span>
+    <span class="tshl-keyword">let</span> <span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">mut</span> ctx, event_loop<span class="tshl-punctuation_bracket">)</span> = <span class="tshl-type">ContextBuilder</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;shooter&quot;</span>, <span class="tshl-string">&quot;FMI&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span>
+        <span class="tshl-function_method">default_conf</span><span class="tshl-punctuation_bracket">(</span>conf<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">clone</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span>
+        <span class="tshl-function_method">build</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span>
+        <span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-comment">// ... Подготвяне на ресурси, вижте следващия слайд</span>
+
+    <span class="tshl-comment">// Пускане на главния loop</span>
+    <span class="tshl-keyword">let</span> state = <span class="tshl-type">MainState</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> ctx, conf<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    event<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">run</span><span class="tshl-punctuation_bracket">(</span>ctx, event_loop, state<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="зареждане-на-ресурси">Зареждане на ресурси</h1>
+<p>За да може библиотеката да си намери картинки и звуци при компилация, добре е да добавим локалната директория "resources" (или както искаме да я наречем). Когато разпространяваме играта, тя ще търси по default папка до exe-то, която се казва "resources", но подкарвайки я с <code>cargo run</code>, е по-удобно да използваме друга:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// ...</span>
+<span class="tshl-comment">// let (mut ctx, event_loop) = ...</span>
+
+<span class="tshl-keyword">if</span> <span class="tshl-keyword">let</span> <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span>manifest_dir<span class="tshl-punctuation_bracket">)</span> = env<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">var</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;CARGO_MANIFEST_DIR&quot;</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> path = path<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">PathBuf</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from</span><span class="tshl-punctuation_bracket">(</span>manifest_dir<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    path<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">push</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;resources&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    ggez<span class="tshl-punctuation_delimiter">::</span>filesystem<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">mount</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> ctx, <span class="tshl-operator">&amp;</span>path, <span class="tshl-constant_builtin">true</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-comment">// let state = MainState::new(&amp;mut ctx, &amp;conf).unwrap();</span>
+<span class="tshl-comment">// ...</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="update">Update</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">update</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">GameResult</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">if</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">game_over</span> { <span class="tshl-keyword">return</span> <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span> }
+    <span class="tshl-keyword">const</span> <span class="tshl-constructor">DESIRED_FPS</span>: <span class="tshl-type_builtin">u32</span> = <span class="tshl-constant_builtin">60</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">while</span> timer<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">check_update_time</span><span class="tshl-punctuation_bracket">(</span>ctx, <span class="tshl-constructor">DESIRED_FPS</span><span class="tshl-punctuation_bracket">)</span>? {
+        <span class="tshl-keyword">let</span> seconds = <span class="tshl-constant_builtin">1.0</span> / <span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">DESIRED_FPS</span> <span class="tshl-operator">as</span> <span class="tshl-type_builtin">f32</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+        <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">time_until_next_enemy</span> -= seconds<span class="tshl-punctuation_delimiter">;</span>
+        <span class="tshl-keyword">if</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">time_until_next_enemy</span> &lt;= <span class="tshl-constant_builtin">0.0</span> {
+            <span class="tshl-comment">// Създаваме следващия противник</span>
+            <span class="tshl-comment">// self.time_until_next_enemy = ...;</span>
+        }
+
+        <span class="tshl-comment">// Обновяваме позиция на играча, на изстрелите, ...</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="update">Update</h1>
+<ul>
+<li>Метода връща <code>GameResult&lt;()&gt;</code>, така че успешен край ще е <code>Ok(())</code>, а неуспешен край вероятно ще дойде от грешка в някоя от функциите за чертане, звуци, и т.н.</li>
+<li>Всичко се случва в цикъл, който ще се викне 60 пъти (или колкото искаме) в секунда, плавно (надяваме се).</li>
+<li>Затова имаме нужда от <code>seconds</code>, или <code>time_delta</code>, или както го наречете -- изминалото време в този цикъл, като части от секундата. Умножаваме тази стойност по всякакво движение, за получим равномерна промяна.</li>
+<li>Състоянието става на тези квантове време, така че няма как да правим продължителна промяна на състоянието -- анимации няма как да станат с "линеен" код. Променяме състоянието (играча е в състояние "стреляне", "движение", и т.н.), и движим позицията му както подобава.</li>
+</ul>
+</div><div class="slide">
+<h1 id="update">Update</h1>
+<p>Най-простата форма на <code>update</code> би могла да изглежда така:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">position</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">x</span> += <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">velocity</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">x</span> <span class="tshl-operator">*</span> seconds<span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">position</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">y</span> += <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">velocity</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">y</span> <span class="tshl-operator">*</span> seconds<span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Променяме <code>velocity</code> в зависимост от, например, задържан клавиш-стрелкичка, или в зависимост от AI-а на противниците, или както си пожелаем. Имаме пълната мощ на библиотеката <a href="http://nalgebra.org/" target="_blank">nalgebra</a>, която вероятно няма да ни трябва за много сложни неща:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>derive<span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">Debug</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">struct</span> <span class="tshl-type">Enemy</span> {
+    <span class="tshl-property">position</span>: <span class="tshl-type">Point2</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">f32</span><span class="tshl-punctuation_bracket">&gt;</span>,
+    <span class="tshl-property">velocity</span>: <span class="tshl-type">Vector2</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">f32</span><span class="tshl-punctuation_bracket">&gt;</span>,
+    <span class="tshl-comment">// ... и каквото още ни трябва ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="update">Update</h1>
+<p>За нещастие, за да се поддържа стабилност на алгебрата, се ползва библиотеката <a href="https://crates.io/crates/mint" target="_blank">mint</a>, която е доста минимална, така че не можем да събираме точки и вектори примерно -- сметките се правят или по координати, или си имплементираме помощни средства. Или правим операции с <code>nalgebra::Point2</code> и ги конвертираме до <code>mint::Point2&lt;f32&gt;</code> с <code>.into()</code> като ги подаваме на ggez.</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code>nalgebra = { version = "0.29.0", features = ["mint"] }</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Алтернативна библиотека за алгебра, която май се използва в примерите днешно време, е <a href="https://docs.rs/glam/0.20.1/glam/" target="_blank">glam</a>, която също има <code>features = ["mint"]</code> за съвместимост.</p>
+</div><div class="slide">
+<h1 id="input">Input</h1>
+<p>Има още два метода, които могат да се имплементират за <code>event::EventHandler</code>:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">key_down_event</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>,
+                  <span class="tshl-variable_parameter">_ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span>,
+                  <span class="tshl-variable_parameter">keycode</span>: event<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">KeyCode</span>,
+                  <span class="tshl-variable_parameter">_keymod</span>: input<span class="tshl-punctuation_delimiter">::</span>keyboard<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">KeyMods</span>,
+                  <span class="tshl-variable_parameter">_repeat</span>: <span class="tshl-type_builtin">bool</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">match</span> keycode {
+        event<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">KeyCode</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Space</span> =&gt; <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">input</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">fire</span> = <span class="tshl-constant_builtin">true</span>,
+        <span class="tshl-comment">// ... Други клавиши ...</span>
+        _ =&gt; <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-comment">// Do nothing</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>И еквивалентния за key up …</p>
+</div><div class="slide">
+<h1 id="input">Input</h1>
+<p>Има още два метода, които могат да се имплементират за <code>event::EventHandler</code>:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">key_up_event</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>,
+                <span class="tshl-variable_parameter">_ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span>,
+                <span class="tshl-variable_parameter">keycode</span>: event<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">KeyCode</span>,
+                <span class="tshl-variable_parameter">_keymod</span>: input<span class="tshl-punctuation_delimiter">::</span>keyboard<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">KeyMods</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">match</span> keycode {
+        event<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">KeyCode</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Space</span> =&gt; <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">input</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">fire</span> = <span class="tshl-constant_builtin">false</span>,
+        <span class="tshl-comment">// ... Други клавиши ...</span>
+        _ =&gt; <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, <span class="tshl-comment">// Do nothing</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="drawing">Drawing</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">draw</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">GameResult</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">&gt;</span> {
+    <span class="tshl-keyword">let</span> dark_blue = graphics<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Color</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from_rgb</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">26</span>, <span class="tshl-constant_builtin">51</span>, <span class="tshl-constant_builtin">77</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    graphics<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">clear</span><span class="tshl-punctuation_bracket">(</span>ctx, dark_blue<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">if</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">game_over</span> {
+        <span class="tshl-comment">// Рисуваме &quot;край на играта&quot;</span>
+        graphics<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">present</span><span class="tshl-punctuation_bracket">(</span>ctx<span class="tshl-punctuation_bracket">)</span>?<span class="tshl-punctuation_delimiter">;</span>
+        <span class="tshl-keyword">return</span> <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>
+    }
+
+    <span class="tshl-comment">// Рисуваме противници, играч, куршум, и т.н.</span>
+
+    graphics<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">present</span><span class="tshl-punctuation_bracket">(</span>ctx<span class="tshl-punctuation_bracket">)</span>?<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="drawing">Drawing</h1>
+<p>Просто викане на методи в модула <code>graphics::</code> Когато имаме координатите и състоянието на противници, играч, изстрели, сцена, фон, и прочее, всичко се свежда до това да извикаме методи, които казват на графичната система какво да нарисува и къде.</p>
+</div><div class="slide">
+<h1 id="collision-detection">Collision detection</h1>
+<p>Не ни трябва нищо сложно за тази конкретна игра. За всеки противник и всеки изстрел, проверяваме дали изстрела е в противника:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">for</span> enemy <span class="tshl-keyword">in</span> <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">enemies</span> {
+    <span class="tshl-keyword">for</span> shot <span class="tshl-keyword">in</span> <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">shots</span> {
+        <span class="tshl-keyword">if</span> enemy<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">bounding_rect</span><span class="tshl-punctuation_bracket">(</span>ctx<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">contains</span><span class="tshl-punctuation_bracket">(</span>shot<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">pos</span><span class="tshl-punctuation_bracket">)</span> {
+            shot<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">is_alive</span> = <span class="tshl-constant_builtin">false</span><span class="tshl-punctuation_delimiter">;</span>
+            enemy<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">is_alive</span> = <span class="tshl-constant_builtin">false</span><span class="tshl-punctuation_delimiter">;</span>
+            <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">score</span> += <span class="tshl-constant_builtin">1</span><span class="tshl-punctuation_delimiter">;</span>
+            <span class="tshl-keyword">let</span> _ = <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">assets</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">boom_sound</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">play</span><span class="tshl-punctuation_bracket">(</span>ctx<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="тестване">Тестване</h1>
+<p>Инициализиране на контекст може да се направи само веднъж, което може да затрудни тестването. Решението е decoupling -- вместо конкретен тип, използваме trait, който можем да варираме:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">pub</span> <span class="tshl-keyword">trait</span> <span class="tshl-type">Sprite</span>: <span class="tshl-type">Debug</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">draw</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">center</span>: <span class="tshl-type">Point2</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">f32</span><span class="tshl-punctuation_bracket">&gt;</span>, <span class="tshl-variable_parameter">ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">GameResult</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">width</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">f32</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">height</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">f32</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="тестване">Тестване</h1>
+<p>В истинския код, имаме нещо истински използваемо, което използва assets, fonts, drawing:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>derive<span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">Debug</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">struct</span> <span class="tshl-type">TextSprite</span> {
+    <span class="tshl-property">text</span>: graphics<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Text</span>,
+}
+
+<span class="tshl-keyword">impl</span> <span class="tshl-type">TextSprite</span> {
+    <span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">label</span>: <span class="tshl-operator">&amp;</span><span class="tshl-type_builtin">str</span>, <span class="tshl-variable_parameter">ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">GameResult</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">TextSprite</span><span class="tshl-punctuation_bracket">&gt;</span> {
+        <span class="tshl-keyword">let</span> font = graphics<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Font</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span>ctx, <span class="tshl-string">&quot;/DejaVuSerif.ttf&quot;</span><span class="tshl-punctuation_bracket">)</span>?<span class="tshl-punctuation_delimiter">;</span>
+        <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> text = graphics<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Text</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span>label<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        text<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">set_font</span><span class="tshl-punctuation_bracket">(</span>font, graphics<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">PxScale</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">18.0</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">TextSprite</span> { text }<span class="tshl-punctuation_bracket">)</span>
+    }
+}
+
+<span class="tshl-keyword">impl</span> <span class="tshl-type">Sprite</span> <span class="tshl-keyword">for</span> <span class="tshl-type">TextSprite</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">draw</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">top_left</span>: <span class="tshl-type">Point2</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">f32</span><span class="tshl-punctuation_bracket">&gt;</span>, <span class="tshl-variable_parameter">ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">GameResult</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">&gt;</span> {
+        <span class="tshl-comment">// ...</span>
+    }
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">width</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">f32</span> { <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">text</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">width</span><span class="tshl-punctuation_bracket">(</span>ctx<span class="tshl-punctuation_bracket">)</span> }
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">height</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">f32</span> { <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">text</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">height</span><span class="tshl-punctuation_bracket">(</span>ctx<span class="tshl-punctuation_bracket">)</span> }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="тестване">Тестване</h1>
+<p>В тестовете, спокойно можем да си сложим един "фалшив" sprite:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>derive<span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">Debug</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">struct</span> <span class="tshl-type">MockSprite</span> {
+    <span class="tshl-property">width</span>: <span class="tshl-type_builtin">u32</span>,
+    <span class="tshl-property">height</span>: <span class="tshl-type_builtin">u32</span>,
+}
+
+<span class="tshl-keyword">impl</span> <span class="tshl-type">Sprite</span> <span class="tshl-keyword">for</span> <span class="tshl-type">MockSprite</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">draw</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">_center</span>: <span class="tshl-type">Point2</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">f32</span><span class="tshl-punctuation_bracket">&gt;</span>, <span class="tshl-variable_parameter">_ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">GameResult</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">&gt;</span> { <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span> }
+
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">width</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">_ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">f32</span> { <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">width</span> }
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">height</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span>, <span class="tshl-variable_parameter">_ctx</span>: <span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> <span class="tshl-type">Context</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">f32</span> { <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">height</span> }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="категории-игри">Категории игри</h1>
+<p>Обекти, които се движат по екрана и имат контакт:</p>
+<ul>
+<li>Имате "играч", "противници", "бонуси", "препятствия"…</li>
+<li>На <code>update</code>, обновявате къде се намират спрямо някакви правила</li>
+<li>На <code>draw</code>, просто ги рисувате</li>
+<li>Имате някакъв "collision detection", в който преценявате какъв контакт имат, всичко със всичко -- прегради, куршуми, видимост</li>
+</ul>
+</div><div class="slide">
+<h1 id="категории-игри">Категории игри</h1>
+<p>Игри на дъска с обекти, които движете в определена форма (<a href="https://github.com/AndrewRadev/rust-memory-game" target="_blank">rust-memory-game</a>):</p>
+<p><img src="resources/memory-game.png" height="400px" /></p>
+</div><div class="slide">
+<h1 id="категории-игри">Категории игри</h1>
+<p>Игри на дъска с обекти, които движете в определена форма:</p>
+<ul>
+<li>Имате някакви обекти, които са на някаква "дъска", "поле"</li>
+<li>Цъкате ги или имате някаква друга интеракция с тях</li>
+<li>В идеалния случай имате отделно логически и визуални координати. От първото се изчислява второто при рисуване.</li>
+<li>Проверява се за някакво специално условие и играта се променя</li>
+</ul>
+</div><div class="slide">
+<h1 id="съвети">Съвети</h1>
+<ul>
+<li>Карайте стъпка по стъпка и няма да имате проблеми. Правете "актьорите" един по един, движете ги, проверявайте дали всичко е наред.</li>
+<li>Пишете си функции за дебъгване -- за чертаене на кутийка около противника, например, да видите дали collision-а работи като хората. За проверка къде са координатите на мишката, etc.</li>
+<li>Извличайте константи с добри имена: <code>PLAYER_MOVE_SPEED</code>, <code>GRAVITY_ACCELERATION</code> са добри константи, които може лесно да промените за дебъгване и натаманяване. <code>THIRTY_TWO</code> и <code>FIVE_HUNDRED</code> не са.</li>
+<li>Удобно е "скъпи" операции да не се случват при конструиране, а с отделен метод. Но трябва да жонглирате <code>Option</code>-и, така че е tradeoff.</li>
+<li>При проблеми с performance, първо пробвайте да пуснете кода с <code>--release</code>.</li>
+</ul>
+</div><div class="slide">
+<h1 id="ресурси">Ресурси</h1>
+<ul>
+<li>Shooter играта: <a href="https://github.com/AndrewRadev/rust-shooter" target="_blank">rust-shooter</a></li>
+<li>Memory играта (недовършена): <a href="https://github.com/AndrewRadev/rust-memory-game" target="_blank">rust-memory-game</a></li>
+<li>Примерите от документацията (astroblasto): <a href="https://github.com/ggez/ggez/blob/master/examples" target="_blank">examples</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="ресурси">Ресурси</h1>
+<ul>
+<li>Shooter играта: <a href="https://github.com/AndrewRadev/rust-shooter" target="_blank">rust-shooter</a></li>
+<li>Memory играта (недовършена): <a href="https://github.com/AndrewRadev/rust-memory-game" target="_blank">rust-memory-game</a></li>
+<li>Примерите от документацията (astroblasto): <a href="https://github.com/ggez/ggez/blob/master/examples" target="_blank">examples</a></li>
+<li>Звукови ефекти: <a href="https://freesound.org/" target="_blank">Freesound</a></li>
+<li>Картинки: <a href="https://kenney.nl/" target="_blank">Kenney</a></li>
+<li>Анимации: <a href="https://github.com/HannesMann/keyframe" target="_blank">keyframe</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="ресурси">Ресурси</h1>
+<ul>
+<li>Shooter играта: <a href="https://github.com/AndrewRadev/rust-shooter" target="_blank">rust-shooter</a></li>
+<li>Memory играта (недовършена): <a href="https://github.com/AndrewRadev/rust-memory-game" target="_blank">rust-memory-game</a></li>
+<li>Примерите от документацията (astroblasto): <a href="https://github.com/ggez/ggez/blob/master/examples" target="_blank">examples</a></li>
+<li>Звукови ефекти: <a href="https://freesound.org/" target="_blank">Freesound</a></li>
+<li>Картинки: <a href="https://kenney.nl/" target="_blank">Kenney</a></li>
+<li>Анимации: <a href="https://github.com/HannesMann/keyframe" target="_blank">keyframe</a></li>
+<li>Лекция от RustFest Zurich: <a href="https://youtu.be/str_mex__0M" target="_blank">Beyonce Brawles</a></li>
+<li>По-генерална помощ за gamedev (множко за простичък проект, но интересно четиво in general): <a href="http://gameprogrammingpatterns.com/" target="_blank">Game Programming Patterns</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="други-варианти-за-игри">Други варианти за игри</h1>
+<h2 id="ecs">ECS</h2>
+<ul>
+<li>Bevy: <a href="https://bevyengine.org/" target="_blank">https://bevyengine.org/</a><ul>
+<li>also see, <a href="https://www.reddit.com/r/rust/comments/kli3xo/bevy_crossterm_program_terminal_games_using_bevy/" target="_blank">bevy_crossterm</a></li></ul></li>
+<li>Godot (само че там има GUI и custom scripting език): <a href="https://godot-rust.github.io/" target="_blank">godot-rust</a></li>
+<li>Amethyst: <a href="https://amethyst.rs/" target="_blank">https://amethyst.rs/</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="други-варианти-за-игри">Други варианти за игри</h1>
+<h2 id="ecs">ECS</h2>
+<ul>
+<li>Bevy: <a href="https://bevyengine.org/" target="_blank">https://bevyengine.org/</a><ul>
+<li>also see, <a href="https://www.reddit.com/r/rust/comments/kli3xo/bevy_crossterm_program_terminal_games_using_bevy/" target="_blank">bevy_crossterm</a></li></ul></li>
+<li>Godot (само че там има GUI и custom scripting език): <a href="https://godot-rust.github.io/" target="_blank">godot-rust</a></li>
+<li>Amethyst: <a href="https://amethyst.rs/" target="_blank">https://amethyst.rs/</a></li>
+</ul>
+<h2 id="минималистични-подобно-на-ggez">Минималистични, подобно на GGEZ</h2>
+<ul>
+<li>Coffee: <a href="https://github.com/hecrj/coffee" target="_blank">https://github.com/hecrj/coffee</a></li>
+<li>Tetra: <a href="https://github.com/17cupsofcoffee/tetra" target="_blank">https://github.com/17cupsofcoffee/tetra</a></li>
+<li>GGEZ, ама за браузъра: <a href="https://github.com/ggez/good-web-game" target="_blank">https://github.com/ggez/good-web-game</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="други-варианти-за-игри">Други варианти за игри</h1>
+<h2 id="ecs">ECS</h2>
+<ul>
+<li>Bevy: <a href="https://bevyengine.org/" target="_blank">https://bevyengine.org/</a><ul>
+<li>also see, <a href="https://www.reddit.com/r/rust/comments/kli3xo/bevy_crossterm_program_terminal_games_using_bevy/" target="_blank">bevy_crossterm</a></li></ul></li>
+<li>Godot (само че там има GUI и custom scripting език): <a href="https://godot-rust.github.io/" target="_blank">godot-rust</a></li>
+<li>Amethyst: <a href="https://amethyst.rs/" target="_blank">https://amethyst.rs/</a></li>
+</ul>
+<h2 id="минималистични-подобно-на-ggez">Минималистични, подобно на GGEZ</h2>
+<ul>
+<li>Coffee: <a href="https://github.com/hecrj/coffee" target="_blank">https://github.com/hecrj/coffee</a></li>
+<li>Tetra: <a href="https://github.com/17cupsofcoffee/tetra" target="_blank">https://github.com/17cupsofcoffee/tetra</a></li>
+<li>GGEZ, ама за браузъра: <a href="https://github.com/ggez/good-web-game" target="_blank">https://github.com/ggez/good-web-game</a></li>
+</ul>
+<h2 id="сравнение">Сравнение</h2>
+<ul>
+<li>Мнението на автора на GGEZ за съществуващите библиотеки: <a href="https://wiki.alopex.li/AGuideToRustGameFrameworks2019" target="_blank">https://wiki.alopex.li/AGuideToRustGameFrameworks2019</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="въпроси">Въпроси</h1>
+</div>
+    </main>
+</body>
+</html>
