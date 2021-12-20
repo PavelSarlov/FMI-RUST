@@ -30,12 +30,19 @@ impl Camera {
         self.forward = rot_mat_y.transform_point3(self.forward);
     }
 
-    pub fn translate(&mut self, translation: Vec3) {
-        let mat_translate = Mat4::from_translation(translation * self.up + translation * self.forward + translation * self.right);
+    pub fn translate_right(&mut self, dist: f32) {
+        let mat_translate = Mat4::from_translation(self.right * dist);
         self.center = mat_translate.transform_point3(self.center);
-        self.up = mat_translate.transform_point3(self.up);
-        self.forward = mat_translate.transform_point3(self.forward);
-        self.right = mat_translate.transform_point3(self.right);
+    }
+
+    pub fn translate_up(&mut self, dist: f32) {
+        let mat_translate = Mat4::from_translation(self.up * dist);
+        self.center = mat_translate.transform_point3(self.center);
+    }
+
+    pub fn translate_forward(&mut self, dist: f32) {
+        let mat_translate = Mat4::from_translation(self.forward * dist);
+        self.center = mat_translate.transform_point3(self.center);
     }
 }
 

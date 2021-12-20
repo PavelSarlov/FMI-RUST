@@ -20,64 +20,39 @@ use std::{
     thread,
 };
 
-use project::camera::Camera;
-
-
-#[derive(Clone, Debug)]
-pub struct VertexWrap {
-    position: Vec3,
-    texcoord: Vec2,
-}
-
-impl VertexWrap {
-    pub fn new(position: Vec3, texcoord: Vec2) -> Self {
-        VertexWrap {
-            position,
-            texcoord,
-        }
-    }
-}
-
-impl Into<Vertex> for VertexWrap {
-    fn into(self) -> Vertex {
-        Vertex {
-            pos: [self.position.x, self.position.y],
-            uv: [self.texcoord.x, self.texcoord.y],
-            color: Color::WHITE.into(),
-        }
-    }
-}
-
-impl Into<Point2<f32>> for VertexWrap {
-    fn into(self) -> Point2<f32> {
-        Point2 {
-            x: self.position.x as f32,
-            y: self.position.y as f32,
-        }
-    }
-}
-
-impl Into<Vec3> for VertexWrap {
-    fn into(self) -> Vec3 {
-        self.position
-    }
-}
+use project::{
+    camera::Camera,
+    vertex_wrap::VertexWrap,
+};
 
 struct MainState {
-    camera: Camera,
     screen_width: f32,
     screen_height: f32,
+    fov_rad: f32,
+    aspect_ratio: f32,
+    far: f32,
+    near: f32,
+    camera: Camera,
 }
 
 impl MainState {
     fn new(_ctx: &mut Context, conf: &Conf) -> GameResult<MainState> {
         let screen_width = conf.window_mode.width;
         let screen_height = conf.window_mode.height;
+        let fov_rad = 3.14159 * 0.5;
+        let aspect_ratio = screen_height / screen_width;
+        let far = 0.1;
+        let near = 1000.0;
+        let camera = Camera::new(Vec3::new(0.0,0.0,1.0), Vec3::new(0.0,1.0,0.0), Vec3::new(0.0,0.0,0.0));
 
         let s = MainState {
-            camera: Camera::new(Vec3::new(0.0,0.0,1.0), Vec3::new(0.0,1.0,0.0), Vec3::new(0.0,0.0,0.0)),
             screen_width,
             screen_height,
+            fov_rad,
+            aspect_ratio,
+            far,
+            near,
+            camera,
         };
         Ok(s)
     }
@@ -93,22 +68,22 @@ impl event::EventHandler<ggez::GameError> for MainState {
         }
 
         if input::keyboard::is_key_pressed(ctx, KeyCode::A) {
-            self.camera.translate(Vec3::new(0.1, 0.0, 0.0));
+            self.camera.translate_right(0.1);
         }
         if input::keyboard::is_key_pressed(ctx, KeyCode::D) {
-            self.camera.translate(Vec3::new(-0.1, 0.0, 0.0));
+            self.camera.translate_right(-0.1);
         }
         if input::keyboard::is_key_pressed(ctx, KeyCode::W) {
-            self.camera.translate(Vec3::new(0.0, 0.0, -0.1));
+            self.camera.translate_forward(-0.1);
         }
         if input::keyboard::is_key_pressed(ctx, KeyCode::S) {
-            self.camera.translate(Vec3::new(0.0, 0.0, 0.1));
+            self.camera.translate_forward(0.1);
         }
         if input::keyboard::is_key_pressed(ctx, KeyCode::Space) {
-            self.camera.translate(Vec3::new(0.0, -0.1, 0.0));
+            self.camera.translate_up(0.1);
         }
         if input::keyboard::is_key_pressed(ctx, KeyCode::LShift) {
-            self.camera.translate(Vec3::new(0.0, 0.1, 0.0));
+            self.camera.translate_up(-0.1);
         }
 
         Ok(())
@@ -116,11 +91,6 @@ impl event::EventHandler<ggez::GameError> for MainState {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         graphics::clear(ctx, [0.1, 0.2, 0.3, 1.0].into());
-
-        let fov_rad = 3.14159 * 0.5;
-        let aspect_ratio = self.screen_height / self.screen_width;
-        let far = 0.1;
-        let near = 1000.0;
 
         let texcoord_list = &[
             Vec2::new(0.0,0.0),
@@ -214,10 +184,10 @@ impl event::EventHandler<ggez::GameError> for MainState {
         //         -4.0,4.0
         //     );
         let mat_proj = Mat4::perspective_lh(
-            fov_rad,
-            aspect_ratio,
-            near,
-            far
+            self.fov_rad,
+            self.aspect_ratio,
+            self.near,
+            self.far
         );
 
         for x in verts.iter_mut() {
