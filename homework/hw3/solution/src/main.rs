@@ -1,3 +1,4 @@
+use solution::solution::*;
+
 fn main() {
-    println!("Hello, world!");
 }
