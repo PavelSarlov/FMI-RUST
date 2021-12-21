@@ -23,9 +23,13 @@ use std::{
 use project::{
     camera::Camera,
     vertex_wrap::VertexWrap,
+    vertex_buffer::VertexBuffer,
+    index_buffer::IndexBuffer,
 };
 
 struct MainState {
+    vertex_buffer: VertexBuffer,
+    index_buffer: IndexBuffer,
     screen_width: f32,
     screen_height: f32,
     fov_rad: f32,
@@ -37,15 +41,19 @@ struct MainState {
 
 impl MainState {
     fn new(_ctx: &mut Context, conf: &Conf) -> GameResult<MainState> {
+        let vertex_buffer = VertexBuffer::new();
+        let index_buffer = IndexBuffer::new();
         let screen_width = conf.window_mode.width;
         let screen_height = conf.window_mode.height;
         let fov_rad = 3.14159 * 0.5;
         let aspect_ratio = screen_height / screen_width;
         let far = 0.1;
         let near = 1000.0;
-        let camera = Camera::new(Vec3::new(0.0,0.0,1.0), Vec3::new(0.0,1.0,0.0), Vec3::new(0.0,0.0,0.0));
+        let camera = Camera::new(Vec3::new(0.0,0.0,1.0), Vec3::new(0.0,1.0,0.0), Vec3::new(0.0,0.0,-1.0));
 
         let s = MainState {
+            vertex_buffer,
+            index_buffer,
             screen_width,
             screen_height,
             fov_rad,

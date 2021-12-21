@@ -1,11 +1,19 @@
 pub struct IndexBuffer {
-    indices: &[u32],   
+    indices: Option<&[u32]>,
 }
 
 impl IndexBuffer {
-    pub fn new(indices: &[u32]) -> Self {
+    pub fn new() -> Self {
         IndexBuffer {
-            indices,
+            None,
         }
+    }
+
+    pub fn set(&mut self, indices: &[u32]) {
+        self.indices = Some(indices.clone());
+    }
+
+    pub fn get(&mut self) -> Option<&[u32]> {
+        self.indices
     }
 }

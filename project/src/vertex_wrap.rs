@@ -1,6 +1,6 @@
 use glam::*;
 use ggez::{
-    graphics::{self,Color,Vertex},
+    graphics::{Color,Vertex},
     mint::{Point2},
 };
 

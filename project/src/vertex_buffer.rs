@@ -1,13 +1,21 @@
 use crate::vertex_wrap::VertexWrap;
 
 pub struct VertexBuffer {
-    verts: &[VertexWrap];
+    verts: Option<&[VertexWrap]>,
 }
 
 impl VertexBuffer {
-    pub fn new(verts: &[VertexWrap]) -> Self {
+    pub fn new() -> Self {
         VertexBuffer {
-            verts,
+            None,
         }
+    }
+
+    pub fn set(&mut self, verts: &[VertexWrap]) {
+        self.verts = Some(verts.clone());
+    }
+
+    pub fn get(&mut self) -> Option<&[VertexWrap]> {
+        self.verts
     }
 }
