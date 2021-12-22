@@ -407,6 +407,7 @@ mod custom_tests {
 ## Links
 - room1 -> East -> room2
 - room2 -> West -> room3
+- room3 -> North -> room3
 ";
 
     const TEST_INPUT_2: &str = "";
@@ -447,6 +448,14 @@ mod custom_tests {
                 .name,
             "room2"
         );
+        assert_eq!(
+            dungeon
+                .get_next_room("room3", Direction::South)
+                .unwrap()
+                .unwrap()
+                .name,
+            "room3"
+        );
     }
 
     #[test]
@@ -474,7 +483,6 @@ mod custom_tests {
     }
 
     #[test]
-    #[should_panic]
     fn test_dungeon_path() {
         let dungeon = Dungeon::from_reader(TEST_INPUT_1.trim().as_bytes()).unwrap();
 
@@ -498,6 +506,12 @@ mod custom_tests {
                 .collect::<Vec<&str>>(),
             vec!["room2", "room3"]
         );
-        dungeon.find_path("room2", "room1").unwrap().unwrap();   // boom
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_dungeon_path_2() {
+        let dungeon = Dungeon::from_reader(TEST_INPUT_1.trim().as_bytes()).unwrap();
+        dungeon.find_path("room2", "room1").unwrap().unwrap();
     }
 }
