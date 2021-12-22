@@ -1,0 +1,1903 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <title>Unsafe Rust and FFI</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="rust,fmi">
+    <link rel="stylesheet" href="resources/codeblock/codeblock.css">
+<link rel="stylesheet" href="resources/frontend/controls.css">
+<link rel="stylesheet" href="resources/global/global.css">
+<link rel="stylesheet" href="resources/global/metadata.css">
+<link rel="stylesheet" href="resources/highlight/hljs-github.css">
+<link rel="stylesheet" href="resources/highlight/style.css">
+<link rel="stylesheet" href="resources/highlight/tshl-github.css">
+<link rel="stylesheet" href="resources/katex/katex.min.css">
+<link rel="stylesheet" href="resources/rustc/rustc.css">
+<link rel="stylesheet" href="resources/splitview/splitview.css">
+<link rel="stylesheet" href="resources/wrapping-pages/wrapping-pages.css">
+<script type="text/javascript" src="resources/codeblock/codeblock.js"></script>
+<script type="text/javascript" src="resources/frontend/controls.js"></script>
+</head>
+<body>
+    <main>
+        <div class="slide">
+<h1 id="unsafe-rust-and-ffi">Unsafe Rust and FFI</h1>
+<h3 id="21-декември-2021">21 декември 2021</h3>
+</div><div class="slide">
+<h1 id="административни-неща">Административни неща</h1>
+</div><div class="slide subslide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Пуснахме <a href="https://fmi.rust-lang.bg/tasks/3" target="_blank">домашно 3</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Пуснахме <a href="https://fmi.rust-lang.bg/tasks/3" target="_blank">домашно 3</a></li>
+<li>Няма да се провежда лекция на 23-ти</li>
+</ul>
+</div><div class="slide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Разглеждали сме малко unsafe Rust в минали лекции за указатели.</p>
+</div><div class="slide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Силната страна на Rust са статичните гаранции за поведението на програмата.</p>
+</div><div class="slide subslide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Силната страна на Rust са статичните гаранции за поведението на програмата.<br />
+<br><br />
+Но тези проверки са консервативни и съществуват програми, които са 'safe', но компилаторът не може да ги верифицира. За да може да пишем такива програми се налага да кажем на компилатора да смекчи ограниченията си.</p>
+</div><div class="slide subslide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Силната страна на Rust са статичните гаранции за поведението на програмата.<br />
+<br><br />
+Но тези проверки са консервативни и съществуват програми, които са 'safe', но компилаторът не може да ги верифицира. За да може да пишем такива програми се налага да кажем на компилатора да смекчи ограниченията си.<br />
+<br><br />
+За тази цел в Rust има ключовата дума <code>unsafe</code>, която премахва някои ограничения на компилатора.</p>
+</div><div class="slide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Блокове, маркирани с <code>unsafe</code>.</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">unsafe</span> {
+    <span class="tshl-comment">// Scary stuff...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide subslide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Блокове, маркирани с <code>unsafe</code>.</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">unsafe</span> {
+    <span class="tshl-comment">// Scary stuff...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Това е може би най-често срещаното използване на <code>unsafe</code>.</p>
+</div><div class="slide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p><code>unsafe</code> типажи.</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">unsafe</span> <span class="tshl-keyword">trait</span> <span class="tshl-type">Scary</span> { ... }</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Вече сме ги виждали впрочем, най-често използваните са</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">pub</span> <span class="tshl-keyword">unsafe</span> auto <span class="tshl-keyword">trait</span> <span class="tshl-type">Send</span> { }
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">unsafe</span> auto <span class="tshl-keyword">trait</span> <span class="tshl-type">Sync</span> { }</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Както знаем вече, те се имплементират автоматично върху типове, които компилатора сметне за подходящи.</p>
+<p>Но специално <code>Send</code> и <code>Sync</code> може да ги деимплементираме с <code>!</code>, когато не искаме да се имплементират за типа ни.</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">impl</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> !<span class="tshl-constructor">Sync</span> <span class="tshl-keyword">for</span> <span class="tshl-type">Rc</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">T</span><span class="tshl-punctuation_bracket">&gt;</span> <span class="tshl-keyword">where</span> <span class="tshl-type">T</span>: ?<span class="tshl-type">Sized</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Понякога може да имаме обратното - <code>Send</code> или <code>Sync</code> да <em>не</em> са имплементирани за наш тип, но всъщност да е правилно да бъдат имплементирани.</p>
+</div><div class="slide subslide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Понякога може да имаме обратното - <code>Send</code> или <code>Sync</code> да <em>не</em> са имплементирани за наш тип, но всъщност да е правилно да бъдат имплементирани.<br />
+<br><br />
+Тогава може да си ги имплементираме сами, но това е <code>unsafe</code>, защото има шанс да нарушим гаранциите на компилатора.<br />
+В този случай трябва сами да гарантираме, че семантиките, които репрезентират типажите, са спазени.</p>
+</div><div class="slide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Тогава може да ги имплементираме по следния начин.</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">unsafe</span> <span class="tshl-keyword">impl</span> <span class="tshl-type">Scary</span> <span class="tshl-keyword">for</span> <span class="tshl-type_builtin">i32</span> { ... }</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Ако програмата ни segfault-ва, може да сме сигурни, че това се случва в <code>unsafe</code> код.</p>
+</div><div class="slide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Има неща които не искаме да се случват в програмата ни, но компилаторът не проверява за тях по една или друга причина…</p>
+</div><div class="slide subslide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Има неща които не искаме да се случват в програмата ни, но компилаторът не проверява за тях по една или друга причина…</p>
+<ul>
+<li>Deadlocks</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Има неща които не искаме да се случват в програмата ни, но компилаторът не проверява за тях по една или друга причина…</p>
+<ul>
+<li>Deadlocks</li>
+<li>Leaks of memory or other resources</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Има неща които не искаме да се случват в програмата ни, но компилаторът не проверява за тях по една или друга причина…</p>
+<ul>
+<li>Deadlocks</li>
+<li>Leaks of memory or other resources</li>
+<li>Exiting without calling destructors</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Има неща които не искаме да се случват в програмата ни, но компилаторът не проверява за тях по една или друга причина…</p>
+<ul>
+<li>Deadlocks</li>
+<li>Leaks of memory or other resources</li>
+<li>Exiting without calling destructors</li>
+<li>Integer overflow</li>
+</ul>
+</div><div class="slide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>…има и неща които може да направим в <code>unsafe</code> код, но е добре да ги избягваме.</p>
+<ul>
+<li>Data races</li>
+<li>Dereferencing a NULL/dangling raw pointer</li>
+<li>Reads of undef (uninitialized) memory</li>
+<li>Breaking the pointer aliasing rules with raw pointers.</li>
+<li>Mutating an immutable value/reference without <code>UnsafeCell&lt;U&gt;</code></li>
+<li>Invoking undefined behavior via compiler intrinsics</li>
+<li>Invalid values in primitive types, even in private fields/locals</li>
+<li>Unwinding into Rust from foreign code or unwinding from Rust into foreign code.</li>
+</ul>
+</div><div class="slide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Чрез <code>unsafe</code>, Rust ни предоставя точно 5 неща които не можем да правим при нормални обстоятелства:</p>
+<ol>
+<li>Четене и писане в static mutable променливи.</li>
+<li>Дереференциране на голи указатели.</li>
+<li>Извикване на <code>unsafe</code> функции.</li>
+<li>Имплементиране на <code>unsafe</code> типажи.</li>
+<li>Достъп до полетата на <code>union</code>.</li>
+</ol>
+</div><div class="slide subslide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Чрез <code>unsafe</code>, Rust ни предоставя точно 5 неща които не можем да правим при нормални обстоятелства:</p>
+<ol>
+<li>Четене и писане в static mutable променливи.</li>
+<li>Дереференциране на голи указатели.</li>
+<li>Извикване на <code>unsafe</code> функции.</li>
+<li>Имплементиране на <code>unsafe</code> типажи.</li>
+<li>Достъп до полетата на <code>union</code>.<br />
+<br><br />
+Когато използвате <code>unsafe</code>, няма да изключите правила на компилатора като borrow checker.</li>
+</ol>
+</div><div class="slide">
+<h1 id="union">Union</h1>
+<p>Синтаксисът е сходен с този на структурите, но полетата на union-ите споделят една и съща памет.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="905ad5f65d2b7a44049a91fcb92363bfbaa33b08">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">union</span> <span class="tshl-type">U</span> {
+    <span class="tshl-property">a</span>: <span class="tshl-type_builtin">u32</span>,
+    <span class="tshl-property">b</span>: <span class="tshl-type_builtin">bool</span>,
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="905ad5f65d2b7a44049a91fcb92363bfbaa33b08">union U {
+    a: u32,
+    b: bool,
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<p>Всички функции които използваме чрез FFI трябва да се маркират като <code>unsafe</code>.</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">unsafe</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">danger_will_robinson</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-comment">// Scary stuff...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<h3 id="ffi">FFI</h3>
+<p>Какво означава FFI?</p>
+</div><div class="slide subslide">
+<h1 id="unsafe-rust">Unsafe Rust</h1>
+<h3 id="ffi">FFI</h3>
+<p>Какво означава FFI?<br />
+<br><br />
+Foreign Function Interface</p>
+</div><div class="slide">
+<h1 id="ffi">FFI</h1>
+<p>За какво се ползва?</p>
+</div><div class="slide subslide">
+<h1 id="ffi">FFI</h1>
+<p>За какво се ползва?<br />
+<br><br />
+За извикване на функции, които не са написани в нашият код.<br />
+Това са най-често функции в библиотеки (<code>.lib/.а</code>, <code>.dll/.so</code> и т.н.), върху които нямаме контрол.</p>
+</div><div class="slide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="cc language-c hljs"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">add_in_c</span><span class="hljs-params">(<span class="hljs-keyword">int</span> a, <span class="hljs-keyword">int</span> b)</span> </span>{
+    <span class="hljs-keyword">return</span> a + b;
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>os<span class="tshl-punctuation_delimiter">::</span>raw<span class="tshl-punctuation_delimiter">::</span>c_int<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">extern</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add_in_c</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type">c_int</span>, <span class="tshl-variable_parameter">b</span>: <span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="extern">extern</h3>
+</div><div class="slide subslide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="extern">extern</h3>
+<ul>
+<li>extern блок дефинира символи (функции или глобални променливи) към които ще се линква</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="extern">extern</h3>
+<ul>
+<li>extern блок дефинира символи (функции или глобални променливи) към които ще се линква</li>
+<li>типа на дефинираните функции е <code>extern "&lt;abi&gt;" unsafe fn(...) -&gt; ...</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="extern">extern</h3>
+<ul>
+<li>extern блок дефинира символи (функции или глобални променливи) към които ще се линква</li>
+<li>типа на дефинираните функции е <code>extern "&lt;abi&gt;" unsafe fn(...) -&gt; ...</code></li>
+<li>add_in_c: <code>extern "C" unsafe fn(c_int, c_int) -&gt; c_int</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="extern">extern</h3>
+<p>Външни функции са unsafe, защото компилаторът не може да гарантира, че работят правилно.</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">extern</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add_in_c</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type">c_int</span>, <span class="tshl-variable_parameter">b</span>: <span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> res = <span class="tshl-keyword">unsafe</span> { <span class="tshl-function">add_in_c</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">1</span>, <span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span> }<span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, res<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="calling-convention">Calling convention</h3>
+<p>Calling conventions се задават на extern блока. По подразбиране е <code>"C"</code>.</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">extern</span> <span class="tshl-string">&quot;C&quot;</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add_in_c</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type">c_int</span>, <span class="tshl-variable_parameter">b</span>: <span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-keyword">extern</span> <span class="tshl-string">&quot;system&quot;</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-constructor">SetEnvironmentVariableA</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">n</span>: <span class="tshl-operator">*</span><span class="tshl-keyword">const</span> <span class="tshl-type_builtin">u8</span>, <span class="tshl-variable_parameter">v</span>: <span class="tshl-operator">*</span><span class="tshl-keyword">const</span> <span class="tshl-type_builtin">u8</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="calling-convention">Calling convention</h3>
+<p>За какво служи конвенцията на извикване на функции?</p>
+</div><div class="slide subslide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="calling-convention">Calling convention</h3>
+<p>За какво служи конвенцията на извикване на функции?<br />
+<br><br />
+За да уеднакви правилата които трябва да спазват извикващата и извиканата функция, така че да няма разминаване при подаване на параметри и връщане на стойност.</p>
+</div><div class="slide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="calling-convention">Calling convention</h3>
+<p>Ако нямаше конвенция, извикването на функции щеше да е хаос.</p>
+<p>Най-общо може да сведем правилата, които конвенцията определя до:</p>
+</div><div class="slide subslide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="calling-convention">Calling convention</h3>
+<p>Ако нямаше конвенция, извикването на функции щеше да е хаос.</p>
+<p>Най-общо може да сведем правилата, които конвенцията определя до:</p>
+<ul>
+<li>как се подават параметрите (в регистри, на стека или и двете)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="calling-convention">Calling convention</h3>
+<p>Ако нямаше конвенция, извикването на функции щеше да е хаос.</p>
+<p>Най-общо може да сведем правилата, които конвенцията определя до:</p>
+<ul>
+<li>как се подават параметрите (в регистри, на стека или и двете)</li>
+<li>реда в който се алокират променливите</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="calling-convention">Calling convention</h3>
+<p>Ако нямаше конвенция, извикването на функции щеше да е хаос.</p>
+<p>Най-общо може да сведем правилата, които конвенцията определя до:</p>
+<ul>
+<li>как се подават параметрите (в регистри, на стека или и двете)</li>
+<li>реда в който се алокират променливите</li>
+<li>по какъв начин се връщат стойности от извиканата функция</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="calling-convention">Calling convention</h3>
+<p>Ако нямаше конвенция, извикването на функции щеше да е хаос.</p>
+<p>Най-общо може да сведем правилата, които конвенцията определя до:</p>
+<ul>
+<li>как се подават параметрите (в регистри, на стека или и двете)</li>
+<li>реда в който се алокират променливите</li>
+<li>по какъв начин се връщат стойности от извиканата функция</li>
+<li>регистрите, които извиканата функция трябва да запази (callee-saved registers)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="calling-convention">Calling convention</h3>
+<p>Ако нямаше конвенция, извикването на функции щеше да е хаос.</p>
+<p>Най-общо може да сведем правилата, които конвенцията определя до:</p>
+<ul>
+<li>как се подават параметрите (в регистри, на стека или и двете)</li>
+<li>реда в който се алокират променливите</li>
+<li>по какъв начин се връщат стойности от извиканата функция</li>
+<li>регистрите, които извиканата функция трябва да запази (callee-saved registers)</li>
+<li>разпределението на подготовката на стека и зачистването му между извикващата и извиканата функция</li>
+</ul>
+</div><div class="slide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="calling-convention">Calling convention</h3>
+<p>За любопитните, разпространени x86 конвенции са</p>
+<ul>
+<li><code>cdecl</code></li>
+<li><code>pascal</code></li>
+<li><code>fastcall</code>, <code>thiscall</code>, <code>stdcall</code>, <code>vectorcall</code> - Windows</li>
+<li><code>Microsoft x64 calling convention</code> - Windows</li>
+<li><code>System V AMD64 ABI</code> - Unix и Unix-like операционни системи</li>
+</ul>
+</div><div class="slide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="calling-convention">Calling convention</h3>
+<p>Calling convention-а задължително трябва да съвпада с това как е компилирана функцията в библиотеката.</p>
+</div><div class="slide subslide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="calling-convention">Calling convention</h3>
+<p>Calling convention-а задължително трябва да съвпада с това как е компилирана функцията в библиотеката.</p>
+<ul>
+<li><code>"Rust"</code> - каквото rustc използва за нормалните функции. Не се използва при FFI.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="calling-convention">Calling convention</h3>
+<p>Calling convention-а задължително трябва да съвпада с това как е компилирана функцията в библиотеката.</p>
+<ul>
+<li><code>"Rust"</code> - каквото rustc използва за нормалните функции. Не се използва при FFI.</li>
+<li><code>"C"</code> - каквото C компилаторът използва по подразбиране. Това почти винаги е правилното, освен ако не е казано друго изрично или библиотеката е компилирана с друг компилатор.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<h3 id="calling-convention">Calling convention</h3>
+<p>Calling convention-а задължително трябва да съвпада с това как е компилирана функцията в библиотеката.</p>
+<ul>
+<li><code>"Rust"</code> - каквото rustc използва за нормалните функции. Не се използва при FFI.</li>
+<li><code>"C"</code> - каквото C компилаторът използва по подразбиране. Това почти винаги е правилното, освен ако не е казано друго изрично или библиотеката е компилирана с друг компилатор.</li>
+<li><code>"system"</code> - използва се за системни функции (на Windows). Или просто използвайте crate-а winapi.</li>
+</ul>
+</div><div class="slide">
+<h1 id="викане-на-c-функции-от-rust">Викане на C функции от Rust</h1>
+<p>Нека да пробваме да компилираме</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="df8618577ecb652a8a0d873977025ed4a2695877">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>os<span class="tshl-punctuation_delimiter">::</span>raw<span class="tshl-punctuation_delimiter">::</span>c_int<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">extern</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add_in_c</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type">c_int</span>, <span class="tshl-variable_parameter">b</span>: <span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> res = <span class="tshl-keyword">unsafe</span> {
+        <span class="tshl-function">add_in_c</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">1</span>, <span class="tshl-constant_builtin">2</span><span class="tshl-punctuation_bracket">)</span>
+    }<span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, res<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">: linking with `cc` failed: exit status: 1</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: "cc" "-m64" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_df8618577ecb652a8a0d873977025ed4a2695877-6d99d3c55ff28718.1idgoatiofb2t7dw.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_df8618577ecb652a8a0d873977025ed4a2695877-6d99d3c55ff28718.1sp2ex8lk5rsg8v8.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_df8618577ecb652a8a0d873977025ed4a2695877-6d99d3c55ff28718.2v8en1l4v1lsrxcv.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_df8618577ecb652a8a0d873977025ed4a2695877-6d99d3c55ff28718.36nahqlicpl8f3tl.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_df8618577ecb652a8a0d873977025ed4a2695877-6d99d3c55ff28718.4m83n15q2cpeg95g.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_df8618577ecb652a8a0d873977025ed4a2695877-6d99d3c55ff28718.4uj6vcs2ekhts8md.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_df8618577ecb652a8a0d873977025ed4a2695877-6d99d3c55ff28718.589cxn4cix7pevis.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_df8618577ecb652a8a0d873977025ed4a2695877-6d99d3c55ff28718.5ig3s8vhjb9ka9y.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_df8618577ecb652a8a0d873977025ed4a2695877-6d99d3c55ff28718.9pixpzkig87yrn6.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_df8618577ecb652a8a0d873977025ed4a2695877-6d99d3c55ff28718.154t5kukhjp5gl45.rcgu.o" "-Wl,--as-needed" "-L" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps" "-L" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-Wl,--start-group" "-Wl,-Bstatic" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-7c582493123fc1dd.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libpanic_unwind-1392776590706175.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libminiz_oxide-2eb6edf4d031cd1e.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libadler-33a7ad3b5f7fedf6.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libobject-7d32adce541987d9.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libmemchr-5cb369120f224726.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libaddr2line-6ab2efd1d2f431a9.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libgimli-567f611439253c7e.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd_detect-ebbc63efd6d2efc5.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/librustc_demangle-862830f0d224a2e1.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libhashbrown-cad0401ae7a80e32.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/librustc_std_workspace_alloc-fd54290077194763.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libunwind-4fc3313c8ccb1ec0.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libcfg_if-19bf8dffe82b09d4.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/liblibc-afc95b1640c4beca.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/liballoc-aff6658baa87e3d1.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/librustc_std_workspace_core-8be8a1689a4f7b48.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libcore-5284934f66073844.rlib" "-Wl,--end-group" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libcompiler_builtins-2a0b2a4f96acb821.rlib" "-Wl,-Bdynamic" "-lgcc_s" "-lutil" "-lrt" "-lpthread" "-lm" "-ldl" "-lc" "-Wl,--eh-frame-hdr" "-Wl,-znoexecstack" "-L" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_df8618577ecb652a8a0d873977025ed4a2695877-6d99d3c55ff28718" "-Wl,--gc-sections" "-pie" "-Wl,-zrelro" "-Wl,-znow" "-nodefaultlibs"
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: /usr/bin/ld: /home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_df8618577ecb652a8a0d873977025ed4a2695877-6d99d3c55ff28718.4uj6vcs2ekhts8md.rcgu.o: in function `main_df8618577ecb652a8a0d873977025ed4a2695877::main':
+          /main_df8618577ecb652a8a0d873977025ed4a2695877.rs:9: undefined reference to `add_in_c'
+          collect2: error: ld returned 1 exit status
+          
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">help</span>: some `extern` functions couldn't be found; some native libraries may need to be installed or have their path specified
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: use the `-l` flag to specify native libraries to link
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: use the `cargo:rustc-link-lib` directive to specify the native libraries to link with Cargo (see https://doc.rust-lang.org/cargo/reference/build-scripts.html#cargorustc-link-libkindname)
+
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="df8618577ecb652a8a0d873977025ed4a2695877">use std::os::raw::c_int;
+
+extern {
+    fn add_in_c(a: c_int, b: c_int) -> c_int;
+}
+
+fn main() {
+    let res = unsafe {
+        add_in_c(1, 2)
+    };
+
+    println!("{}", res);
+}</pre>
+<p>Очаквано, не сме казали на компилатора къде да намери функцията</p>
+</div><div class="slide">
+<h1 id="linking">Linking</h1>
+<h3 id="ръчният-начин">Ръчният начин</h3>
+<div class="split-view" markdown="1"><div class="lhs" markdown="1"><p>Static linking</p>
+<p>компилираме C кода до math.lib / libmath.a</p>
+<p>
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">cargo rustc -- -L . -l math
+<span class="hljs-comment"># или</span>
+cargo rustc -- -L . -l static=math</code></pre>
+                    </div>
+                    
+                </div>
+                </p></div>
+<div class="rhs" markdown="1"><p>Dynamic linking</p>
+<p>компилираме C кода до math.dll / libmath.so</p>
+<p>
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">cargo rustc -- -L . -l math
+<span class="hljs-comment"># или</span>
+cargo rustc -- -L . -l dylib=math</code></pre>
+                    </div>
+                    
+                </div>
+                </p></div></div>
+</div><div class="slide">
+<h1 id="linking">Linking</h1>
+<h3 id="правилният-начин">Правилният начин</h3>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>link<span class="tshl-punctuation_bracket">(</span>name=<span class="tshl-string">&quot;math&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">extern</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add_in_c</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type">c_int</span>, <span class="tshl-variable_parameter">b</span>: <span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide subslide">
+<h1 id="linking">Linking</h1>
+<h3 id="правилният-начин">Правилният начин</h3>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>link<span class="tshl-punctuation_bracket">(</span>name=<span class="tshl-string">&quot;math&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">extern</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add_in_c</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type">c_int</span>, <span class="tshl-variable_parameter">b</span>: <span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<ul>
+<li><code>#[link(name="math")]</code> - линква към динамичната библиотека <code>math</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="linking">Linking</h1>
+<h3 id="правилният-начин">Правилният начин</h3>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>link<span class="tshl-punctuation_bracket">(</span>name=<span class="tshl-string">&quot;math&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">extern</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add_in_c</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type">c_int</span>, <span class="tshl-variable_parameter">b</span>: <span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<ul>
+<li><code>#[link(name="math")]</code> - линква към динамичната библиотека <code>math</code></li>
+<li><code>#[link(name="math", kind="static")]</code> - линква към статичната библиотека <code>math</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="linking">Linking</h1>
+<h3 id="правилният-начин">Правилният начин</h3>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>link<span class="tshl-punctuation_bracket">(</span>name=<span class="tshl-string">&quot;math&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">extern</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">add_in_c</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type">c_int</span>, <span class="tshl-variable_parameter">b</span>: <span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<ul>
+<li><code>#[link(name="math")]</code> - линква към динамичната библиотека <code>math</code></li>
+<li><code>#[link(name="math", kind="static")]</code> - линква към статичната библиотека <code>math</code></li>
+<li><code>#[link(name="math", kind="framework")]</code> - линква към MacOS framework <code>math</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="linking">Linking</h1>
+<h3 id="правилният-начин">Правилният начин</h3>
+</div><div class="slide subslide">
+<h1 id="linking">Linking</h1>
+<h3 id="правилният-начин">Правилният начин</h3>
+<ul>
+<li>Обикновено динамичните библиотеки се намират в някоя стандартна директория (зависи от операционната система, environment variables и конфигурационни файлове)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="linking">Linking</h1>
+<h3 id="правилният-начин">Правилният начин</h3>
+<ul>
+<li>Обикновено динамичните библиотеки се намират в някоя стандартна директория (зависи от операционната система, environment variables и конфигурационни файлове)</li>
+<li>Тогава <code>#[link(name="library_name")]</code> е достатъчно</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="linking">Linking</h1>
+<h3 id="правилният-начин">Правилният начин</h3>
+<ul>
+<li>Обикновено динамичните библиотеки се намират в някоя стандартна директория (зависи от операционната система, environment variables и конфигурационни файлове)</li>
+<li>Тогава <code>#[link(name="library_name")]</code> е достатъчно</li>
+<li>За статична библиотека все още трябва да кажем на компилатора къде да я намери</li>
+</ul>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">cargo rustc -- -L .</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="linking">Linking</h1>
+<h3 id="странности">Странности</h3>
+<p>Няма значение на кой блок е поставен <code>#[link(...)]</code> атрибутът.</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>link<span class="tshl-punctuation_bracket">(</span>name=<span class="tshl-string">&quot;foo&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>link<span class="tshl-punctuation_bracket">(</span>name=<span class="tshl-string">&quot;bar&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">extern</span> {}
+
+<span class="tshl-keyword">extern</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">foo_init</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">foo_stuff</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">x</span>: <span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-keyword">extern</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">bar_init</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">bar_stuff</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="build-scripts">Build scripts</h1>
+<p>Cargo предоставя възможност за изпълняване на скрипт преди компилиране на crate-a.</p>
+<p>Използва се при FFI, ако искаме сами да си компилираме C кода и да укажем как да се линкнем към него.</p>
+<p><a href="http://doc.crates.io/build-script.html" target="_blank">http://doc.crates.io/build-script.html</a></p>
+</div><div class="slide">
+<h1 id="build-scripts">Build scripts</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="tomltoml language-toml hljs"><span class="hljs-section">[package]</span>
+<span class="hljs-attr">name</span> = <span class="hljs-string">"ffi"</span>
+<span class="hljs-attr">version</span> = <span class="hljs-string">"0.1.0"</span>
+<span class="hljs-attr">authors</span> = [<span class="hljs-string">"..."</span>]
+<span class="hljs-attr">build</span> = <span class="hljs-string">"build.rs"</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// build.rs</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    ..<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property"></span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="build-scripts">Build scripts</h1>
+</div><div class="slide subslide">
+<h1 id="build-scripts">Build scripts</h1>
+<ul>
+<li>build.rs няма достъп до нормалните dependencies</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="build-scripts">Build scripts</h1>
+<ul>
+<li>build.rs няма достъп до нормалните dependencies</li>
+<li>вместо това използва build-dependencies</li>
+</ul>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="tomltoml language-toml hljs">[build-dependencies]
+...</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="build-scripts">Build scripts</h1>
+<ul>
+<li>cargo прихваща stdout на build скрипта</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="build-scripts">Build scripts</h1>
+<ul>
+<li>cargo прихваща stdout на build скрипта</li>
+<li>всеки ред който започва с <code>cargo:</code> се разбира като команда</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="build-scripts">Build scripts</h1>
+<ul>
+<li>cargo прихваща stdout на build скрипта</li>
+<li>всеки ред който започва с <code>cargo:</code> се разбира като команда</li>
+<li>форматът е <code>cargo:key=value</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="build-scripts">Build scripts</h1>
+<ul>
+<li>cargo прихваща stdout на build скрипта</li>
+<li>всеки ред който започва с <code>cargo:</code> се разбира като команда</li>
+<li>форматът е <code>cargo:key=value</code></li>
+<li><code>cargo:rustc-link-search=.</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="build-scripts">Build scripts</h1>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="103353e0c95a46a9bd68561421db25eb78e145f0">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// build.rs</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;cargo:rustc-link-search=.&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="103353e0c95a46a9bd68561421db25eb78e145f0">// build.rs
+
+fn main() {
+    println!("cargo:rustc-link-search=.");
+}</pre>
+</div><div class="slide">
+<h1 id="callbacks">Callbacks</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="cc language-c hljs"><span class="hljs-comment">// main.c</span>
+
+<span class="hljs-function"><span class="hljs-keyword">typedef</span> <span class="hljs-title">int</span> <span class="hljs-params">(*callback)</span><span class="hljs-params">(<span class="hljs-keyword">int</span>)</span></span>;
+
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">apply</span><span class="hljs-params">(<span class="hljs-keyword">int</span> a, callback op)</span> </span>{
+    <span class="hljs-keyword">return</span> op(a);
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// main.rs</span>
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>link<span class="tshl-punctuation_bracket">(</span>name=<span class="tshl-string">&quot;math&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">extern</span> <span class="tshl-string">&quot;C&quot;</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">apply</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type">c_int</span>, <span class="tshl-variable_parameter">op</span>: <span class="tshl-keyword">fn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">cube</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">x</span>: <span class="tshl-type_builtin">i32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i32</span> { x <span class="tshl-operator">*</span> x <span class="tshl-operator">*</span> x }
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, <span class="tshl-keyword">unsafe</span> { apply<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">11</span>, cube<span class="tshl-punctuation_bracket">)</span> }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="callbacks">Callbacks</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="cc language-c hljs"><span class="hljs-comment">// main.c</span>
+
+<span class="hljs-function"><span class="hljs-keyword">typedef</span> <span class="hljs-title">int</span> <span class="hljs-params">(*callback)</span><span class="hljs-params">(<span class="hljs-keyword">int</span>)</span></span>;
+
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">apply</span><span class="hljs-params">(<span class="hljs-keyword">int</span> a, callback op)</span> </span>{
+    <span class="hljs-keyword">return</span> op(a);
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="00831ccc8c58c48de66cefd63726757c274b7239">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// main.rs</span>
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>link<span class="tshl-punctuation_bracket">(</span>name=<span class="tshl-string">&quot;math&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">extern</span> <span class="tshl-string">&quot;C&quot;</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">apply</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type">c_int</span>, <span class="tshl-variable_parameter">op</span>: <span class="tshl-keyword">fn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">cube</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">x</span>: <span class="tshl-type_builtin">i32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i32</span> { x <span class="tshl-operator">*</span> x <span class="tshl-operator">*</span> x }
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, <span class="tshl-keyword">unsafe</span> { apply<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">11</span>, cube<span class="tshl-punctuation_bracket">)</span> }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(187,187,85)">warning</span><span style="font-weight:bold">: `extern` block uses type `fn(i32) -&gt; i32`, which is not FFI-safe</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_00831ccc8c58c48de66cefd63726757c274b7239.rs:6:28
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">6</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    fn apply(a: c_int, op: fn(c_int) -&gt; c_int) -&gt; c_int;
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                           <span style="font-weight:bold;color:rgb(187,187,85)">^^^^^^^^^^^^^^^^^^</span> <span style="font-weight:bold;color:rgb(187,187,85)">not FFI-safe</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: `#[warn(improper_ctypes)]` on by default
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">help</span>: consider using an `extern fn(...) -&gt; ...` function pointer instead
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: this function pointer has Rust-specific calling convention
+
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">: linking with `cc` failed: exit status: 1</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: "cc" "-m64" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_00831ccc8c58c48de66cefd63726757c274b7239-a9e0d3fdae7d69c8.13w3kx63x7t1uxn7.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_00831ccc8c58c48de66cefd63726757c274b7239-a9e0d3fdae7d69c8.1mwk2irtasww002h.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_00831ccc8c58c48de66cefd63726757c274b7239-a9e0d3fdae7d69c8.1p0pptu84x1u77z7.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_00831ccc8c58c48de66cefd63726757c274b7239-a9e0d3fdae7d69c8.1z21ddgzsna1dde2.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_00831ccc8c58c48de66cefd63726757c274b7239-a9e0d3fdae7d69c8.2ginqvh554bh3zv0.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_00831ccc8c58c48de66cefd63726757c274b7239-a9e0d3fdae7d69c8.2r7lot1gu2qy5f2u.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_00831ccc8c58c48de66cefd63726757c274b7239-a9e0d3fdae7d69c8.37ys26recabcqqvz.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_00831ccc8c58c48de66cefd63726757c274b7239-a9e0d3fdae7d69c8.4peqx0am4k8qyb3y.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_00831ccc8c58c48de66cefd63726757c274b7239-a9e0d3fdae7d69c8.57pb79r8kmke1mhu.rcgu.o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_00831ccc8c58c48de66cefd63726757c274b7239-a9e0d3fdae7d69c8.3va7i8v9ie0edwuw.rcgu.o" "-Wl,--as-needed" "-L" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps" "-L" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-lmath" "-Wl,--start-group" "-Wl,-Bstatic" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-7c582493123fc1dd.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libpanic_unwind-1392776590706175.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libminiz_oxide-2eb6edf4d031cd1e.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libadler-33a7ad3b5f7fedf6.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libobject-7d32adce541987d9.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libmemchr-5cb369120f224726.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libaddr2line-6ab2efd1d2f431a9.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libgimli-567f611439253c7e.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd_detect-ebbc63efd6d2efc5.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/librustc_demangle-862830f0d224a2e1.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libhashbrown-cad0401ae7a80e32.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/librustc_std_workspace_alloc-fd54290077194763.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libunwind-4fc3313c8ccb1ec0.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libcfg_if-19bf8dffe82b09d4.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/liblibc-afc95b1640c4beca.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/liballoc-aff6658baa87e3d1.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/librustc_std_workspace_core-8be8a1689a4f7b48.rlib" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libcore-5284934f66073844.rlib" "-Wl,--end-group" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libcompiler_builtins-2a0b2a4f96acb821.rlib" "-Wl,-Bdynamic" "-lgcc_s" "-lutil" "-lrt" "-lpthread" "-lm" "-ldl" "-lc" "-Wl,--eh-frame-hdr" "-Wl,-znoexecstack" "-L" "/home/andrew/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "/home/andrew/projects/rust-secrets/lectures/slides/output/resources/rustc/target/debug/deps/main_00831ccc8c58c48de66cefd63726757c274b7239-a9e0d3fdae7d69c8" "-Wl,--gc-sections" "-pie" "-Wl,-zrelro" "-Wl,-znow" "-nodefaultlibs"
+  <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: /usr/bin/ld: cannot find -lmath
+          collect2: error: ld returned 1 exit status
+          
+
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error; 1 warning emitted</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="00831ccc8c58c48de66cefd63726757c274b7239">use std::os::raw::c_int;
+
+#[link(name="math")]
+extern "C" {
+    fn apply(a: c_int, op: fn(c_int) -> c_int) -> c_int;
+}
+
+fn cube(x: i32) -> i32 { x * x * x }
+
+fn main() {
+    println!("{}", unsafe { apply(11, cube) });
+}</pre>
+</div><div class="slide">
+<h1 id="callbacks">Callbacks</h1>
+<p>Kомпилаторът ни подсказва:</p>
+</div><div class="slide subslide">
+<h1 id="callbacks">Callbacks</h1>
+<p>Kомпилаторът ни подсказва:</p>
+<ul>
+<li><code>apply</code> очаква <code>int (*callback)(int)</code>, т.е. <code>extern "C" fn(c_int) -&gt; c_int</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="callbacks">Callbacks</h1>
+<p>Kомпилаторът ни подсказва:</p>
+<ul>
+<li><code>apply</code> очаква <code>int (*callback)(int)</code>, т.е. <code>extern "C" fn(c_int) -&gt; c_int</code></li>
+<li>ние му подаваме <code>fn(c_int) -&gt; c_int</code>, т.е. <code>extern "Rust" fn(c_int) -&gt; c_int</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="callbacks">Callbacks</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// main.rs</span>
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>link<span class="tshl-punctuation_bracket">(</span>name=<span class="tshl-string">&quot;math&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">extern</span> <span class="tshl-string">&quot;C&quot;</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">apply</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type">c_int</span>, <span class="tshl-variable_parameter">op</span>: <span class="tshl-keyword">extern</span> <span class="tshl-keyword">fn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-keyword">extern</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">cube</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">x</span>: <span class="tshl-type_builtin">i32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i32</span> { x <span class="tshl-operator">*</span> x <span class="tshl-operator">*</span> x }
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, <span class="tshl-keyword">unsafe</span> { apply<span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">11</span>, cube<span class="tshl-punctuation_bracket">)</span> }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="panics">Panics</h1>
+<blockquote>
+  <p>A panic! across an FFI boundary is undefined behavior.</p>
+</blockquote>
+<p>Когато подаваме или експортираме rust функции трябва да се подсигурим, че те не могат да се панират. В тази ситуация е удобно да се използва <code>catch_unwind</code>.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="34d806b67a21007438cfff34c0205e576f8d2037">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>panic<span class="tshl-punctuation_delimiter">::</span>catch_unwind<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">extern</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">oh_no</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i32</span> {
+    <span class="tshl-keyword">let</span> result = <span class="tshl-function">catch_unwind</span><span class="tshl-punctuation_bracket">(</span>|| {
+        <span class="tshl-function_macro">panic</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Oops!&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-keyword">match</span> result {
+        <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span>_<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-constant_builtin">0</span>,
+        <span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span>_<span class="tshl-punctuation_bracket">)</span> =&gt; <span class="tshl-constant_builtin">1</span>,
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="34d806b67a21007438cfff34c0205e576f8d2037">fn main() {}
+use std::panic::catch_unwind;
+
+extern fn oh_no() -> i32 {
+    let result = catch_unwind(|| {
+        panic!("Oops!");
+    });
+
+    match result {
+        Ok(_) => 0,
+        Err(_) => 1,
+    }
+}</pre>
+</div><div class="slide">
+<h1 id="panics">Panics</h1>
+<p>NB! Не го използвайте за generic try/catch block!!</p>
+<p>Не е гарантирано, че ще хване всички паници, защото някои от тях са abort.</p>
+</div><div class="slide">
+<h1 id="exports">Exports</h1>
+<p>За експортиране на функции към C или друг език се налага да използваме <code>#[no_mangle]</code>, за да предотвратим промяна на името в генерираните символи на библиотеката.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="cdc7baed32381525dbde69e20df3daf9627ad97f">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>no_mangle<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">extern</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">call_me_from_c</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="cdc7baed32381525dbde69e20df3daf9627ad97f">#[no_mangle]
+extern fn call_me_from_c() {
+}
+fn main() {}</pre>
+</div><div class="slide">
+<h1 id="други-неща">Други неща</h1>
+<h3 id="variadic-functions">Variadic functions</h3>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#!<span class="tshl-punctuation_bracket">[</span>feature<span class="tshl-punctuation_bracket">(</span>c_variadic<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">unsafe</span> <span class="tshl-keyword">extern</span> <span class="tshl-string">&quot;C&quot;</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">n</span>: <span class="tshl-type_builtin">usize</span>, <span class="tshl-keyword">mut</span> args: ...<span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">usize</span> {
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> sum = <span class="tshl-constant_builtin">0</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">for</span> _ <span class="tshl-keyword">in</span> <span class="tshl-constant_builtin">0</span>..n {
+        sum += args<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">arg</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type_builtin">usize</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }
+    sum
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<h3 id="importing-global-variables">Importing global variables</h3>
+<div class="split-view" markdown="1"><div class="lhs" markdown="1"><p>
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="cc language-c hljs"><span class="hljs-keyword">extern</span> <span class="hljs-keyword">void</span>* magic;</code></pre>
+                    </div>
+                    
+                </div>
+                </p></div>
+<div class="rhs" markdown="1"><p>
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>os<span class="tshl-punctuation_delimiter">::</span>raw<span class="tshl-punctuation_delimiter">::</span>c_void<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">extern</span> {
+    <span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>no_mangle<span class="tshl-punctuation_bracket">]</span></span>
+    <span class="tshl-keyword">static</span> magic: <span class="tshl-operator">*</span><span class="tshl-keyword">const</span> <span class="tshl-type">c_void</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                </p></div></div>
+</div><div class="slide">
+<h1 id="writing-wrappers">Writing wrappers</h1>
+<p>Много често е удобно да напишем "rusty" интерфейс към библиотеката</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> libc<span class="tshl-punctuation_delimiter">::</span>{c_int, c_size_t}<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>link<span class="tshl-punctuation_bracket">(</span>name=<span class="tshl-string">&quot;math&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">extern</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">math_array_sum</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">arr</span>: <span class="tshl-operator">*</span><span class="tshl-keyword">const</span> <span class="tshl-type">c_int</span>, <span class="tshl-variable_parameter">len</span>: <span class="tshl-type">c_size_t</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-comment">/// Safe wrapper</span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">array_sum</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">arr</span>: <span class="tshl-operator">&amp;</span><span class="tshl-punctuation_bracket">[</span><span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">]</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span> {
+    <span class="tshl-keyword">unsafe</span> { <span class="tshl-function">math_array_sum</span><span class="tshl-punctuation_bracket">(</span>arr<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_ptr</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>, arr<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">len</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span> }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="writing-wrappers">Writing wrappers</h1>
+</div><div class="slide subslide">
+<h1 id="writing-wrappers">Writing wrappers</h1>
+<ul>
+<li>Конвертиране на кодове за грешки до <code>Option</code> или <code>Result</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="writing-wrappers">Writing wrappers</h1>
+<ul>
+<li>Конвертиране на кодове за грешки до <code>Option</code> или <code>Result</code></li>
+<li>Методи</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="writing-wrappers">Writing wrappers</h1>
+<ul>
+<li>Конвертиране на кодове за грешки до <code>Option</code> или <code>Result</code></li>
+<li>Методи</li>
+<li>Деструктори</li>
+</ul>
+</div><div class="slide">
+<h1 id="споделяне-на-структури">Споделяне на структури</h1>
+<p>Структурите в rust нямат определено подреждане на полетата.</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="cc language-c hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">FooBar</span> {</span>
+    <span class="hljs-keyword">int</span> foo;
+    <span class="hljs-keyword">short</span> bar;
+};
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">foobar</span><span class="hljs-params">(FooBar x)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">FooBar</span> {
+    <span class="tshl-property">foo</span>: <span class="tshl-type">c_int</span>,
+    <span class="tshl-property">bar</span>: <span class="tshl-type">c_short</span>,
+}
+
+<span class="tshl-keyword">extern</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">foobar</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">x</span>: <span class="tshl-type">FooBar</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="споделяне-на-структури">Споделяне на структури</h1>
+<p>Структурите в rust нямат определено подреждане на полетата.</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="cc language-c hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">FooBar</span> {</span>
+    <span class="hljs-keyword">int</span> foo;
+    <span class="hljs-keyword">short</span> bar;
+};
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">foobar</span><span class="hljs-params">(FooBar x)</span> </span>{
+    <span class="hljs-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="6d02c4ba60eade12e3231c62b2a0c34bf55cf37d">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">struct</span> <span class="tshl-type">FooBar</span> {
+    <span class="tshl-property">foo</span>: <span class="tshl-type">c_int</span>,
+    <span class="tshl-property">bar</span>: <span class="tshl-type">c_short</span>,
+}
+
+<span class="tshl-keyword">extern</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">foobar</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">x</span>: <span class="tshl-type">FooBar</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(187,187,85)">warning</span><span style="font-weight:bold">: `extern` block uses type `FooBar`, which is not FFI-safe</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_6d02c4ba60eade12e3231c62b2a0c34bf55cf37d.rs:10:18
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">10</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    fn foobar(x: FooBar);
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>                 <span style="font-weight:bold;color:rgb(187,187,85)">^^^^^^</span> <span style="font-weight:bold;color:rgb(187,187,85)">not FFI-safe</span>
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+   <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: `#[warn(improper_ctypes)]` on by default
+   <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">help</span>: consider adding a `#[repr(C)]` or `#[repr(transparent)]` attribute to this struct
+   <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: this struct has unspecified layout
+<span style="font-weight:bold;color:rgb(85,187,85)">note</span>: the type is defined here
+  <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_6d02c4ba60eade12e3231c62b2a0c34bf55cf37d.rs:4:1
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">4</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,187,85)">/</span> struct FooBar {
+<span style="font-weight:bold;color:rgb(85,85,255)">5</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,187,85)">|</span>     foo: c_int,
+<span style="font-weight:bold;color:rgb(85,85,255)">6</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,187,85)">|</span>     bar: c_short,
+<span style="font-weight:bold;color:rgb(85,85,255)">7</span>  <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,187,85)">|</span> }
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span><span style="font-weight:bold;color:rgb(85,187,85)">|_^</span></div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="6d02c4ba60eade12e3231c62b2a0c34bf55cf37d">use std::os::raw::{c_int, c_short};
+fn main() {}
+struct FooBar {
+    foo: c_int,
+    bar: c_short,
+}
+
+extern {
+    fn foobar(x: FooBar);
+}</pre>
+</div><div class="slide">
+<h1 id="споделяне-на-структури">Споделяне на структури</h1>
+<p>За да споделим структура между Rust и C трябва да забраним на компилатора да размества полетата с <code>#[repr(C)]</code>.</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="439d89283ed8ac144c59add3beb2c777f7c030ee">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">extern</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">foobar</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">x</span>: <span class="tshl-type">FooBar</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>repr<span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">C</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">struct</span> <span class="tshl-type">FooBar</span> {
+    <span class="tshl-property">foo</span>: <span class="tshl-type">c_int</span>,
+    <span class="tshl-property">bar</span>: <span class="tshl-type">c_short</span>,
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="439d89283ed8ac144c59add3beb2c777f7c030ee">use std::os::raw::{c_int, c_short};
+fn main() {}
+extern {
+    fn foobar(x: FooBar);
+}
+
+#[repr(C)]
+struct FooBar {
+    foo: c_int,
+    bar: c_short,
+}</pre>
+</div><div class="slide">
+<h1 id="споделяне-на-низове">Споделяне на низове</h1>
+</div><div class="slide subslide">
+<h1 id="споделяне-на-низове">Споделяне на низове</h1>
+<ul>
+<li>Низовете в Rust са utf-8 encoded, нямат терминираща нула и си пазят размера отделно</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="споделяне-на-низове">Споделяне на низове</h1>
+<ul>
+<li>Низовете в Rust са utf-8 encoded, нямат терминираща нула и си пазят размера отделно</li>
+<li>Низовете в C могат да имат всякакъв encoding и завършват с терминираща нула</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="споделяне-на-низове">Споделяне на низове</h1>
+<ul>
+<li>Низовете в Rust са utf-8 encoded, нямат терминираща нула и си пазят размера отделно</li>
+<li>Низовете в C могат да имат всякакъв encoding и завършват с терминираща нула</li>
+<li>Трябва да конвертираме от единия до другия вид когато изпращаме низове</li>
+</ul>
+</div><div class="slide">
+<h1 id="споделяне-на-низове">Споделяне на низове</h1>
+<h3 id="cstring">CString</h3>
+<ul>
+<li>Низ със собственост, съвместим със C.</li>
+<li>Не съдържа нулеви байтове <code>'\0'</code> във вътрешността и завършва на терминираща нула.</li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="1c83617faefe89b528d5b3af2e46941177898911">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> std<span class="tshl-punctuation_delimiter">::</span>ffi<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">CString</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-comment">// създава се от неща които имплементират Into&lt;Vec&lt;u8&gt;&gt;,</span>
+<span class="tshl-comment">// в това число &amp;str и String</span>
+<span class="tshl-keyword">let</span> hello = <span class="tshl-type">CString</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Hello!&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">unsafe</span> {
+    <span class="tshl-function">print</span><span class="tshl-punctuation_bracket">(</span>hello<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_ptr</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="1c83617faefe89b528d5b3af2e46941177898911">use std::os::raw::c_char;
+extern {
+fn print(s: *const c_char);
+}
+use std::ffi::CString;
+
+fn main() {
+// създава се от неща които имплементират Into<Vec<u8>>,
+// в това число &str и String
+let hello = CString::new("Hello!").unwrap();
+
+unsafe {
+    print(hello.as_ptr());
+}
+}</pre>
+</div><div class="slide">
+<h1 id="споделяне-на-низове">Споделяне на низове</h1>
+<h3 id="cstring">CString</h3>
+<p>Какъв е проблемът?</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="5e7ecc6a2f055e7fe36ca2bf3ab4a108367d0f0a">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">extern</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">print</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">s</span>: <span class="tshl-operator">*</span><span class="tshl-keyword">const</span> <span class="tshl-type">c_char</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}
+
+<span class="tshl-keyword">unsafe</span> {
+    <span class="tshl-function">print</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">CString</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Hello!&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_ptr</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(187,187,85)">warning</span><span style="font-weight:bold">: getting the inner pointer of a temporary `CString`</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_5e7ecc6a2f055e7fe36ca2bf3ab4a108367d0f0a.rs:10:43
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">10</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>    print(CString::new("Hello!").unwrap().as_ptr());
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>          <span style="font-weight:bold;color:rgb(85,85,255)">-------------------------------</span> <span style="font-weight:bold;color:rgb(187,187,85)">^^^^^^</span> <span style="font-weight:bold;color:rgb(187,187,85)">this pointer will be invalid</span>
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>          <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>          <span style="font-weight:bold;color:rgb(85,85,255)">this `CString` is deallocated at the end of the statement, bind it to a variable to extend its lifetime</span>
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+   <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: `#[warn(temporary_cstring_as_ptr)]` on by default
+   <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: pointers do not have a lifetime; when calling `as_ptr` the `CString` will be deallocated at the end of the statement because nothing is referencing it as far as the type system is concerned
+   <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">help</span>: for more information, see https://doc.rust-lang.org/reference/destructors.html</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="5e7ecc6a2f055e7fe36ca2bf3ab4a108367d0f0a">use std::os::raw::c_char;
+use std::ffi::CString;
+extern {
+    fn print(s: *const c_char);
+}
+
+fn main () {
+unsafe {
+    print(CString::new("Hello!").unwrap().as_ptr());
+}
+}</pre>
+</div><div class="slide">
+<h1 id="споделяне-на-низове">Споделяне на низове</h1>
+<h3 id="cstring">CString</h3>
+<p>Работим с голи указатели, а не с референции. Трябва да се погрижим паметта да живее достатъчно!</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="d9386e15d088f5ee58864d5e03ea6d1c7a0bce2f">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> hello = <span class="tshl-type">CString</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Hello!&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">let</span> ptr = hello<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_ptr</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>                             <span class="tshl-comment">// `ptr` е валиден докато `hello` е жив</span>
+<span class="tshl-keyword">unsafe</span> { <span class="tshl-function">print</span><span class="tshl-punctuation_bracket">(</span>ptr<span class="tshl-punctuation_bracket">)</span> }<span class="tshl-punctuation_delimiter">;</span>                                <span class="tshl-comment">// Ок</span>
+
+<span class="tshl-keyword">let</span> ptr = <span class="tshl-type">CString</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Hello!&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">as_ptr</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>   <span class="tshl-comment">// временния CString се деалокира</span>
+<span class="tshl-keyword">unsafe</span> { <span class="tshl-function">print</span><span class="tshl-punctuation_bracket">(</span>ptr<span class="tshl-punctuation_bracket">)</span> }<span class="tshl-punctuation_delimiter">;</span>                                <span class="tshl-comment">// подаваме dangling pointer</span></code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(187,187,85)">warning</span><span style="font-weight:bold">: getting the inner pointer of a temporary `CString`</span>
+  <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_d9386e15d088f5ee58864d5e03ea6d1c7a0bce2f.rs:12:43
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">12</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>let ptr = CString::new("Hello!").unwrap().as_ptr();   // временния CString се деалокира
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>          <span style="font-weight:bold;color:rgb(85,85,255)">-------------------------------</span> <span style="font-weight:bold;color:rgb(187,187,85)">^^^^^^</span> <span style="font-weight:bold;color:rgb(187,187,85)">this pointer will be invalid</span>
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>          <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+   <span style="font-weight:bold;color:rgb(85,85,255)">| </span>          <span style="font-weight:bold;color:rgb(85,85,255)">this `CString` is deallocated at the end of the statement, bind it to a variable to extend its lifetime</span>
+   <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+   <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: `#[warn(temporary_cstring_as_ptr)]` on by default
+   <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">note</span>: pointers do not have a lifetime; when calling `as_ptr` the `CString` will be deallocated at the end of the statement because nothing is referencing it as far as the type system is concerned
+   <span style="font-weight:bold;color:rgb(85,85,255)">= </span><span style="font-weight:bold">help</span>: for more information, see https://doc.rust-lang.org/reference/destructors.html</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="d9386e15d088f5ee58864d5e03ea6d1c7a0bce2f">use std::os::raw::c_char;
+use std::ffi::CString;
+extern {
+fn print(s: *const c_char);
+}
+fn main() {
+let hello = CString::new("Hello!").unwrap();
+let ptr = hello.as_ptr();                             // `ptr` е валиден докато `hello` е жив
+unsafe { print(ptr) };                                // Ок
+
+let ptr = CString::new("Hello!").unwrap().as_ptr();   // временния CString се деалокира
+unsafe { print(ptr) };                                // подаваме dangling pointer
+}</pre>
+</div><div class="slide">
+<h1 id="споделяне-на-низове">Споделяне на низове</h1>
+<h3 id="cstr">CStr</h3>
+</div><div class="slide subslide">
+<h1 id="споделяне-на-низове">Споделяне на низове</h1>
+<h3 id="cstr">CStr</h3>
+<ul>
+<li>Borrowed CString</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="споделяне-на-низове">Споделяне на низове</h1>
+<h3 id="cstr">CStr</h3>
+<ul>
+<li>Borrowed CString</li>
+<li>удобно ако C код ни даде низ</li>
+</ul>
+</div><div class="slide">
+<h1 id="option-and-the-nullable-pointer-optimization">Option and the "nullable pointer optimization"</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="cc language-c hljs"><span class="hljs-function"><span class="hljs-keyword">typedef</span> <span class="hljs-title">int</span> <span class="hljs-params">(*callback)</span><span class="hljs-params">(<span class="hljs-keyword">int</span>)</span></span>;
+
+<span class="hljs-comment">// callback can be a function pointer or NULL</span>
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">register</span><span class="hljs-params">(f: callback)</span></span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">extern</span> <span class="tshl-string">&quot;C&quot;</span> {
+    <span class="tshl-comment">/// Registers the callback.</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">register</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">cb</span>: <span class="tshl-type">Option</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-keyword">extern</span> <span class="tshl-string">&quot;C&quot;</span> <span class="tshl-keyword">fn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="opaque-types">Opaque types</h1>
+<p>Често C код използва opaque types.</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="cc language-c hljs"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Foo</span>;</span>
+
+<span class="hljs-function">Foo* <span class="hljs-title">init</span><span class="hljs-params">()</span></span>;
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">stuff</span><span class="hljs-params">(Foo* foo)</span></span>;</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="opaque-types">Opaque types</h1>
+<p>За да представим такъв тип в rust можем да използваме празен enum</p>
+<p>Не можем да създадем променлива от този тип, защото enum-а няма варианти</p>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="a1c92f6b313f7d1e0f6df828df782f19120c5ccc">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">enum</span> <span class="tshl-type">Foo</span> {}
+
+<span class="tshl-keyword">extern</span> {
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">init</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-operator">*</span><span class="tshl-keyword">const</span> <span class="tshl-type">Foo</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">fn</span> <span class="tshl-function">stuff</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">foo</span>: <span class="tshl-operator">*</span><span class="tshl-keyword">const</span> <span class="tshl-type">Foo</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">c_int</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<pre class="rustc-source" data-sha="a1c92f6b313f7d1e0f6df828df782f19120c5ccc">use std::os::raw::c_int;
+fn main() {}
+enum Foo {}
+
+extern {
+    fn init() -> *const Foo;
+    fn stuff(foo: *const Foo) -> c_int;
+}</pre>
+</div><div class="slide">
+<h1 id="компилиране-до-библиотека">Компилиране до библиотека</h1>
+<p>До сега сме правили библиотеки за Rust чрез <code>cargo new --lib</code>.<br />
+При компилация този вид crate ни дава rlib и има следния Cargo.toml</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="tomltoml language-toml hljs"><span class="hljs-section">[package]</span>
+<span class="hljs-attr">name</span> = <span class="hljs-string">"project_name"</span>
+<span class="hljs-attr">version</span> = <span class="hljs-string">"0.1.0"</span>
+<span class="hljs-attr">authors</span> = [<span class="hljs-string">"..."</span>]
+<span class="hljs-section">
+[dependencies]</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="компилиране-до-библиотека">Компилиране до библиотека</h1>
+<p>Това е достатъчно когато правим crate за Rust екосистемата, но понякога се налага да създадем специфично статична или динамична библиотека.</p>
+</div><div class="slide">
+<h1 id="компилиране-до-библиотека">Компилиране до библиотека</h1>
+<p>В този случай може да използвате <code>Cargo.toml</code>, за да укажете това</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="tomltoml language-toml hljs"><span class="hljs-section">[package]</span>
+<span class="hljs-attr">name</span> = <span class="hljs-string">"project_name"</span>
+<span class="hljs-attr">version</span> = <span class="hljs-string">"0.1.0"</span>
+<span class="hljs-section">
+[lib]</span>
+<span class="hljs-attr">crate-type</span> = [<span class="hljs-string">"..."</span>]
+<span class="hljs-section">
+[dependencies]</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="компилиране-до-библиотека">Компилиране до библиотека</h1>
+<p>На мястото на триеточието може да поставим следните типове:</p>
+</div><div class="slide subslide">
+<h1 id="компилиране-до-библиотека">Компилиране до библиотека</h1>
+<p>На мястото на триеточието може да поставим следните типове:</p>
+<ul>
+<li><code>bin</code> - binary</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилиране-до-библиотека">Компилиране до библиотека</h1>
+<p>На мястото на триеточието може да поставим следните типове:</p>
+<ul>
+<li><code>bin</code> - binary</li>
+<li><code>lib</code> - компилатора избира типа на библиотеката</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилиране-до-библиотека">Компилиране до библиотека</h1>
+<p>На мястото на триеточието може да поставим следните типове:</p>
+<ul>
+<li><code>bin</code> - binary</li>
+<li><code>lib</code> - компилатора избира типа на библиотеката</li>
+<li><code>rlib</code> - статична Rust библиотека с метаданни <code>.rlib</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилиране-до-библиотека">Компилиране до библиотека</h1>
+<p>На мястото на триеточието може да поставим следните типове:</p>
+<ul>
+<li><code>bin</code> - binary</li>
+<li><code>lib</code> - компилатора избира типа на библиотеката</li>
+<li><code>rlib</code> - статична Rust библиотека с метаданни <code>.rlib</code></li>
+<li><code>dylib</code> - динамична Rust библиотека <code>.so</code>, <code>.dylib</code>, <code>.dll</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилиране-до-библиотека">Компилиране до библиотека</h1>
+<p>На мястото на триеточието може да поставим следните типове:</p>
+<ul>
+<li><code>bin</code> - binary</li>
+<li><code>lib</code> - компилатора избира типа на библиотеката</li>
+<li><code>rlib</code> - статична Rust библиотека с метаданни <code>.rlib</code></li>
+<li><code>dylib</code> - динамична Rust библиотека <code>.so</code>, <code>.dylib</code>, <code>.dll</code></li>
+<li><code>staticlib</code> - статична native библиотека <code>.a</code>, <code>.lib</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилиране-до-библиотека">Компилиране до библиотека</h1>
+<p>На мястото на триеточието може да поставим следните типове:</p>
+<ul>
+<li><code>bin</code> - binary</li>
+<li><code>lib</code> - компилатора избира типа на библиотеката</li>
+<li><code>rlib</code> - статична Rust библиотека с метаданни <code>.rlib</code></li>
+<li><code>dylib</code> - динамична Rust библиотека <code>.so</code>, <code>.dylib</code>, <code>.dll</code></li>
+<li><code>staticlib</code> - статична native библиотека <code>.a</code>, <code>.lib</code></li>
+<li><code>cdylib</code> - динамична native библиотека предназначена за използване от други езици <code>.so</code>, <code>.dylib</code>, <code>.dll</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилиране-до-библиотека">Компилиране до библиотека</h1>
+<p>На мястото на триеточието може да поставим следните типове:</p>
+<ul>
+<li><code>bin</code> - binary</li>
+<li><code>lib</code> - компилатора избира типа на библиотеката</li>
+<li><code>rlib</code> - статична Rust библиотека с метаданни <code>.rlib</code></li>
+<li><code>dylib</code> - динамична Rust библиотека <code>.so</code>, <code>.dylib</code>, <code>.dll</code></li>
+<li><code>staticlib</code> - статична native библиотека <code>.a</code>, <code>.lib</code></li>
+<li><code>cdylib</code> - динамична native библиотека предназначена за използване от други езици <code>.so</code>, <code>.dylib</code>, <code>.dll</code></li>
+<li><code>proc-macro</code> - процедурен макрос</li>
+</ul>
+</div><div class="slide">
+<h1 id="компилиране-до-библиотека">Компилиране до библиотека</h1>
+<p>При компилация с cargo файловете се намират в <code>target/${target_type}</code></p>
+</div><div class="slide">
+<h1 id="bindgen-crate">bindgen crate</h1>
+<p>Автоматично генериране на bindings</p>
+<p><a href="https://github.com/rust-lang-nursery/rust-bindgen" target="_blank">Bindgen</a></p>
+</div><div class="slide">
+<h1 id="ресурси">Ресурси</h1>
+</div><div class="slide subslide">
+<h1 id="ресурси">Ресурси</h1>
+<ul>
+<li><a href="https://doc.rust-lang.org/nomicon/index.html" target="_blank">Rustonomicon</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="ресурси">Ресурси</h1>
+<ul>
+<li><a href="https://doc.rust-lang.org/nomicon/index.html" target="_blank">Rustonomicon</a></li>
+<li><a href="http://doc.crates.io/manifest.html" target="_blank">Cargo Manifest</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="ресурси">Ресурси</h1>
+<ul>
+<li><a href="https://doc.rust-lang.org/nomicon/index.html" target="_blank">Rustonomicon</a></li>
+<li><a href="http://doc.crates.io/manifest.html" target="_blank">Cargo Manifest</a></li>
+<li><a href="https://doc.rust-lang.org/reference/linkage.html" target="_blank">Rust Reference Manual</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="въпроси">Въпроси</h1>
+</div>
+    </main>
+</body>
+</html>
