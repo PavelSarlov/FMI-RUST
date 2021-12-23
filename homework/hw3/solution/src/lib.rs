@@ -223,6 +223,7 @@ impl Dungeon {
     ///
     pub fn from_reader<B: BufRead>(reader: B) -> Result<Self, Errors> {
         let lines: Vec<String> = reader.lines().map(|x| x.unwrap()).collect();
+
         if lines.clone().len() == 0_usize {
             return Err(Errors::LineParseError { line_number: 0 });
         }
@@ -250,17 +251,6 @@ impl Dungeon {
                     }
                     _ => match reading_state {
                         ReadingState::Rooms => {
-                            // match Dungeon::get_line_parts(
-                            //     line.as_str(),
-                            //     line_number,
-                            //     &reading_state,
-                            // ) {
-                            //     Ok(parts) => match dungeon.add_room(parts[0]) {
-                            //         Err(err) => return Err(err),
-                            //         _ => {}
-                            //     },
-                            //     Err(err) => return Err(err),
-                            // };
                             let parts = Dungeon::get_line_parts(
                                 line.as_str(),
                                 line_number,
@@ -279,23 +269,13 @@ impl Dungeon {
                                 if reading_state != ReadingState::Links {
                                     return Err(Errors::LineParseError { line_number });
                                 }
-                                match Dungeon::get_line_parts(
+                                let parts = Dungeon::get_line_parts(
                                     line.as_str(),
                                     line_number,
                                     &reading_state,
-                                ) {
-                                    Ok(parts) => {
-                                        let dir = match Direction::from_str(parts[1]) {
-                                            Ok(d) => d,
-                                            Err(err) => return Err(err),
-                                        };
-                                        match dungeon.set_link(parts[0], dir, parts[2]) {
-                                            Err(err) => return Err(err),
-                                            _ => {}
-                                        }
-                                    }
-                                    Err(err) => return Err(err),
-                                };
+                                )?;
+                                let dir = Direction::from_str(parts[1])?;
+                                dungeon.set_link(parts[0], dir, parts[2])?;
                             }
                         },
                     },
@@ -414,6 +394,7 @@ mod custom_tests {
     const TEST_INPUT_3: &str = "Line 1 err";
     const TEST_INPUT_4: &str = "## Rooms\nLine 2 err";
     const TEST_INPUT_5: &str = "## Rooms\n- duplicate\n- duplicate";
+    const TEST_INPUT_6: &str = "## Rooms\n- room1\n- room2\n\n## Links\n- room1 -> DIR -> room2";
 
     #[test]
     fn test_dungeon_parsing_1() {
@@ -480,6 +461,12 @@ mod custom_tests {
     #[should_panic]
     fn test_dungeon_parsing_5() {
         Dungeon::from_reader(TEST_INPUT_5.as_bytes()).unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_dungeon_parsing_6() {
+        Dungeon::from_reader(TEST_INPUT_6.as_bytes()).unwrap();
     }
 
     #[test]
