@@ -231,55 +231,43 @@ impl Dungeon {
         let mut dungeon = Dungeon::new();
         let mut reading_state = ReadingState::Rooms;
 
-        // The beginning of the match abomination,
-        // proceed with caution. :))
         for (i, line) in lines.iter().enumerate() {
             let line_number = i + 1;
 
-            match line_number {
-                1 => {
-                    if line != "## Rooms" {
-                        return Err(Errors::LineParseError { line_number });
-                    }
-                }
-                _ => match line.as_str() {
-                    "" => {
-                        if reading_state != ReadingState::Rooms {
+            match reading_state {
+                ReadingState::Rooms => {
+                    if line_number == 1 {
+                        if line != "## Rooms" {
                             return Err(Errors::LineParseError { line_number });
                         }
-                        reading_state = ReadingState::EmptyLine;
+                        continue;
                     }
-                    _ => match reading_state {
-                        ReadingState::Rooms => {
-                            let parts = Dungeon::get_line_parts(
-                                line.as_str(),
-                                line_number,
-                                &reading_state,
-                            )?;
-                            dungeon.add_room(parts[0])?;
-                        }
-                        _ => match line.as_str() {
-                            "## Links" => {
-                                if reading_state != ReadingState::EmptyLine {
-                                    return Err(Errors::LineParseError { line_number });
-                                }
-                                reading_state = ReadingState::Links;
-                            }
-                            _ => {
-                                if reading_state != ReadingState::Links {
-                                    return Err(Errors::LineParseError { line_number });
-                                }
-                                let parts = Dungeon::get_line_parts(
-                                    line.as_str(),
-                                    line_number,
-                                    &reading_state,
-                                )?;
-                                let dir = Direction::from_str(parts[1])?;
-                                dungeon.set_link(parts[0], dir, parts[2])?;
-                            }
-                        },
-                    },
+                    if line == "" {
+                        reading_state = ReadingState::EmptyLine;
+                        continue;
+                    }
+                    let parts = Dungeon::get_line_parts(
+                        line.as_str(),
+                        line_number,
+                        &reading_state,
+                    )?;
+                    dungeon.add_room(parts[0])?;
                 },
+                ReadingState::EmptyLine => {
+                    if line != "## Links" {
+                        return Err(Errors::LineParseError { line_number });
+                    }
+                    reading_state = ReadingState::Links;
+                },
+                ReadingState::Links => {
+                    let parts = Dungeon::get_line_parts(
+                        line.as_str(),
+                        line_number,
+                        &reading_state,
+                    )?;
+                    let dir = Direction::from_str(parts[1])?;
+                    dungeon.set_link(parts[0], dir, parts[2])?;
+                }
             }
         }
 
