@@ -42,10 +42,10 @@ impl MainState {
         let screen_width = conf.window_mode.width;
         let screen_height = conf.window_mode.height;
         let fov_rad = 3.14159 * 0.5;
-        let aspect_ratio = screen_height / screen_width;
+        let aspect_ratio = 1.0 / (screen_height / screen_width);
         let far = 0.1;
         let near = 1000.0;
-        let camera = Camera::new(Vec3::new(0.0,0.0,1.0), Vec3::new(0.0,1.0,0.0), Vec3::new(0.0,0.0,-1.0));
+        let camera = Camera::new(Vec3::new(0.0,0.0,1.0), Vec3::new(0.0,-1.0,0.0), Vec3::new(0.0,0.0,-1.0));
 
         let s = MainState {
             screen_width,
@@ -95,9 +95,6 @@ impl event::EventHandler<ggez::GameError> for MainState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         graphics::clear(ctx, [0.1, 0.2, 0.3, 1.0].into());
 
-        // println!("{:?}", &verts);
-        // std::thread::sleep(std::time::Duration::from_millis(1000));
-
         self.theta += 0.001 * timer::delta(ctx).as_millis() as f32;
 
         let tris = &mut [
@@ -122,19 +119,20 @@ impl event::EventHandler<ggez::GameError> for MainState {
             Triangle::new(&[Vec3Wrap(Vec3::new(0.0, 1.0, 0.0)), Vec3Wrap(Vec3::new(1.0, 1.0, 1.0)), Vec3Wrap(Vec3::new(1.0, 1.0, 0.0))]),
 
             // bottom
-            Triangle::new(&[Vec3Wrap(Vec3::new(0.0, 0.0, 0.0)), Vec3Wrap(Vec3::new(0.0, 0.0, 1.0)), Vec3Wrap(Vec3::new(1.0, 0.0, 1.0))]),
-            Triangle::new(&[Vec3Wrap(Vec3::new(0.0, 0.0, 0.0)), Vec3Wrap(Vec3::new(1.0, 0.0, 1.0)), Vec3Wrap(Vec3::new(1.0, 0.0, 0.0))]),
+            Triangle::new(&[Vec3Wrap(Vec3::new(1.0, 0.0, 1.0)), Vec3Wrap(Vec3::new(0.0, 0.0, 1.0)), Vec3Wrap(Vec3::new(0.0, 0.0, 0.0))]),
+            Triangle::new(&[Vec3Wrap(Vec3::new(1.0, 0.0, 1.0)), Vec3Wrap(Vec3::new(0.0, 0.0, 0.0)), Vec3Wrap(Vec3::new(1.0, 0.0, 0.0))]),
         ];
 
         let mat_world = Mat4::from_scale_rotation_translation(
-            Vec3::new(0.5,0.5,0.5),
-            Quat::from_rotation_x(self.theta) * Quat::from_rotation_y(self.theta),
+            Vec3::new(1.0,1.0,1.0),
+            Quat::IDENTITY,// * Quat::from_rotation_x(self.theta) * Quat::from_rotation_z(self.theta),
             Vec3::new(0.0,0.0,1.0),
         );
         let mat_view = Mat4::look_at_lh(
             self.camera.forward,
             self.camera.center,
-            self.camera.up);
+            self.camera.up
+        );
         let mat_proj = Mat4::perspective_lh(
             self.fov_rad,
             self.aspect_ratio,
@@ -143,23 +141,35 @@ impl event::EventHandler<ggez::GameError> for MainState {
         );
 
         for tri in tris.iter_mut() {
+
             for vert in tri.verts.iter_mut() {
                 *vert = mat_world.transform_point3((*vert).into()).into();
                 *vert = mat_view.transform_point3((*vert).into()).into();
-                *vert = mat_proj.transform_point3((*vert).into()).into();
-                *vert = (vert.0 + Vec3::new(1.0, 1.0, 0.0)).into();
-                *vert = (vert.0 * Vec3::new(0.5*self.screen_width, 0.5*self.screen_height, 0.0)).into();
             }
 
-            let poly = Mesh::new_polygon(
-                ctx,
-                graphics::DrawMode::stroke(1.0),
-                &tri.verts,
-                Color::WHITE,
-            )?;
-            graphics::draw(ctx, &poly, graphics::DrawParam::default())?;
+            let line1 = tri.verts[1].0 - tri.verts[0].0;
+            let line2 = tri.verts[2].0 - tri.verts[0].0;
+            let normal = line2.cross(line1).normalize();
+
+            // if normal.z < 0.0 {
+            if normal.dot(tri.verts[0].0 - self.camera.center) < 0.0 {
+                for vert in tri.verts.iter_mut() {
+                    *vert = mat_proj.transform_point3((*vert).into()).into();
+                    *vert = (vert.0 + Vec3::new(1.0, 1.0, 0.0)).into();
+                    *vert = (vert.0 * Vec3::new(0.5*self.screen_width, 0.5*self.screen_height, 0.0)).into();
+                }
+
+                let poly = Mesh::new_polygon(
+                    ctx,
+                    graphics::DrawMode::stroke(2.0),
+                    &tri.verts,
+                    Color::new(1.0,1.0,1.0,0.1),
+                )?;
+                graphics::draw(ctx, &poly, graphics::DrawParam::default())?;
+            }
         };
 
+        // std::thread::sleep(std::time::Duration::from_millis(1000));
         graphics::present(ctx)?;
         Ok(())
     }
