@@ -20,6 +20,7 @@ use std::{
     time,
     thread,
     f32::consts::PI,
+    cmp::Ordering,
 };
 
 use project::{
@@ -36,6 +37,7 @@ struct MainState {
     near: f32,
     camera: Camera,
     theta: f32,
+    model: TriMesh,
 }
 
 impl MainState {
@@ -48,6 +50,7 @@ impl MainState {
         let far = 1000.0;
         let near = 0.1;
         let camera = Camera::new(Vec3::new(0.0,0.0,1.0), Vec3::new(0.0,1.0,0.0), Vec3::new(0.0,0.0,0.0));
+        let model = TriMesh::load_from_obj_file("resources/teapot.obj")?;
 
         let s = MainState {
             screen_width,
@@ -58,6 +61,7 @@ impl MainState {
             near,
             camera,
             theta: 0.0,
+            model,
         };
         Ok(s)
     }
@@ -99,36 +103,10 @@ impl event::EventHandler<ggez::GameError> for MainState {
 
         self.theta += 0.001 * timer::delta(ctx).as_millis() as f32;
 
-        let tris = &mut [
-            // south
-            Triangle::new(&[Vec3Wrap(Vec3::new(0.0, 0.0, 0.0)), Vec3Wrap(Vec3::new(0.0, 1.0, 0.0)), Vec3Wrap(Vec3::new(1.0, 1.0, 0.0))]),
-            Triangle::new(&[Vec3Wrap(Vec3::new(0.0, 0.0, 0.0)), Vec3Wrap(Vec3::new(1.0, 1.0, 0.0)), Vec3Wrap(Vec3::new(1.0, 0.0, 0.0))]),
-
-            // east
-            Triangle::new(&[Vec3Wrap(Vec3::new(1.0, 0.0, 0.0)), Vec3Wrap(Vec3::new(1.0, 1.0, 0.0)), Vec3Wrap(Vec3::new(1.0, 1.0, 1.0))]),
-            Triangle::new(&[Vec3Wrap(Vec3::new(1.0, 0.0, 0.0)), Vec3Wrap(Vec3::new(1.0, 1.0, 1.0)), Vec3Wrap(Vec3::new(1.0, 0.0, 1.0))]),
-
-            // north
-            Triangle::new(&[Vec3Wrap(Vec3::new(1.0, 0.0, 1.0)), Vec3Wrap(Vec3::new(1.0, 1.0, 1.0)), Vec3Wrap(Vec3::new(0.0, 1.0, 1.0))]),
-            Triangle::new(&[Vec3Wrap(Vec3::new(1.0, 0.0, 1.0)), Vec3Wrap(Vec3::new(0.0, 1.0, 1.0)), Vec3Wrap(Vec3::new(0.0, 0.0, 1.0))]),
-
-            // west
-            Triangle::new(&[Vec3Wrap(Vec3::new(0.0, 0.0, 1.0)), Vec3Wrap(Vec3::new(0.0, 1.0, 1.0)), Vec3Wrap(Vec3::new(0.0, 1.0, 0.0))]),
-            Triangle::new(&[Vec3Wrap(Vec3::new(0.0, 0.0, 1.0)), Vec3Wrap(Vec3::new(0.0, 1.0, 0.0)), Vec3Wrap(Vec3::new(0.0, 0.0, 0.0))]),
-
-            // top
-            Triangle::new(&[Vec3Wrap(Vec3::new(0.0, 1.0, 0.0)), Vec3Wrap(Vec3::new(0.0, 1.0, 1.0)), Vec3Wrap(Vec3::new(1.0, 1.0, 1.0))]),
-            Triangle::new(&[Vec3Wrap(Vec3::new(0.0, 1.0, 0.0)), Vec3Wrap(Vec3::new(1.0, 1.0, 1.0)), Vec3Wrap(Vec3::new(1.0, 1.0, 0.0))]),
-
-            // bottom
-            Triangle::new(&[Vec3Wrap(Vec3::new(1.0, 0.0, 1.0)), Vec3Wrap(Vec3::new(0.0, 0.0, 1.0)), Vec3Wrap(Vec3::new(0.0, 0.0, 0.0))]),
-            Triangle::new(&[Vec3Wrap(Vec3::new(1.0, 0.0, 1.0)), Vec3Wrap(Vec3::new(0.0, 0.0, 0.0)), Vec3Wrap(Vec3::new(1.0, 0.0, 0.0))]),
-        ];
-
         let mat_world = Mat4::from_scale_rotation_translation(
-            Vec3::new(1.0,1.0,1.0).normalize(),
+            Vec3::new(1.0,1.0,1.0),
             (Quat::IDENTITY * Quat::from_rotation_x(self.theta) * Quat::from_rotation_z(self.theta)).normalize(),
-            Vec3::new(0.0,0.0,3.0).normalize(),
+            Vec3::new(0.0,0.0,5.0),
         );
         let mat_view = Mat4::look_at_lh(
             self.camera.forward,
@@ -142,7 +120,9 @@ impl event::EventHandler<ggez::GameError> for MainState {
             self.far
         );
 
-        for tri in tris.iter_mut() {
+        let mut trisToRaster = Vec::<Triangle>::new();
+
+        for tri in self.model.tris.clone().iter_mut() {
 
             for vert in tri.verts.iter_mut() {
                 *vert = mat_world.project_point3((*vert).into()).into();
@@ -154,36 +134,50 @@ impl event::EventHandler<ggez::GameError> for MainState {
             let normal = line1.cross(line2).normalize();
 
             let to_cam = normal.dot((tri.verts[0].0 + self.camera.center).normalize());
-            println!("{:?}", to_cam);
-            // if normal.z < 0.0 {
+            // println!("{:?}", to_cam);
+
             if to_cam < 0.0 {
                 let light_dir = Vec3::new(0.0, 0.0, -1.0).normalize();
                 let dp: f32 = normal.dot(light_dir);
-                tri.color.a = (dp + 1.0) / 2.0;
+                tri.color.r = (dp + 1.0) / 2.0;
+                tri.color.g = (dp + 1.0) / 2.0;
+                tri.color.b = (dp + 1.0) / 2.0;
 
                 for vert in tri.verts.iter_mut() {
                     *vert = mat_proj.project_point3((*vert).into()).into();
                     *vert = (vert.0 + Vec3::new(1.0, 1.0, 0.0)).into();
-                    *vert = (vert.0 * Vec3::new(0.5*self.screen_width, 0.5*self.screen_height, 0.0)).into();
+                    *vert = (vert.0 * Vec3::new(0.5*self.screen_width, 0.5*self.screen_height, 1.0)).into();
                 }
 
-                // crashes with fill ???
-                // let poly = Mesh::new_polygon(
-                //     ctx,
-                //     graphics::DrawMode::stroke(2.0),
-                //     &tri.verts,
-                //     Color::new(1.0,1.0,1.0,0.1),
-                // )?;
-                let poly = Mesh::from_triangles(
-                    ctx,
-                    &tri.verts,
-                    tri.color,
-                )?;
-                graphics::draw(ctx, &poly, graphics::DrawParam::default())?;
+                trisToRaster.push(tri.clone());
             }
         };
 
-        // std::thread::sleep(std::time::Duration::from_millis(1000));
+        trisToRaster.sort_by(|a, b| {
+            let z1: f32 = (a.verts[0].0.z + a.verts[1].0.z + a.verts[2].0.z) / 3.0;
+            let z2: f32 = (b.verts[0].0.z + b.verts[1].0.z + b.verts[2].0.z) / 3.0;
+            z2.partial_cmp(&z1).unwrap()
+        });
+
+        for tri in trisToRaster {
+            // crashes with fill ???
+            // let polyLine = Mesh::new_polygon(
+            //     ctx,
+            //     graphics::DrawMode::stroke(5.0),
+            //     &tri.verts,
+            //     Color::new(0.0,0.0,0.0,0.1),
+            // )?;
+            let polyFill = Mesh::from_triangles(
+                ctx,
+                &tri.verts,
+                tri.color,
+            )?;
+
+            graphics::draw(ctx, &polyFill, graphics::DrawParam::default())?;
+            // graphics::draw(ctx, &polyLine, graphics::DrawParam::default())?;
+        }
+
+        // std::thread::sleep(std::time::Duration::from_millis(50000));
         graphics::present(ctx)?;
         Ok(())
     }
