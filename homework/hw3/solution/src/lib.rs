@@ -192,23 +192,30 @@ pub enum ReadingState {
 }
 
 impl Dungeon {
-    fn get_line_parts<'a>(
-        line: &'a str,
+    fn get_line_parts(
+        line: &str,
         line_number: usize,
-        state: &'a ReadingState,
-    ) -> Result<Vec<&'a str>, Errors> {
-        if &line[0..2] != "- " {
+        state: &ReadingState,
+    ) -> Result<Vec<String>, Errors> {
+        let chars = line.chars().collect::<Vec<_>>();
+
+        if chars[0..2].iter().collect::<String>() != "- " {
             return Err(Errors::LineParseError { line_number });
         }
 
         match state {
-            ReadingState::Rooms => Ok(vec![&line[2..]]),
+            ReadingState::Rooms => Ok(vec![chars[2..].iter().collect::<String>()]),
             ReadingState::Links => {
-                let words: Vec<&str> = line[2..].split("->").collect();
+                let words: Vec<String> = chars[2..]
+                    .iter()
+                    .collect::<String>()
+                    .split("->")
+                    .map(|s| String::from(s))
+                    .collect();
                 if words.len() != 3 {
                     return Err(Errors::LineParseError { line_number });
                 }
-                Ok(words.iter().map(|w| w.trim()).collect())
+                Ok(words.iter().map(|w| String::from(w.trim())).collect())
             }
             _ => Err(Errors::LineParseError { line_number }),
         }
@@ -246,27 +253,21 @@ impl Dungeon {
                         reading_state = ReadingState::EmptyLine;
                         continue;
                     }
-                    let parts = Dungeon::get_line_parts(
-                        line.as_str(),
-                        line_number,
-                        &reading_state,
-                    )?;
-                    dungeon.add_room(parts[0])?;
-                },
+                    let parts =
+                        Dungeon::get_line_parts(line.as_str(), line_number, &reading_state)?;
+                    dungeon.add_room(&parts[0])?;
+                }
                 ReadingState::EmptyLine => {
                     if line != "## Links" {
                         return Err(Errors::LineParseError { line_number });
                     }
                     reading_state = ReadingState::Links;
-                },
+                }
                 ReadingState::Links => {
-                    let parts = Dungeon::get_line_parts(
-                        line.as_str(),
-                        line_number,
-                        &reading_state,
-                    )?;
-                    let dir = Direction::from_str(parts[1])?;
-                    dungeon.set_link(parts[0], dir, parts[2])?;
+                    let parts =
+                        Dungeon::get_line_parts(line.as_str(), line_number, &reading_state)?;
+                    let dir = Direction::from_str(&parts[1])?;
+                    dungeon.set_link(&parts[0], dir, &parts[2])?;
                 }
             }
         }
