@@ -209,7 +209,7 @@ impl Dungeon {
                 let words: Vec<String> = chars[2..]
                     .iter()
                     .collect::<String>()
-                    .split("->")
+                    .split(" -> ")
                     .map(|s| String::from(s))
                     .collect();
                 if words.len() != 3 {
