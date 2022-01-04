@@ -72,6 +72,7 @@ impl Eq for Direction {}
 /// Една стая в подземията. Дефинира се само с име, макар че в по-интересна имплементация може да
 /// държи item-и, противници...
 ///
+#[derive(Debug)]
 pub struct Room {
     pub name: String,
     // Каквито други полета ви трябват
@@ -80,6 +81,7 @@ pub struct Room {
 
 /// Контейнер за стаите и не само. Ще работим предимно със тази структура.
 ///
+#[derive(Debug)]
 pub struct Dungeon {
     // Каквито полета ви трябват
     rooms: HashMap<String, Room>,
@@ -253,8 +255,7 @@ impl Dungeon {
                         reading_state = ReadingState::EmptyLine;
                         continue;
                     }
-                    let parts =
-                        Dungeon::get_line_parts(line.as_str(), line_number, &reading_state)?;
+                    let parts = Dungeon::get_line_parts(line.as_str(), line_number, &reading_state)?;
                     dungeon.add_room(&parts[0])?;
                 }
                 ReadingState::EmptyLine => {
@@ -264,8 +265,7 @@ impl Dungeon {
                     reading_state = ReadingState::Links;
                 }
                 ReadingState::Links => {
-                    let parts =
-                        Dungeon::get_line_parts(line.as_str(), line_number, &reading_state)?;
+                    let parts = Dungeon::get_line_parts(line.as_str(), line_number, &reading_state)?;
                     let dir = Direction::from_str(&parts[1])?;
                     dungeon.set_link(&parts[0], dir, &parts[2])?;
                 }
@@ -429,33 +429,30 @@ mod custom_tests {
     }
 
     #[test]
-    #[should_panic]
     fn test_dungeon_parsing_2() {
-        Dungeon::from_reader(TEST_INPUT_2.as_bytes()).unwrap();
+        assert!(matches!(Dungeon::from_reader(TEST_INPUT_2.as_bytes()).unwrap_err(), Errors::LineParseError { line_number: 0 }));
     }
 
     #[test]
-    #[should_panic]
     fn test_dungeon_parsing_3() {
-        Dungeon::from_reader(TEST_INPUT_3.as_bytes()).unwrap();
+        assert!(matches!(Dungeon::from_reader(TEST_INPUT_3.as_bytes()).unwrap_err(), Errors::LineParseError { line_number: 1 }));
     }
 
     #[test]
-    #[should_panic]
     fn test_dungeon_parsing_4() {
-        Dungeon::from_reader(TEST_INPUT_4.as_bytes()).unwrap();
+        assert!(matches!(Dungeon::from_reader(TEST_INPUT_4.as_bytes()).unwrap_err(), Errors::LineParseError { line_number: 2 }));
     }
 
     #[test]
-    #[should_panic]
     fn test_dungeon_parsing_5() {
-        Dungeon::from_reader(TEST_INPUT_5.as_bytes()).unwrap();
+        let _room = String::from("duplicate");
+        assert!(matches!(Dungeon::from_reader(TEST_INPUT_5.as_bytes()).unwrap_err(), Errors::DuplicateRoom(_room)));
     }
 
     #[test]
-    #[should_panic]
     fn test_dungeon_parsing_6() {
-        Dungeon::from_reader(TEST_INPUT_6.as_bytes()).unwrap();
+        let _dir = String::from("DIR");
+        assert!(matches!(Dungeon::from_reader(TEST_INPUT_6.as_bytes()).unwrap_err(), Errors::DirectionParseError(_dir)));
     }
 
     #[test]
@@ -485,9 +482,8 @@ mod custom_tests {
     }
 
     #[test]
-    #[should_panic]
     fn test_dungeon_path_2() {
         let dungeon = Dungeon::from_reader(TEST_INPUT_1.trim().as_bytes()).unwrap();
-        dungeon.find_path("room2", "room1").unwrap().unwrap();
+        assert!(matches!(dungeon.find_path("room2", "room1"), Ok(None)));
     }
 }
