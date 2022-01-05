@@ -16,6 +16,12 @@ impl Into<Point2<f32>> for Vec2Wrap {
     }
 }
 
+impl Into<Vec2> for Vec2Wrap {
+    fn into(self) -> Vec2 {
+        self.0
+    }
+}
+
 impl From<Vec2> for Vec2Wrap {
     fn from(v: Vec2) -> Self {
         Vec2Wrap(v)
@@ -25,6 +31,12 @@ impl From<Vec2> for Vec2Wrap {
 impl From<[f32; 2]> for Vec2Wrap {
     fn from(a: [f32; 2]) -> Self {
         Vec2Wrap(Vec2::from_slice(&a))
+    }
+}
+
+impl From<Point2<f32>> for Vec2Wrap {
+    fn from(p: Point2<f32>) -> Self {
+        Vec2Wrap(Vec2::from_slice(&[p.x, p.y]))
     }
 }
 
@@ -52,4 +64,18 @@ impl Into<Vertex> for MyVertex {
             color: self.color
         }
     }
+}
+
+pub fn world_to_screen_space(screen_width: f32, screen_height: f32, point: Vec2) -> Vec2 {
+    Vec2::new(
+        point.x + screen_width / 2.,
+        screen_height - (point.y + screen_height) / 2.
+    )
+}
+
+pub fn screen_to_world_space(screen_width: f32, screen_height: f32, point: Vec2) -> Vec2 {
+    Vec2::new(
+        point.x - screen_width / 2.,
+        screen_height + (point.y - screen_height) * 2.
+    )
 }
