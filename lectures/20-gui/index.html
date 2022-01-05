@@ -1,0 +1,586 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <title>Графични (desktop) интерфейси</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="rust,fmi">
+    <link rel="stylesheet" href="resources/codeblock/codeblock.css">
+<link rel="stylesheet" href="resources/frontend/controls.css">
+<link rel="stylesheet" href="resources/global/global.css">
+<link rel="stylesheet" href="resources/global/metadata.css">
+<link rel="stylesheet" href="resources/highlight/hljs-github.css">
+<link rel="stylesheet" href="resources/highlight/style.css">
+<link rel="stylesheet" href="resources/highlight/tshl-github.css">
+<link rel="stylesheet" href="resources/katex/katex.min.css">
+<link rel="stylesheet" href="resources/rustc/rustc.css">
+<link rel="stylesheet" href="resources/splitview/splitview.css">
+<link rel="stylesheet" href="resources/wrapping-pages/wrapping-pages.css">
+<script type="text/javascript" src="resources/codeblock/codeblock.js"></script>
+<script type="text/javascript" src="resources/frontend/controls.js"></script>
+</head>
+<body>
+    <main>
+        <div class="slide">
+<h1 id="графични-desktop-интерфейси">Графични (desktop) интерфейси</h1>
+<h3 id="04-януари-2022">04 януари 2022</h3>
+</div><div class="slide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Домашно 3 тече с пълна сила: <a href="https://fmi.rust-lang.bg/tasks/3" target="_blank">https://fmi.rust-lang.bg/tasks/3</a></li>
+<li>Мислете за проекти (<a href="https://fmi.rust-lang.bg/guides/projects" target="_blank">https://fmi.rust-lang.bg/guides/projects</a>)</li>
+</ul>
+</div><div class="slide">
+<h1 id="gtk">GTK</h1>
+<ul>
+<li>Главния сайт: <a href="https://gtk-rs.org/" target="_blank">https://gtk-rs.org/</a></li>
+<li>Добър, макар и недовършен guide за GTK4: <a href="https://gtk-rs.org/gtk4-rs/stable/latest/book/" target="_blank">https://gtk-rs.org/gtk4-rs/stable/latest/book/</a></li>
+<li>API документация за GTK4: <a href="https://docs.rs/gtk4/latest/gtk4/" target="_blank">https://docs.rs/gtk4/latest/gtk4/</a></li>
+<li>API документация за GTK3 (по-стабилна засега): <a href="https://docs.rs/gtk/latest/gtk/" target="_blank">https://docs.rs/gtk/latest/gtk/</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="как-да-направим-ооп-style-наследяване">Как да направим ООП-style наследяване?</h1>
+<ul>
+<li><code>Deref</code>: Ограничен, само за един тип</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="как-да-направим-ооп-style-наследяване">Как да направим ООП-style наследяване?</h1>
+<ul>
+<li><code>Deref</code>: Ограничен, само за един тип</li>
+<li>Делегация, в някоя бъдеща версия на Rust (<a href="https://github.com/elahn/rfcs/blob/delegation2018/text/0000-delegation.md#guide-level-explanation" target="_blank">RFC</a>)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="как-да-направим-ооп-style-наследяване">Как да направим ООП-style наследяване?</h1>
+<ul>
+<li><code>Deref</code>: Ограничен, само за един тип</li>
+<li>Делегация, в някоя бъдеща версия на Rust (<a href="https://github.com/elahn/rfcs/blob/delegation2018/text/0000-delegation.md#guide-level-explanation" target="_blank">RFC</a>)</li>
+<li>Trait-ове</li>
+</ul>
+</div><div class="slide">
+<h1 id="наследяване-в-gtk-rs">Наследяване в GTK-rs</h1>
+<h3 id="ext-traits">Ext-traits</h3>
+<p>Типа <a href="https://docs.rs/gtk/0.14.3/gtk/struct.MessageDialog.html" target="_blank"><code>gtk::MessageDialog</code></a> има само и единствено една асоциирана функция <code>new</code>. (Други типове могат да имат и други асоциирани методи, но предимно само за конструиране).</p>
+<p>Оттам нататък, всички собствени методи на този "клас" се намират в trait-а <a href="https://docs.rs/gtk/0.14.3/gtk/prelude/trait.MessageDialogExt.html" target="_blank"><code>gtk::prelude::MessageDialogExt</code></a>.</p>
+<p>Всички наследени методи се намират в trait-овете: <code>DialogExt</code>, <code>GtkWindowExt</code>, <code>BinExt</code>, <code>ContainerExt</code>, <code>WidgetExt</code>, <code>glib::object::ObjectExt</code>, <code>BuildableExt</code>. Това са всички типове, за които имаме <code>IsA</code> имплементация за <code>MessageDialog</code>.</p>
+<p>Това работи, когато повечето код е автоматично-генерирани binding-и, но би било доста тегаво да се поддържа ръчно.</p>
+</div><div class="slide">
+<h1 id="ооп-style-наследяване">ООП-style наследяване</h1>
+<h3 id="isat"><code>IsA&lt;T&gt;</code></h3>
+<p>(Вижте и <a href="https://gtk-rs.org/gtk4-rs/stable/latest/book/gobject_subclassing.html" target="_blank">https://gtk-rs.org/gtk4-rs/stable/latest/book/gobject_subclassing.html</a>)</p>
+<p>Примерно, имаме</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-type">MessageDialog</span><span class="tshl-punctuation_delimiter">::</span>new&lt;<span class="tshl-constructor">T</span>: <span class="tshl-constructor">IsA</span>&lt;<span class="tshl-constructor">Window</span>&gt;&gt;<span class="tshl-punctuation_bracket">(</span>parent: <span class="tshl-constructor">Option</span>&lt;<span class="tshl-operator">&amp;</span><span class="tshl-constructor">T</span>&gt;, <span class="tshl-comment">/* ... */</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter"></span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Това ни позволява да cast-ваме неща напред-назад:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">let</span> button = gtk<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Button</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">let</span> widget = button<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">upcast</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span>gtk<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Widget</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-function_macro">assert</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span>widget.downcast::&lt;gtk::<span class="tshl-constructor">Button</span>&gt;<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>.is_ok<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Забележете, че <code>upcast</code> не връща резултат, а връща директно структура от правилния тип. Това се проверява <strong>compile-time</strong>, така че <code>upcast</code> няма да се компилира, ако cast-а е несъвместим.</p>
+<p>Downcast, от друга страна, няма как да се провери at compile-time, затова връща <code>Result</code>.</p>
+<p>Native rust-ки аналог (kind of): <a href="https://doc.rust-lang.org/std/any/" target="_blank">Any</a></p>
+</div><div class="slide">
+<h1 id="инсталация-на-gtk3">Инсталация на GTK3</h1>
+<p>Външните библиотеки вероятно ще са най-досадната част, особено под Windows: <a href="https://www.gtk.org/docs/installations/" target="_blank">https://www.gtk.org/docs/installations/</a></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="tomltoml language-toml hljs"><span class="hljs-section">[dependencies]</span>
+<span class="hljs-attr">gtk</span> = { version = <span class="hljs-string">"0.14"</span>, features = [<span class="hljs-string">"v3_20"</span>] }</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>В main файла:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">// За да може всички trait-ове да се include-нат,</span>
+<span class="tshl-comment">// иначе ще трябва да се изброяват *доста*:</span>
+<span class="tshl-keyword">use</span> gtk<span class="tshl-punctuation_delimiter">::</span>prelude<span class="tshl-punctuation_delimiter">::</span><span class="tshl-operator">*</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> gio<span class="tshl-punctuation_delimiter">::</span>prelude<span class="tshl-punctuation_delimiter">::</span><span class="tshl-operator">*</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="инсталация-на-gtk4">Инсталация на GTK4</h1>
+<p>Горе-долу същата, но книгата им изтъква и разни неща като flatpak: <a href="https://gtk-rs.org/gtk4-rs/stable/latest/book/installation.html" target="_blank">https://gtk-rs.org/gtk4-rs/stable/latest/book/installation.html</a></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="tomltoml language-toml hljs"><span class="hljs-section">[dependencies]</span>
+<span class="hljs-attr">gtk</span> = { version = <span class="hljs-string">"0.3.1"</span>, package = <span class="hljs-string">"gtk4"</span>, features = [<span class="hljs-string">"v4_4"</span>]}
+<span class="hljs-comment"># или:</span>
+<span class="hljs-attr">gtk4</span> = { version = <span class="hljs-string">"0.3.1"</span>, features = [<span class="hljs-string">"v4_4"</span>]}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>В main файла:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> gtk<span class="tshl-punctuation_delimiter">::</span>prelude<span class="tshl-punctuation_delimiter">::</span><span class="tshl-operator">*</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> gio<span class="tshl-punctuation_delimiter">::</span>prelude<span class="tshl-punctuation_delimiter">::</span><span class="tshl-operator">*</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="версии">Версии</h1>
+<p>Ако намерите tutorial online, който не се компилира, добра идея е да пробвате да пуснете <code>cargo update</code> -- това ще опита да инсталира по-нови версии на пакетите, които продължават да са съвместими с изискванията.</p>
+<p>Примерно, проекта може да е фиксирал libc версия "0.2.33", но пакетите просто да търсят версия "0.2.x". Един <code>cargo update</code> може да вдигне до версия "0.2.82", която е API-compatible, но просто оправя някакви вътрешни проблеми.</p>
+</div><div class="slide">
+<h1 id="размери-на-пакетите">Размери на пакетите</h1>
+<p>Досадно големи. Моя "quickmd" пакет има 3.7GB "target" директория. Проекти, които сте пробвали да компилирате веднъж и сте ги изоставили, може да ги зачистите с <code>cargo clean</code>.</p>
+</div><div class="slide">
+<h1 id="glade">Glade</h1>
+<p>При твърде сложен дизайн на интерфейса, може да си заслужава да минем на Glade: <a href="https://glade.gnome.org/" target="_blank">https://glade.gnome.org/</a>. Може да заредите UI-а от <a href="https://docs.rs/gtk/latest/gtk/struct.Builder.html" target="_blank"><code>gtk::Builder</code></a> и достъпвате компоненти с <code>.object("&lt;name&gt;")</code>.</p>
+<p>Само че builder-а генерира XML за GTK3, нищо че в книгата има пример с GTK4… 😅 <a href="https://gtk-rs.org/gtk4-rs/stable/latest/book/interface_builder.html" target="_blank">https://gtk-rs.org/gtk4-rs/stable/latest/book/interface_builder.html</a></p>
+<p>Отвъд това, "опаковането" на gui компоненти в наши си типове може да се окаже по-сложно… Но пък glade може и да ви даде идея какво имате като типове widget-и и какво може да използвате, дори да минете на ръка.</p>
+</div><div class="slide">
+<h1 id="demo">Demo</h1>
+<h3 id="quickmd">Quickmd</h3>
+<p>Source: <a href="https://github.com/AndrewRadev/rust-quickmd" target="_blank">https://github.com/AndrewRadev/rust-quickmd</a></p>
+</div><div class="slide">
+<h1 id="комуникиране-между-нишки">Комуникиране между нишки</h1>
+<p>В GTK, widget-ите трябва да им се викат методи в главния thread. Това означава, че ако искате да предавате ownership напред-назад, вероятно е добре да ги опаковате в клонируеми smart pointer-и, но дори тогава може да не сработят нещата.</p>
+<p>Проблема е добре описан в този blog post: <a href="https://coaxion.net/blog/2019/02/mpsc-channel-api-for-painless-usage-of-threads-with-gtk-in-rust/" target="_blank">https://coaxion.net/blog/2019/02/mpsc-channel-api-for-painless-usage-of-threads-with-gtk-in-rust/</a></p>
+<p>Решението на статията е доста добро -- използвайте канали! В quickmd, има две нишки, които си комуникират със съобщения с канали:</p>
+<ul>
+<li>UI thread</li>
+<li>Watcher loop</li>
+</ul>
+<p>Когато watcher-а, докато си цикли безкрайно, намери промяна във файл, изпраща съобщение по канал, и това съобщение стига до UI нишката и предизвиква update.</p>
+<p>В някои отношения, това усложнява нещата. В други, ги опростява <em>значително</em>. Няма нужда да си мислите как ще споделите някакво парче данни -- дръжте му ownership-а на едно-единствено място и просто изпращайте съобщения по канал. Това улеснява много и тестването на неща в изолация.</p>
+</div><div class="slide">
+<h1 id="demo">Demo</h1>
+<h3 id="gtk4">GTK4</h3>
+<p>Source: <a href="https://github.com/AndrewRadev/gtk4-example" target="_blank">https://github.com/AndrewRadev/gtk4-example</a></p>
+</div><div class="slide">
+<h1 id="дебъгване">Дебъгване</h1>
+<ul>
+<li><code>GTK_DEBUG=help cargo run</code> за помощ,</li>
+<li><code>GTK_DEBUG=interactive cargo run</code> за да видите дървото от widget-и live и да го ръчкате</li>
+</ul>
+</div><div class="slide">
+<h1 id="gtkapplication-vs-gtkmain">gtk::Application vs gtk::main</h1>
+<p>"Стария" стил на писане на GTK приложения (GTK 2.0):</p>
+</div><div class="slide subslide">
+<h1 id="gtkapplication-vs-gtkmain">gtk::Application vs gtk::main</h1>
+<p>"Стария" стил на писане на GTK приложения (GTK 2.0):</p>
+<ul>
+<li><code>gtk::init()</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="gtkapplication-vs-gtkmain">gtk::Application vs gtk::main</h1>
+<p>"Стария" стил на писане на GTK приложения (GTK 2.0):</p>
+<ul>
+<li><code>gtk::init()</code></li>
+<li>Правим каквото правим, създаваме си дървото от GUI елементи</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="gtkapplication-vs-gtkmain">gtk::Application vs gtk::main</h1>
+<p>"Стария" стил на писане на GTK приложения (GTK 2.0):</p>
+<ul>
+<li><code>gtk::init()</code></li>
+<li>Правим каквото правим, създаваме си дървото от GUI елементи</li>
+<li>Викаме на най-главния прозорец <code>window.show_all()</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="gtkapplication-vs-gtkmain">gtk::Application vs gtk::main</h1>
+<p>"Стария" стил на писане на GTK приложения (GTK 2.0):</p>
+<ul>
+<li><code>gtk::init()</code></li>
+<li>Правим каквото правим, създаваме си дървото от GUI елементи</li>
+<li>Викаме на най-главния прозорец <code>window.show_all()</code></li>
+<li><code>gtk::main()</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="gtkapplication-vs-gtkmain">gtk::Application vs gtk::main</h1>
+<p>"Стария" стил на писане на GTK приложения (GTK 2.0):</p>
+<ul>
+<li><code>gtk::init()</code></li>
+<li>Правим каквото правим, създаваме си дървото от GUI елементи</li>
+<li>Викаме на най-главния прозорец <code>window.show_all()</code></li>
+<li><code>gtk::main()</code></li>
+<li>За да приключим, някъде викаме <code>gtk::main_quit()</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="gtkapplication-vs-gtkmain">gtk::Application vs gtk::main</h1>
+<p>"Новия" стил на писане на GTK приложения (GTK 3.0+):</p>
+</div><div class="slide subslide">
+<h1 id="gtkapplication-vs-gtkmain">gtk::Application vs gtk::main</h1>
+<p>"Новия" стил на писане на GTK приложения (GTK 3.0+):</p>
+<ul>
+<li><code>let application = gtk::Application::new(&lt;уникално име&gt;, &lt;флагове&gt;)?;</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="gtkapplication-vs-gtkmain">gtk::Application vs gtk::main</h1>
+<p>"Новия" стил на писане на GTK приложения (GTK 3.0+):</p>
+<ul>
+<li><code>let application = gtk::Application::new(&lt;уникално име&gt;, &lt;флагове&gt;)?;</code></li>
+<li><code>application.connect_startup(|application| &lt;инициализираме си всичко&gt;);</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="gtkapplication-vs-gtkmain">gtk::Application vs gtk::main</h1>
+<p>"Новия" стил на писане на GTK приложения (GTK 3.0+):</p>
+<ul>
+<li><code>let application = gtk::Application::new(&lt;уникално име&gt;, &lt;флагове&gt;)?;</code></li>
+<li><code>application.connect_startup(|application| &lt;инициализираме си всичко&gt;);</code></li>
+<li>Стартираме приложението със <code>application.run(&amp;args().collect::&lt;Vec&lt;_&gt;&gt;());</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="gtkapplication-vs-gtkmain">gtk::Application vs gtk::main</h1>
+<p>"Новия" стил на писане на GTK приложения (GTK 3.0+):</p>
+<ul>
+<li><code>let application = gtk::Application::new(&lt;уникално име&gt;, &lt;флагове&gt;)?;</code></li>
+<li><code>application.connect_startup(|application| &lt;инициализираме си всичко&gt;);</code></li>
+<li>Стартираме приложението със <code>application.run(&amp;args().collect::&lt;Vec&lt;_&gt;&gt;());</code></li>
+<li>(или може би със <code>application.run(&amp;[]);</code>)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="gtkapplication-vs-gtkmain">gtk::Application vs gtk::main</h1>
+<p>"Новия" стил на писане на GTK приложения (GTK 3.0+):</p>
+<ul>
+<li><code>let application = gtk::Application::new(&lt;уникално име&gt;, &lt;флагове&gt;)?;</code></li>
+<li><code>application.connect_startup(|application| &lt;инициализираме си всичко&gt;);</code></li>
+<li>Стартираме приложението със <code>application.run(&amp;args().collect::&lt;Vec&lt;_&gt;&gt;());</code></li>
+<li>(или може би със <code>application.run(&amp;[]);</code>)</li>
+<li>(Вместо <code>gtk::Window</code>, използваме <code>gtk::ApplicationWindow</code>)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="gtkapplication-vs-gtkmain">gtk::Application vs gtk::main</h1>
+<p>"Новия" стил на писане на GTK приложения (GTK 3.0+):</p>
+<ul>
+<li><code>let application = gtk::Application::new(&lt;уникално име&gt;, &lt;флагове&gt;)?;</code></li>
+<li><code>application.connect_startup(|application| &lt;инициализираме си всичко&gt;);</code></li>
+<li>Стартираме приложението със <code>application.run(&amp;args().collect::&lt;Vec&lt;_&gt;&gt;());</code></li>
+<li>(или може би със <code>application.run(&amp;[]);</code>)</li>
+<li>(Вместо <code>gtk::Window</code>, използваме <code>gtk::ApplicationWindow</code>)</li>
+<li>За да приключим, някъде викаме <em>на приложението</em> <code>application.quit()</code> (или очакваме автоматично да приключи при затваряне на всички прозорци)</li>
+</ul>
+</div><div class="slide">
+<h1 id="gtkapplication-vs-gtkmain">gtk::Application vs gtk::main</h1>
+<p>Двата модела не са съвсем еквивалентни -- стария стил означава, че приложението е self-contained -- стартира, прави нещо, приключва. Ако пуснете второ такова приложение, то ще е отделно.</p>
+<p>С новия модел, ако пуснете второ приложение, то просто ще "активира" първото. Примерно, ако в командния ред пуснете <code>firefox http://google.com</code>, това ще ви отвори firefox и ще чака в терминала. Ако след това в друг терминал пуснете <code>firefox http://duckduckgo.com</code>, това веднага ще приключи, и ще отвори DuckDuckGo във вече отворения firefox.</p>
+<p>Това усложнява малко логиката, но е нещо, което е oчаквано донякъде в повечето модерни GUI приложения. Един application, множество прозорци. Има и бонуси, като интеграция с DBUS и разни други неща.</p>
+</div><div class="slide">
+<h1 id="command-line-handling">Command-line handling</h1>
+<p>В <a href="https://github.com/AndrewRadev/rust-quickmd" target="_blank">rust-quickmd</a>:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> gio<span class="tshl-punctuation_delimiter">::</span>prelude<span class="tshl-punctuation_delimiter">::</span><span class="tshl-operator">*</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> gio<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">ApplicationFlags</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-keyword">let</span> app = gtk<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Application</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span>
+        <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;com.andrewradev.quickmd&quot;</span><span class="tshl-punctuation_bracket">)</span>,
+        <span class="tshl-type">ApplicationFlags</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">HANDLES_OPEN</span> | <span class="tshl-type">ApplicationFlags</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">HANDLES_COMMAND_LINE</span>
+    <span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">expect</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;GTK initialization failed&quot;</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    app<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">connect_command_line</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-keyword">move</span> |app, cmdline| {
+        <span class="tshl-keyword">if</span> <span class="tshl-keyword">let</span> <span class="tshl-constructor">Err</span><span class="tshl-punctuation_bracket">(</span>e<span class="tshl-punctuation_bracket">)</span> = <span class="tshl-function">run</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span>app, cmdline<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">arguments</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span> {
+            <span class="tshl-function_macro">eprintln</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, e<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+            <span class="tshl-constant_builtin">1</span> <span class="tshl-comment">// неуспешен резултат</span>
+        } <span class="tshl-keyword">else</span> {
+            <span class="tshl-constant_builtin">0</span> <span class="tshl-comment">// успешен резултат</span>
+        }
+    }<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    app<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">run</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span>env<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">args</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">collect</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">Vec</span><span class="tshl-punctuation_bracket">&lt;</span><span class="tshl-type">_</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">&gt;</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Тоест, вместо да чакаме <code>connect_startup</code>, чакаме <code>connect_command_line</code>, защото очакваме някакъв потенциално различен вход при всяко изпълнение.</p>
+</div><div class="slide">
+<h1 id="egui">EGUI</h1>
+</div><div class="slide subslide">
+<h1 id="egui">EGUI</h1>
+<ul>
+<li>По-rusty, предвид че си е създадено <em>за</em> Rust, няма legacy design decisions както GTK.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="egui">EGUI</h1>
+<ul>
+<li>По-rusty, предвид че си е създадено <em>за</em> Rust, няма legacy design decisions както GTK.</li>
+<li>Immediate-mode, а не "retained" -- няма widget-и, които си държат state, просто на всеки loop се рендерира всичко от нулата.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="egui">EGUI</h1>
+<ul>
+<li>По-rusty, предвид че си е създадено <em>за</em> Rust, няма legacy design decisions както GTK.</li>
+<li>Immediate-mode, а не "retained" -- няма widget-и, които си държат state, просто на всеки loop се рендерира всичко от нулата.</li>
+<li>Има интересни features, може да се компилира за web, може да си persist-ва state-а на приложението</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="egui">EGUI</h1>
+<ul>
+<li>По-rusty, предвид че си е създадено <em>за</em> Rust, няма legacy design decisions както GTK.</li>
+<li>Immediate-mode, а не "retained" -- няма widget-и, които си държат state, просто на всеки loop се рендерира всичко от нулата.</li>
+<li>Има интересни features, може да се компилира за web, може да си persist-ва state-а на приложението</li>
+<li>НО: няма native look &amp; feel, и си е work in progress. Някои неща стават доста тегаво, защото се мъчи да бъде гъвкаво и минималистично.</li>
+</ul>
+</div><div class="slide">
+<h1 id="demo">Demo</h1>
+<h3 id="egui----basic-template">EGUI -- basic template</h3>
+<p>Source: <a href="https://github.com/emilk/eframe_template/" target="_blank">https://github.com/emilk/eframe_template/</a></p>
+</div><div class="slide">
+<h1 id="egui-template----хитри-неща">EGUI template -- хитри неща</h1>
+<ul>
+<li><p><code>#[cfg_attr(feature = "persistence", derive(serde::Deserialize, serde::Serialize))]</code>: <a href="https://doc.rust-lang.org/reference/conditional-compilation.html#the-cfg_attr-attribute" target="_blank">https://doc.rust-lang.org/reference/conditional-compilation.html#the-cfg_attr-attribute</a></p></li>
+<li><p>T.e. ако <code>feature = "persistence"</code>, все едно има <code>#[derive(serde::Deserialize, serde::Serialize)]</code></p></li>
+<li><p>Опционални пакети:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code>serde = { version = "1", features = ["derive"], optional = true }
+
+[features]
+default = []
+# Enable if you want to persist app state on shutdown:
+persistence = ["eframe/persistence", "serde"]</code></pre>
+                    </div>
+                    
+                </div>
+                </li>
+</ul>
+</div><div class="slide">
+<h1 id="demo">Demo</h1>
+<h3 id="egui----mp3-filter">EGUI -- mp3 filter</h3>
+<p>Source: <a href="https://github.com/andrewradev/egui-mp3s" target="_blank">https://github.com/andrewradev/egui-mp3s</a></p>
+</div><div class="slide">
+<h1 id="зареждане-на-картинки">Зареждане на картинки</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">if</span> <span class="tshl-keyword">let</span> <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span>image_tag<span class="tshl-punctuation_bracket">)</span> = tag<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">pictures</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">next</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-comment">// Първо, обработваме PNG/JPEG/Whatever данните с &quot;image&quot; crate-а</span>
+    <span class="tshl-keyword">if</span> <span class="tshl-keyword">let</span> <span class="tshl-constructor">Ok</span><span class="tshl-punctuation_bracket">(</span>image<span class="tshl-punctuation_bracket">)</span> = <span class="tshl-punctuation_delimiter">::</span>image<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">load_from_memory</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span>image_tag<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">data</span><span class="tshl-punctuation_bracket">)</span> {
+        <span class="tshl-keyword">let</span> dimensions = image<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">dimensions</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+        <span class="tshl-keyword">let</span> egui_image = epi<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Image</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from_rgba_unmultiplied</span><span class="tshl-punctuation_bracket">(</span>
+            <span class="tshl-punctuation_bracket">[</span>dimensions<span class="tshl-punctuation_delimiter">.</span><span class="tshl-constant_builtin">0</span> <span class="tshl-operator">as</span> <span class="tshl-type_builtin">usize</span>, dimensions<span class="tshl-punctuation_delimiter">.</span><span class="tshl-constant_builtin">1</span> <span class="tshl-operator">as</span> <span class="tshl-type_builtin">usize</span><span class="tshl-punctuation_bracket">]</span>,
+            <span class="tshl-comment">// После, конвертираме до списък от RGBA8 стойности и до [u8] с deref:</span>
+            image<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">to_rgba8</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">deref</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>,
+        <span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+        <span class="tshl-comment">// `frame` е `epi::Frame` и идва като параметър на `update` функцията:</span>
+        <span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">selected_texture</span> = <span class="tshl-constructor">Some</span><span class="tshl-punctuation_bracket">(</span>frame<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">alloc</span><span class="tshl-punctuation_bracket">(</span>egui_image<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+        <span class="tshl-comment">// Вероятно е добра идея да викнем и:</span>
+        <span class="tshl-comment">// `self.selected_texture.take().map(|t| frame.free(t));` в един момент</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="кое-е-по-харно">Кое е по-харно?</h1>
+</div><div class="slide subslide">
+<h1 id="кое-е-по-харно">Кое е по-харно?</h1>
+<h3 id="gtk">GTK</h3>
+<ul>
+<li>✅ Тонове widget-и за каквото ви душа иска</li>
+<li>✅ <code>GTK_DEBUG=interactive</code>, има glade за интерфейс</li>
+<li>✅ Guide и обилна документация</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="кое-е-по-харно">Кое е по-харно?</h1>
+<h3 id="gtk">GTK</h3>
+<ul>
+<li>✅ Тонове widget-и за каквото ви душа иска</li>
+<li>✅ <code>GTK_DEBUG=interactive</code>, има glade за интерфейс</li>
+<li>✅ Guide и обилна документация</li>
+<li>❌ Особени абстракции като <code>*Ext</code> trait-овете</li>
+<li>❌ Голям surface area</li>
+<li>❌ Вероятно малко досадно да се подкара под windows, macOS</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="кое-е-по-харно">Кое е по-харно?</h1>
+<h3 id="gtk">GTK</h3>
+<ul>
+<li>✅ Тонове widget-и за каквото ви душа иска</li>
+<li>✅ <code>GTK_DEBUG=interactive</code>, има glade за интерфейс</li>
+<li>✅ Guide и обилна документация</li>
+<li>❌ Особени абстракции като <code>*Ext</code> trait-овете</li>
+<li>❌ Голям surface area</li>
+<li>❌ Вероятно малко досадно да се подкара под windows, macOS</li>
+</ul>
+<h3 id="egui">Egui</h3>
+<ul>
+<li>✅ По-директно API, по-проста употреба</li>
+<li>✅ Лесна компилация -- нулеви външни зависимости</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="кое-е-по-харно">Кое е по-харно?</h1>
+<h3 id="gtk">GTK</h3>
+<ul>
+<li>✅ Тонове widget-и за каквото ви душа иска</li>
+<li>✅ <code>GTK_DEBUG=interactive</code>, има glade за интерфейс</li>
+<li>✅ Guide и обилна документация</li>
+<li>❌ Особени абстракции като <code>*Ext</code> trait-овете</li>
+<li>❌ Голям surface area</li>
+<li>❌ Вероятно малко досадно да се подкара под windows, macOS</li>
+</ul>
+<h3 id="egui">Egui</h3>
+<ul>
+<li>✅ По-директно API, по-проста употреба</li>
+<li>✅ Лесна компилация -- нулеви външни зависимости</li>
+<li>❌ Някои неща все пак са досадни заради минимализъм и/или съвместимост между desktop/web</li>
+<li>❌ Не толкова mature, примерно няма да намерите code editor widget, webview…</li>
+</ul>
+</div><div class="slide">
+<h1 id="други-интересни-ресурси">Други интересни ресурси</h1>
+<ul>
+<li>Добра лекция, която прави един UI с GTK и също с терминален интерфейс: <a href="https://www.youtube.com/watch?v=dK9-oXptFcM" target="_blank">https://www.youtube.com/watch?v=dK9-oXptFcM</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="други-интересни-ресурси">Други интересни ресурси</h1>
+<ul>
+<li>Добра лекция, която прави един UI с GTK и също с терминален интерфейс: <a href="https://www.youtube.com/watch?v=dK9-oXptFcM" target="_blank">https://www.youtube.com/watch?v=dK9-oXptFcM</a></li>
+<li><a href="https://github.com/MoAlyousef/fltk-rs" target="_blank">fltk</a>: Малко по-дървен интерфейс, но популярен за базови неща.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="други-интересни-ресурси">Други интересни ресурси</h1>
+<ul>
+<li>Добра лекция, която прави един UI с GTK и също с терминален интерфейс: <a href="https://www.youtube.com/watch?v=dK9-oXptFcM" target="_blank">https://www.youtube.com/watch?v=dK9-oXptFcM</a></li>
+<li><a href="https://github.com/MoAlyousef/fltk-rs" target="_blank">fltk</a>: Малко по-дървен интерфейс, но популярен за базови неща.</li>
+<li><a href="https://github.com/antoyo/relm" target="_blank">relm</a>: Библиотека, която седи отгоре на GTK и предоставя elm-подобен интерфейс.</li>
+<li><a href="https://github.com/AaronErhardt/relm4" target="_blank">relm4</a>: Същото като горното, ама различно? 😅</li>
+<li><a href="https://github.com/bodil/vgtk" target="_blank">vgtk</a>: Също седи отгоре на GTK, прави интересни неща с макроси.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="други-интересни-ресурси">Други интересни ресурси</h1>
+<ul>
+<li>Добра лекция, която прави един UI с GTK и също с терминален интерфейс: <a href="https://www.youtube.com/watch?v=dK9-oXptFcM" target="_blank">https://www.youtube.com/watch?v=dK9-oXptFcM</a></li>
+<li><a href="https://github.com/MoAlyousef/fltk-rs" target="_blank">fltk</a>: Малко по-дървен интерфейс, но популярен за базови неща.</li>
+<li><a href="https://github.com/antoyo/relm" target="_blank">relm</a>: Библиотека, която седи отгоре на GTK и предоставя elm-подобен интерфейс.</li>
+<li><a href="https://github.com/AaronErhardt/relm4" target="_blank">relm4</a>: Същото като горното, ама различно? 😅</li>
+<li><a href="https://github.com/bodil/vgtk" target="_blank">vgtk</a>: Също седи отгоре на GTK, прави интересни неща с макроси.</li>
+<li><a href="https://github.com/tauri-apps/tauri" target="_blank">tauri</a>: Използва webview, като electron, но с доста по-малък overhead (твърдят).</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="други-интересни-ресурси">Други интересни ресурси</h1>
+<ul>
+<li>Добра лекция, която прави един UI с GTK и също с терминален интерфейс: <a href="https://www.youtube.com/watch?v=dK9-oXptFcM" target="_blank">https://www.youtube.com/watch?v=dK9-oXptFcM</a></li>
+<li><a href="https://github.com/MoAlyousef/fltk-rs" target="_blank">fltk</a>: Малко по-дървен интерфейс, но популярен за базови неща.</li>
+<li><a href="https://github.com/antoyo/relm" target="_blank">relm</a>: Библиотека, която седи отгоре на GTK и предоставя elm-подобен интерфейс.</li>
+<li><a href="https://github.com/AaronErhardt/relm4" target="_blank">relm4</a>: Същото като горното, ама различно? 😅</li>
+<li><a href="https://github.com/bodil/vgtk" target="_blank">vgtk</a>: Също седи отгоре на GTK, прави интересни неща с макроси.</li>
+<li><a href="https://github.com/tauri-apps/tauri" target="_blank">tauri</a>: Използва webview, като electron, но с доста по-малък overhead (твърдят).</li>
+<li><a href="https://github.com/sixtyfpsui/sixtyfps" target="_blank">sixtyfps</a>: The new hotness, малко особено, цели да е cross-platform и cross-language даже.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="други-интересни-ресурси">Други интересни ресурси</h1>
+<ul>
+<li>Добра лекция, която прави един UI с GTK и също с терминален интерфейс: <a href="https://www.youtube.com/watch?v=dK9-oXptFcM" target="_blank">https://www.youtube.com/watch?v=dK9-oXptFcM</a></li>
+<li><a href="https://github.com/MoAlyousef/fltk-rs" target="_blank">fltk</a>: Малко по-дървен интерфейс, но популярен за базови неща.</li>
+<li><a href="https://github.com/antoyo/relm" target="_blank">relm</a>: Библиотека, която седи отгоре на GTK и предоставя elm-подобен интерфейс.</li>
+<li><a href="https://github.com/AaronErhardt/relm4" target="_blank">relm4</a>: Същото като горното, ама различно? 😅</li>
+<li><a href="https://github.com/bodil/vgtk" target="_blank">vgtk</a>: Също седи отгоре на GTK, прави интересни неща с макроси.</li>
+<li><a href="https://github.com/tauri-apps/tauri" target="_blank">tauri</a>: Използва webview, като electron, но с доста по-малък overhead (твърдят).</li>
+<li><a href="https://github.com/sixtyfpsui/sixtyfps" target="_blank">sixtyfps</a>: The new hotness, малко особено, цели да е cross-platform и cross-language даже.</li>
+<li>И всичко друго в секция "GUI" в <a href="https://github.com/rust-unofficial/awesome-rust#gui" target="_blank">"awesome-rust"</a>.</li>
+<li>Също, <a href="https://areweguiyet.com/" target="_blank">"Are we GUI Yet?"</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="въпроси">Въпроси</h1>
+</div>
+    </main>
+</body>
+</html>
