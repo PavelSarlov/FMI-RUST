@@ -16,10 +16,11 @@ use std::{
 };
 use glam::f32::{Vec2};
 
-use PrimitiveIsaac::{
+use puker::{
     entities::*,
     assets::*,
     utils::*,
+    dungeon::*,
 };
 
 struct MainState {
@@ -27,11 +28,13 @@ struct MainState {
     screen_height: f32,
     assets: Assets,
     player: Player,
+    dungeon: Dungeon,
+    cur_room: usize,
 }
 
 impl MainState {
     fn new(ctx: &mut Context, conf: &Conf) -> GameResult<MainState> {
-        input::mouse::set_cursor_grabbed(ctx, true);
+        input::mouse::set_cursor_grabbed(ctx, true)?;
 
         let assets = Assets::new(ctx)?;
         let screen_width = conf.window_mode.width;
@@ -44,12 +47,16 @@ impl MainState {
             Vec2::new(1., 0.),
             5.
         );
+        let dungeon = Dungeon::generate_dungeon();
+        let cur_room = Dungeon::get_start_room();
 
         let s = MainState {
             screen_width, 
             screen_height,           
             assets,
             player,
+            dungeon,
+            cur_room,
         };
 
         Ok(s)
@@ -83,7 +90,9 @@ impl EventHandler for MainState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         graphics::clear(ctx, [0.1, 0.2, 0.3, 1.0].into());
 
-        self.player.draw(ctx, &self.assets, (self.screen_width, self.screen_height));
+        self.dungeon.draw_room(ctx, &self.assets, (self.screen_width, self.screen_height), self.cur_room)?;
+
+        self.player.draw(ctx, &self.assets, (self.screen_width, self.screen_height))?;
 
         graphics::present(ctx)?;
         Ok(())

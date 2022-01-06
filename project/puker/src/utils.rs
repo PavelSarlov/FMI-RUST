@@ -1,8 +1,13 @@
 use ggez::{
     mint::Point2,
-    graphics::{Rect, Vertex},
+    graphics::{Vertex},
 };
 use glam::f32::*;
+
+#[derive(Debug)]
+pub enum Errors {
+    UnknownRoom(usize),
+}
 
 #[derive(Clone, Debug, Copy)]
 pub struct Vec2Wrap(pub Vec2);

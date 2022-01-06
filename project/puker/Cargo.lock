@@ -3,14 +3,6 @@
 version = 3
 
 [[package]]
-name = "PrimitiveIsaac"
-version = "0.1.0"
-dependencies = [
- "ggez",
- "glam",
-]
-
-[[package]]
 name = "ab_glyph"
 version = "0.2.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1785,6 +1777,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c7342d5883fbccae1cc37a2353b09c87c9b0f3afd73f5fb9bba687a1f733b029"
 dependencies = [
  "unicode-xid",
+]
+
+[[package]]
+name = "puker"
+version = "0.1.0"
+dependencies = [
+ "ggez",
+ "glam",
+ "rand",
 ]
 
 [[package]]
