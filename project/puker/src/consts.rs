@@ -13,14 +13,14 @@ pub const PLAYER_SHOOT_RATE: f32 = 2.5;
 pub const PLAYER_SHOOT_RANGE: f32 = 400.;
 pub const PLAYER_SHOOT_TIMEOUT: f32 = 0.;
 pub const PLAYER_HEALTH: f32 = 5.;
-pub const PLAYER_SPEED: f32 = 5.;
+pub const PLAYER_SPEED: f32 = 3.;
 pub const PLAYER_ANGLE: f32 = 0.;
 
 pub const ENEMY_SHOOT_RATE: f32 = 0.5;
 pub const ENEMY_SHOOT_RANGE: f32 = 400.;
 pub const ENEMY_SHOOT_TIMEOUT: f32 = 0.;
 pub const ENEMY_HEALTH: f32 = 3.;
-pub const ENEMY_SPEED: f32 = 2.;
+pub const ENEMY_SPEED: f32 = 1.;
 pub const ENEMY_ANGLE: f32 = 0.;
 
 pub const SHOT_SPEED: f32 = 6.;
