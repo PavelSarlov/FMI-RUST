@@ -1,15 +1,30 @@
 use ggez::{
     mint::Point2,
     graphics::{Vertex},
+    GameError,
 };
 use glam::f32::*;
+use std::fmt;
 
 #[derive(Debug)]
 pub enum Errors {
-    UnknownRoom(usize),
+    UnknownRoomIndex(usize),
+    UnknownGridNum(usize),
 }
 
-#[derive(Clone, Debug, Copy)]
+impl fmt::Display for Errors {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl Into<GameError> for Errors {
+    fn into(self) -> GameError {
+        GameError::CustomError(self.to_string())
+    }
+}
+
+#[derive(Clone, Debug, Copy, Default)]
 pub struct Vec2Wrap(pub Vec2);
 
 impl Into<Point2<f32>> for Vec2Wrap {
@@ -74,13 +89,15 @@ impl Into<Vertex> for MyVertex {
 pub fn world_to_screen_space(screen_width: f32, screen_height: f32, point: Vec2) -> Vec2 {
     Vec2::new(
         point.x + screen_width / 2.,
-        screen_height - (point.y + screen_height) / 2.
+        // screen_height - (point.y + screen_height) / 2.
+        -point.y + screen_height / 2.,
     )
 }
 
 pub fn screen_to_world_space(screen_width: f32, screen_height: f32, point: Vec2) -> Vec2 {
     Vec2::new(
         point.x - screen_width / 2.,
-        screen_height + (point.y - screen_height) * 2.
+        // screen_height + (point.y - screen_height) * 2.
+        -point.y + screen_height / 2.,
     )
 }

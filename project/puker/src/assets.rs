@@ -15,6 +15,7 @@ pub struct Assets {
     pub door_south: Image,
     pub door_east: Image,
     pub door_west: Image,
+    pub door_base: Image,
 }
 
 impl Assets {
@@ -28,6 +29,7 @@ impl Assets {
         let door_east = Image::new(ctx, "/door_east.png")?;
         let door_south = Image::new(ctx, "/door_south.png")?;
         let door_west = Image::new(ctx, "/door_west.png")?;
+        let door_base = Image::new(ctx, "/door_base.png")?;
 
         Ok(Self {
             player_base,
@@ -39,6 +41,7 @@ impl Assets {
             door_south,
             door_east,
             door_west,
+            door_base,
         })
     }
 }
