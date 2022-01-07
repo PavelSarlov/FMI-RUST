@@ -1,0 +1,1048 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <title>Web assembly</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="rust,fmi">
+    <link rel="stylesheet" href="resources/codeblock/codeblock.css">
+<link rel="stylesheet" href="resources/frontend/controls.css">
+<link rel="stylesheet" href="resources/global/global.css">
+<link rel="stylesheet" href="resources/global/metadata.css">
+<link rel="stylesheet" href="resources/highlight/hljs-github.css">
+<link rel="stylesheet" href="resources/highlight/style.css">
+<link rel="stylesheet" href="resources/highlight/tshl-github.css">
+<link rel="stylesheet" href="resources/katex/katex.min.css">
+<link rel="stylesheet" href="resources/rustc/rustc.css">
+<link rel="stylesheet" href="resources/splitview/splitview.css">
+<link rel="stylesheet" href="resources/wrapping-pages/wrapping-pages.css">
+<script type="text/javascript" src="resources/codeblock/codeblock.js"></script>
+<script type="text/javascript" src="resources/frontend/controls.js"></script>
+</head>
+<body>
+    <main>
+        <div class="slide">
+<h1 id="web-assembly">Web assembly</h1>
+<h3 id="06-януари-2022">06 януари 2022</h3>
+</div><div class="slide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Трето домашно до следващия вторник</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Трето домашно до следващия вторник<br />
+<br/></li>
+<li>Изберете си проект</li>
+<li>предложете в #projects канала в дискорд или по имейл <a href="mailto:fmi@rust-lang.bg" target="_blank">fmi@rust-lang.bg</a></li>
+<li>информация: <a href="https://fmi.rust-lang.bg/guides/projects" target="_blank">https://fmi.rust-lang.bg/guides/projects</a></li>
+<li>showcase от минали години: <a href="https://github.com/fmi/rust-projects" target="_blank">https://github.com/fmi/rust-projects</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="web-assembly">Web assembly</h1>
+<blockquote>
+  <p>WebAssembly (abbreviated Wasm) is a binary instruction format for a stack-based virtual machine. Wasm is designed as a portable compilation target for programming languages, enabling deployment on the web for client and server applications.</p>
+</blockquote>
+<p>Източник: <a href="https://webassembly.org/" target="_blank">https://webassembly.org/</a></p>
+</div><div class="slide">
+<h1 id="web-assembly">Web assembly</h1>
+<ul>
+<li>формат за bytecode, който се изпълнява от виртуална машина</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="web-assembly">Web assembly</h1>
+<ul>
+<li>формат за bytecode, който се изпълнява от виртуална машина</li>
+<li>доста ограничен - сметки върху числа, операции по паметта, не много повече</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="web-assembly">Web assembly</h1>
+<ul>
+<li>формат за bytecode, който се изпълнява от виртуална машина</li>
+<li>доста ограничен - сметки върху числа, операции по паметта, не много повече</li>
+<li>няма автоматичено управление на паметта, нишки, exceptions</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="web-assembly">Web assembly</h1>
+<ul>
+<li>формат за bytecode, който се изпълнява от виртуална машина</li>
+<li>доста ограничен - сметки върху числа, операции по паметта, не много повече</li>
+<li>няма автоматичено управление на паметта, нишки, exceptions</li>
+<li>няма достъп до външния свят - ОС, файлова система, networking</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="web-assembly">Web assembly</h1>
+<ul>
+<li>формат за bytecode, който се изпълнява от виртуална машина</li>
+<li>доста ограничен - сметки върху числа, операции по паметта, не много повече</li>
+<li>няма автоматичено управление на паметта, нишки, exceptions</li>
+<li>няма достъп до външния свят - ОС, файлова система, networking<br />
+<br/></li>
+<li>основна цел - изпълняване на client-side код в уеб сайтове; алтернатива на JavaScript</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="web-assembly">Web assembly</h1>
+<ul>
+<li>формат за bytecode, който се изпълнява от виртуална машина</li>
+<li>доста ограничен - сметки върху числа, операции по паметта, не много повече</li>
+<li>няма автоматичено управление на паметта, нишки, exceptions</li>
+<li>няма достъп до външния свят - ОС, файлова система, networking<br />
+<br/></li>
+<li>основна цел - изпълняване на client-side код в уеб сайтове; алтернатива на JavaScript</li>
+<li>може да се използва и извън уеб среда, като портативен формат за изпълним код</li>
+</ul>
+</div><div class="slide">
+<h1 id="поддръжка">Поддръжка</h1>
+<ul>
+<li>Кои езици поддържат компилация до web assembly?</li>
+<li><a href="https://github.com/appcypher/awesome-wasm-langs" target="_blank">https://github.com/appcypher/awesome-wasm-langs</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<ul>
+<li>обикновенно за компилиране до wasm се използва <code>wasm_bindgen</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<ul>
+<li>обикновенно за компилиране до wasm се използва <code>wasm_bindgen</code></li>
+<li>но първо ще видим как се прави компилация на ръка</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<ul>
+<li>обикновенно за компилиране до wasm се използва <code>wasm_bindgen</code></li>
+<li>но първо ще видим как се прави компилация на ръка</li>
+<li>използвайки само <code>cargo</code> и <code>rustc</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>най-често от компилаторите се очаква да генерират код за същата платформа върху която се изпълняват</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>най-често от компилаторите се очаква да генерират код за същата платформа върху която се изпълняват</li>
+<li>но понякога искаме компилираната програма или библиотека да се изпълнява на друга платформа</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>най-често от компилаторите се очаква да генерират код за същата платформа върху която се изпълняват</li>
+<li>но понякога искаме компилираната програма или библиотека да се изпълнява на друга платформа</li>
+<li>например пишем код за микро контролер</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>най-често от компилаторите се очаква да генерират код за същата платформа върху която се изпълняват</li>
+<li>но понякога искаме компилираната програма или библиотека да се изпълнява на друга платформа</li>
+<li>например пишем код за микро контролер</li>
+<li>това се нарича cross compilation</li>
+</ul>
+</div><div class="slide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>rustc използва llvm като backend за генериране на крайния код</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>rustc използва llvm като backend за генериране на крайния код</li>
+<li>llvm поддържа задаване на платформата за която да генерира код чрез target tuple</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>rustc използва llvm като backend за генериране на крайния код</li>
+<li>llvm поддържа задаване на платформата за която да генерира код чрез target tuple</li>
+<li>target tuple-а оказва</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>rustc използва llvm като backend за генериране на крайния код</li>
+<li>llvm поддържа задаване на платформата за която да генерира код чрез target tuple</li>
+<li>target tuple-а оказва<ul>
+<li>архитектурата на процесора (набор от процесорни инструкции)</li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>rustc използва llvm като backend за генериране на крайния код</li>
+<li>llvm поддържа задаване на платформата за която да генерира код чрез target tuple</li>
+<li>target tuple-а оказва<ul>
+<li>архитектурата на процесора (набор от процесорни инструкции)</li>
+<li>операционната система (ако има такава)</li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>rustc използва llvm като backend за генериране на крайния код</li>
+<li>llvm поддържа задаване на платформата за която да генерира код чрез target tuple</li>
+<li>target tuple-а оказва<ul>
+<li>архитектурата на процесора (набор от процесорни инструкции)</li>
+<li>операционната система (ако има такава)</li>
+<li>и понякога допълнително детайли за средата в която ще се изпълнява</li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>rustc използва llvm като backend за генериране на крайния код</li>
+<li>llvm поддържа задаване на платформата за която да генерира код чрез target tuple</li>
+<li>target tuple-а оказва<ul>
+<li>архитектурата на процесора (набор от процесорни инструкции)</li>
+<li>операционната система (ако има такава)</li>
+<li>и понякога допълнително детайли за средата в която ще се изпълнява</li></ul></li>
+<li>примери</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>rustc използва llvm като backend за генериране на крайния код</li>
+<li>llvm поддържа задаване на платформата за която да генерира код чрез target tuple</li>
+<li>target tuple-а оказва<ul>
+<li>архитектурата на процесора (набор от процесорни инструкции)</li>
+<li>операционната система (ако има такава)</li>
+<li>и понякога допълнително детайли за средата в която ще се изпълнява</li></ul></li>
+<li>примери<ul>
+<li>x86_64-unknown-linux-gnu</li>
+<li>x86_64-pc-windows-msvc</li>
+<li>aarch64-unknown-linux-gnu</li></ul></li>
+</ul>
+</div><div class="slide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>web assembly се поддържа като вид "процесорна архитектура"</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>web assembly се поддържа като вид "процесорна архитектура"</li>
+<li><code>wasm32-unknown-unknown</code> - чисто web assembly</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>web assembly се поддържа като вид "процесорна архитектура"</li>
+<li><code>wasm32-unknown-unknown</code> - чисто web assembly</li>
+<li><code>wasm32-wasi</code> - web assembly с достъп до функции на ОС</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>web assembly се поддържа като вид "процесорна архитектура"</li>
+<li><code>wasm32-unknown-unknown</code> - чисто web assembly</li>
+<li><code>wasm32-wasi</code> - web assembly с достъп до функции на ОС</li>
+<li>(не използвайте <code>wasm32-unknown-emscripten</code>)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="крос-компилация">Крос компилация</h3>
+<ul>
+<li>web assembly се поддържа като вид "процесорна архитектура"</li>
+<li><code>wasm32-unknown-unknown</code> - чисто web assembly</li>
+<li><code>wasm32-wasi</code> - web assembly с достъп до функции на ОС</li>
+<li>(не използвайте <code>wasm32-unknown-emscripten</code>)</li>
+</ul>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">rustup target add wasm32-unknown-unknown</code></pre>
+                    </div>
+                    
+                </div>
+                
+<ul>
+<li>това ще ни инсталира прекомпилирана версия на стандартната rust библиотека, към която ще се линква</li>
+</ul>
+</div><div class="slide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="std-и-no_std">std и no_std</h3>
+<ul>
+<li>Rust поддържа глобален атрибут <code>#![no_std]</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="std-и-no_std">std и no_std</h3>
+<ul>
+<li>Rust поддържа глобален атрибут <code>#![no_std]</code><ul>
+<li>премахва се достъпа до стандартната библиотека (<code>std</code>)</li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="std-и-no_std">std и no_std</h3>
+<ul>
+<li>Rust поддържа глобален атрибут <code>#![no_std]</code><ul>
+<li>премахва се достъпа до стандартната библиотека (<code>std</code>)</li>
+<li>има достъп само до <code>core</code> (и <code>alloc</code> като външна библиотека)</li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="std-и-no_std">std и no_std</h3>
+<ul>
+<li>Rust поддържа глобален атрибут <code>#![no_std]</code><ul>
+<li>премахва се достъпа до стандартната библиотека (<code>std</code>)</li>
+<li>има достъп само до <code>core</code> (и <code>alloc</code> като външна библиотека)</li>
+<li>използва се за embedded среди, където обикновенно няма ОС</li></ul></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="std-и-no_std">std и no_std</h3>
+<ul>
+<li>Rust поддържа глобален атрибут <code>#![no_std]</code><ul>
+<li>премахва се достъпа до стандартната библиотека (<code>std</code>)</li>
+<li>има достъп само до <code>core</code> (и <code>alloc</code> като външна библиотека)</li>
+<li>използва се за embedded среди, където обикновенно няма ОС<br />
+<br></li></ul></li>
+<li>при wasm не е нужно ограничаване до no_std - може да се използва <code>std</code> библиотеката</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="компилация-на-rust-до-wasm">Компилация на rust до wasm</h1>
+<h3 id="std-и-no_std">std и no_std</h3>
+<ul>
+<li>Rust поддържа глобален атрибут <code>#![no_std]</code><ul>
+<li>премахва се достъпа до стандартната библиотека (<code>std</code>)</li>
+<li>има достъп само до <code>core</code> (и <code>alloc</code> като външна библиотека)</li>
+<li>използва се за embedded среди, където обикновенно няма ОС<br />
+<br></li></ul></li>
+<li>при wasm не е нужно ограничаване до no_std - може да се използва <code>std</code> библиотеката</li>
+<li>но ако се използва функция, която не се поддържа (напр. работа с нишки) програмата ще panic-не</li>
+</ul>
+</div><div class="slide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="rust-до-wasm">Rust до Wasm</h3>
+<p>Cargo.toml</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="tomltoml language-toml hljs"><span class="hljs-section">[lib]</span>
+<span class="hljs-attr">crate-type</span> = [<span class="hljs-string">"cdylib"</span>]</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Трябва проекта да се компилира като библиотека.<br />
+Тази библиотека ще се зареди от javascript код и ще се използват функциите дефинирани в нея.</p>
+</div><div class="slide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="rust-до-wasm">Rust до Wasm</h3>
+<p>src/lib.rs</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>no_mangle<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">extern</span> <span class="tshl-string">&quot;C&quot;</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type_builtin">i32</span>, <span class="tshl-variable_parameter">b</span>: <span class="tshl-type_builtin">i32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i32</span> {
+    a + b
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Функцията <code>add</code> ще бъде достъпна от javascript</p>
+</div><div class="slide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="rust-до-wasm">Rust до Wasm</h3>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">cargo build --release --target wasm32-unknown-unknown</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Това ше генерира <code>target/wasm32-unknown-unknown/release/example_01.wasm</code></p>
+</div><div class="slide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="изпълняване-в-уеб-браузър">Изпълняване в уеб браузър</h3>
+<ul>
+<li>нужен e статичен file server</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="изпълняване-в-уеб-браузър">Изпълняване в уеб браузър</h3>
+<ul>
+<li>нужен e статичен file server</li>
+<li>.wasm не може да се импортира от html файл, поради CORS защити</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="изпълняване-в-уеб-браузър">Изпълняване в уеб браузър</h3>
+<ul>
+<li>нужен e статичен file server</li>
+<li>.wasm не може да се импортира от html файл, поради CORS защити</li>
+<li>трябва да се използва javascript функцията <code>fetch</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="изпълняване-в-уеб-браузър">Изпълняване в уеб браузър</h3>
+<ul>
+<li>нужен e статичен file server</li>
+<li>.wasm не може да се импортира от html файл, поради CORS защити</li>
+<li>трябва да се използва javascript функцията <code>fetch</code></li>
+<li>може да използвате <a href="https://github.com/brson/basic-http-server" target="_blank">basic-http-server</a>: <code>cargo install basic-http-server</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="изпълняване-в-уеб-браузър">Изпълняване в уеб браузър</h3>
+<ul>
+<li>нужен e статичен file server</li>
+<li>.wasm не може да се импортира от html файл, поради CORS защити</li>
+<li>трябва да се използва javascript функцията <code>fetch</code></li>
+<li>може да използвате <a href="https://github.com/brson/basic-http-server" target="_blank">basic-http-server</a>: <code>cargo install basic-http-server</code></li>
+<li>ако имате python може да ползвате <code>python3 -m http.server</code> (<a href="https://pythonbasics.org/webserver/" target="_blank">обяснение</a>)</li>
+</ul>
+</div><div class="slide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="изпълняване-в-уеб-браузър">Изпълняване в уеб браузър</h3>
+<p>Сървъра ще връща следните файлове:</p>
+<ul>
+<li>index.html</li>
+<li>index.js</li>
+<li>wasm_lib.wasm</li>
+</ul>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">cp target/wasm32-unknown-unknown/release/example_01.wasm \
+    wasm_lib.wasm</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="изпълняване-в-уеб-браузър">Изпълняване в уеб браузър</h3>
+<p>index.html</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="htmlhtml language-html hljs"><span class="hljs-meta">&lt;!DOCTYPE html&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Hello wasm!<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"./index.js"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"module"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="изпълняване-в-уеб-браузър">Изпълняване в уеб браузър</h3>
+<p>index.js</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="jsjs language-js hljs">WebAssembly.instantiateStreaming(fetch(<span class="hljs-string">'./wasm_lib.wasm'</span>), {})
+    .then(<span class="hljs-function"><span class="hljs-params">wasm</span> =&gt;</span> {
+        <span class="hljs-comment">// през `instance.exports` можем да достъпваме функциите,</span>
+        <span class="hljs-comment">// които сме дефинирали в нашата библиотека.</span>
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"add(1, 2) = "</span>, wasm.instance.exports.add(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>))
+    })</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="ограничения">Ограничения</h3>
+<ul>
+<li>този пример работи, защото използвахме <code>i32</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="ограничения">Ограничения</h3>
+<ul>
+<li>този пример работи, защото използвахме <code>i32</code></li>
+<li>но по-сложни типове, като низове, масиви, обекти, не могат да се прехвърлят директно между js и wasm</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="ограничения">Ограничения</h3>
+<ul>
+<li>този пример работи, защото използвахме <code>i32</code></li>
+<li>но по-сложни типове, като низове, масиви, обекти, не могат да се прехвърлят директно между js и wasm</li>
+<li>нужен е специален код от двете страни на ffi границата</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="ограничения">Ограничения</h3>
+<ul>
+<li>този пример работи, защото използвахме <code>i32</code></li>
+<li>но по-сложни типове, като низове, масиви, обекти, не могат да се прехвърлят директно между js и wasm</li>
+<li>нужен е специален код от двете страни на ffi границата</li>
+<li>за това се използва <code>wasm-bindgen</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="wasm-bindgen">Wasm-bindgen</h3>
+<ul>
+<li>wasm-bindgen се грижи да направи интерфейс между wasm и javascript</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="wasm-bindgen">Wasm-bindgen</h3>
+<ul>
+<li>wasm-bindgen се грижи да направи интерфейс между wasm и javascript</li>
+<li>конвертиране на Rust-ки типове до JS еквиваленти - uint, string, vec, …</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="wasm-bindgen">Wasm-bindgen</h3>
+<ul>
+<li>wasm-bindgen се грижи да направи интерфейс между wasm и javascript</li>
+<li>конвертиране на Rust-ки типове до JS еквиваленти - uint, string, vec, …</li>
+<li>копиране на памет между wasm и JS</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="wasm-bindgen">Wasm-bindgen</h3>
+<ul>
+<li>wasm-bindgen се грижи да направи интерфейс между wasm и javascript</li>
+<li>конвертиране на Rust-ки типове до JS еквиваленти - uint, string, vec, …</li>
+<li>копиране на памет между wasm и JS</li>
+<li>четене на wasm паметта от JS</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="wasm-bindgen">Wasm-bindgen</h3>
+<ul>
+<li>wasm-bindgen се грижи да направи интерфейс между wasm и javascript</li>
+<li>конвертиране на Rust-ки типове до JS еквиваленти - uint, string, vec, …</li>
+<li>копиране на памет между wasm и JS</li>
+<li>четене на wasm паметта от JS</li>
+<li>конвертиране на низове между utf8 и utf16</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="пример-1">Пример 1</h1>
+<h3 id="wasm-bindgen">Wasm-bindgen</h3>
+<ul>
+<li>wasm-bindgen се грижи да направи интерфейс между wasm и javascript</li>
+<li>конвертиране на Rust-ки типове до JS еквиваленти - uint, string, vec, …</li>
+<li>копиране на памет между wasm и JS</li>
+<li>четене на wasm паметта от JS</li>
+<li>конвертиране на низове между utf8 и utf16</li>
+<li>и др.</li>
+</ul>
+</div><div class="slide">
+<h1 id="wasm-bindgen">Wasm bindgen</h1>
+<p>Необходима е програмата <code>wasm-bindgen</code>, която може да се инсталира през cargo</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">cargo install wasm-bindgen-cli</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Необхидима е и библиотеката <code>wasm-bindgen</code>. Cargo.toml:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="tomltoml language-toml hljs"><span class="hljs-section">[dependencies]</span>
+<span class="hljs-attr">wasm-bindgen</span> = { version = <span class="hljs-string">"0.2.69"</span>, features = [<span class="hljs-string">"serde-serialize"</span>] }</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="wasm-bindgen">Wasm bindgen</h1>
+<h3 id="използване">Използване</h3>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="shsh language-sh hljs">cargo build --release --target wasm32-unknown-unknown
+
+wasm-bindgen target/wasm32-unknown-unknown/release/wasm_lib.wasm \
+    --out-dir pkg \
+    --target web</code></pre>
+                    </div>
+                    
+                </div>
+                
+<ul>
+<li>копира wasm файла в <code>pkg/wasm_lib_bg.wasm</code></li>
+<li>генерира js файл с wrapper-и на експортнатите функции <code>pkg/wasm_lib.js</code></li>
+<li>генерира и typescript дефиниции</li>
+</ul>
+</div><div class="slide">
+<h1 id="пример-2">Пример 2</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">use</span> wasm_bindgen<span class="tshl-punctuation_delimiter">::</span>prelude<span class="tshl-punctuation_delimiter">::</span><span class="tshl-operator">*</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>wasm_bindgen<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">add_i32</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type_builtin">i32</span>, <span class="tshl-variable_parameter">b</span>: <span class="tshl-type_builtin">i32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">i32</span> {
+    a + b
+}
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>wasm_bindgen<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">add_u32</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">a</span>: <span class="tshl-type_builtin">u32</span>, <span class="tshl-variable_parameter">b</span>: <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type_builtin">u32</span> {
+    a + b
+}
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>wasm_bindgen<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">greet</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">String</span> {
+    <span class="tshl-string">&quot;hello wasm&quot;</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">to_string</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}
+
+<span class="tshl-comment">// `wasm_bindgen` атрибута позволява да подаваме структурата</span>
+<span class="tshl-comment">// на JS код като opaque тип, т.е. указател</span>
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>wasm_bindgen<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>derive<span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">Debug</span>, serde<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Serialize</span>, serde<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Deserialize</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">struct</span> <span class="tshl-type">User</span> {
+    <span class="tshl-property">name</span>: <span class="tshl-type">String</span>,
+    <span class="tshl-property">age</span>: <span class="tshl-type_builtin">u32</span>,
+}
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>wasm_bindgen<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">impl</span> <span class="tshl-type">User</span> {
+    <span class="tshl-comment">// В този случай `User` е opaque type</span>
+    <span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">name</span>: <span class="tshl-type">String</span>, <span class="tshl-variable_parameter">age</span>: <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">User</span> {
+        <span class="tshl-type">User</span> { name, age }
+    }
+
+    <span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">to_js_value</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">JsValue</span> {
+        <span class="tshl-comment">// Сериализира структурата до JSON и я подава на JS,</span>
+        <span class="tshl-comment">// където ще се десериализира до JS обект</span>
+        <span class="tshl-type">JsValue</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">from_serde</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_builtin">self</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="пример-2">Пример 2</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="jsjs language-js hljs"><span class="hljs-keyword">import</span> { add_i32, add_u32, greet, User, <span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> init } <span class="hljs-keyword">from</span> <span class="hljs-string">'./pkg/wasm_lib.js'</span>
+
+init(<span class="hljs-string">'./pkg/wasm_lib_bg.wasm'</span>)
+    .then(<span class="hljs-function"><span class="hljs-params">_wasm</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(greet())
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"add_i32(-1, -2) = "</span>, add_i32(<span class="hljs-number">-1</span>, <span class="hljs-number">-2</span>))  <span class="hljs-comment">// -3</span>
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"add_u32(-1, -2) = "</span>, add_u32(<span class="hljs-number">-1</span>, <span class="hljs-number">-2</span>))  <span class="hljs-comment">// 4294967293</span>
+
+        <span class="hljs-keyword">const</span> user = User.new(<span class="hljs-string">"Иванчо"</span>, <span class="hljs-number">10</span>)
+        <span class="hljs-built_in">console</span>.log(user)               <span class="hljs-comment">// Object { ptr: 1114144 }</span>
+        <span class="hljs-built_in">console</span>.log(user.to_js_value()) <span class="hljs-comment">// Object { name: "Иванчо", age: 10 }</span>
+    })</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="импортиране-на-функции">Импортиране на функции</h1>
+<p>Wasm модул има достъп единсвено до функции, които са му подадени експлицитно от страна на JS при създаването му.</p>
+<p>Rust</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">extern</span> <span class="tshl-string">&quot;C&quot;</span> {
+    <span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">myStuff</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Javascript</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</div>
+                        <pre><code class="jsjs language-js hljs"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">myStuff</span>(<span class="hljs-params"></span>) </span>{ <span class="hljs-comment">/* ... */</span> }
+
+<span class="hljs-keyword">const</span> importObject = {
+    <span class="hljs-attr">env</span>: { myStuff }
+}
+
+WebAssembly
+    .instantiateStreaming(fetch(<span class="hljs-string">'./wasm_lib.wasm'</span>), importObject)
+    .then(<span class="hljs-function"><span class="hljs-params">wasm</span> =&gt;</span> {
+        <span class="hljs-comment">/// ...</span>
+    })</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="примери">Примери</h1>
+<h3 id="статична-търсачка">Статична търсачка</h3>
+<ul>
+<li><a href="https://endler.dev/2019/tinysearch/" target="_blank">A Tiny, Static, Full-Text Search Engine using Rust and WebAssembly</a></li>
+<li><a href="https://github.com/tinysearch/tinysearch" target="_blank">https://github.com/tinysearch/tinysearch</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="примери">Примери</h1>
+<h3 id="игри">Игри</h3>
+<ul>
+<li>доста библиотеки поддържат wasm</li>
+<li><a href="https://github.com/ggez/good-web-game" target="_blank">good-web-game</a></li>
+<li><a href="https://github.com/not-fl3/miniquad" target="_blank">miniquad</a> / <a href="https://github.com/not-fl3/macroquad" target="_blank">macroquad</a></li>
+<li><a href="https://github.com/bevyengine/bevy" target="_blank">bevy</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="инструменти-за-wasm">Инструменти за wasm</h1>
+<h3 id="wasm-pack">wasm-pack</h3>
+<ul>
+<li><a href="https://rustwasm.github.io/wasm-pack/installer/" target="_blank">https://rustwasm.github.io/wasm-pack/installer/</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="инструменти-за-wasm">Инструменти за wasm</h1>
+<h3 id="wasm-pack">wasm-pack</h3>
+<ul>
+<li><a href="https://rustwasm.github.io/wasm-pack/installer/" target="_blank">https://rustwasm.github.io/wasm-pack/installer/</a></li>
+<li>или <code>cargo install wasm-pack</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="инструменти-за-wasm">Инструменти за wasm</h1>
+<h3 id="wasm-pack">wasm-pack</h3>
+<ul>
+<li><a href="https://rustwasm.github.io/wasm-pack/installer/" target="_blank">https://rustwasm.github.io/wasm-pack/installer/</a></li>
+<li>или <code>cargo install wasm-pack</code></li>
+<li>помага за интеграция с javascript света - npm, bundler-и, …</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="инструменти-за-wasm">Инструменти за wasm</h1>
+<h3 id="wasm-pack">wasm-pack</h3>
+<ul>
+<li><a href="https://rustwasm.github.io/wasm-pack/installer/" target="_blank">https://rustwasm.github.io/wasm-pack/installer/</a></li>
+<li>или <code>cargo install wasm-pack</code></li>
+<li>помага за интеграция с javascript света - npm, bundler-и, …</li>
+<li>автоматизира това, което правихме досега ръчно</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="инструменти-за-wasm">Инструменти за wasm</h1>
+<h3 id="wasm-pack">wasm-pack</h3>
+<ul>
+<li><a href="https://rustwasm.github.io/wasm-pack/installer/" target="_blank">https://rustwasm.github.io/wasm-pack/installer/</a></li>
+<li>или <code>cargo install wasm-pack</code></li>
+<li>помага за интеграция с javascript света - npm, bundler-и, …</li>
+<li>автоматизира това, което правихме досега ръчно<ul>
+<li>инсталация на target <code>wasm32-unknown-unknown</code> с <code>rustup</code></li>
+<li>компилация на rust до <code>.wasm</code></li>
+<li><code>wasm-bindgen</code> за js binding-и</li>
+<li>някои оптимизации</li></ul></li>
+</ul>
+</div><div class="slide">
+<h1 id="инструменти-за-wasm">Инструменти за wasm</h1>
+<h3 id="js-sys-и-web-sys">js-sys и web-sys</h3>
+<ul>
+<li><a href="https://docs.rs/js-sys" target="_blank">https://docs.rs/js-sys</a></li>
+<li>bindings към стандартни javascript API-та</li>
+</ul>
+<p><br></p>
+<ul>
+<li><a href="https://docs.rs/web-sys/" target="_blank">https://docs.rs/web-sys/</a></li>
+<li>bindings към уеб и DOM API-та</li>
+<li>документации и примери в wasmbindgen книгата (<a href="https://rustwasm.github.io/wasm-bindgen/examples/dom.html" target="_blank">https://rustwasm.github.io/wasm-bindgen/examples/dom.html</a>)</li>
+</ul>
+</div><div class="slide">
+<h1 id="оптимизации">Оптимизации</h1>
+<p>Aко ще добавяме wasm към web страница обикновено размера на модула е по-важен критерий от скоростта му</p>
+</div><div class="slide subslide">
+<h1 id="оптимизации">Оптимизации</h1>
+<p>Aко ще добавяме wasm към web страница обикновено размера на модула е по-важен критерий от скоростта му</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="tomltoml language-toml hljs"><span class="hljs-section">[profile.release]</span>
+<span class="hljs-attr">opt-level</span> = <span class="hljs-string">"z"</span>
+<span class="hljs-attr">lto</span> = <span class="hljs-string">"thin"</span>
+<span class="hljs-attr">codegen-units</span> = <span class="hljs-number">1</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide subslide">
+<h1 id="оптимизации">Оптимизации</h1>
+<p>Aко ще добавяме wasm към web страница обикновено размера на модула е по-важен критерий от скоростта му</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="tomltoml language-toml hljs"><span class="hljs-section">[profile.release]</span>
+<span class="hljs-attr">opt-level</span> = <span class="hljs-string">"z"</span>
+<span class="hljs-attr">lto</span> = <span class="hljs-string">"thin"</span>
+<span class="hljs-attr">codegen-units</span> = <span class="hljs-number">1</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<ul>
+<li><a href="https://github.com/WebAssembly/binaryen" target="_blank">wasm-opt</a> - премахване на ненужни символи</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="оптимизации">Оптимизации</h1>
+<p>Aко ще добавяме wasm към web страница обикновено размера на модула е по-важен критерий от скоростта му</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="tomltoml language-toml hljs"><span class="hljs-section">[profile.release]</span>
+<span class="hljs-attr">opt-level</span> = <span class="hljs-string">"z"</span>
+<span class="hljs-attr">lto</span> = <span class="hljs-string">"thin"</span>
+<span class="hljs-attr">codegen-units</span> = <span class="hljs-number">1</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<ul>
+<li><a href="https://github.com/WebAssembly/binaryen" target="_blank">wasm-opt</a> - премахване на ненужни символи</li>
+<li><a href="https://docs.rs/wee_alloc" target="_blank">wee_alloc</a> - глобален алокатор оптимизиран за малък размер</li>
+</ul>
+</div><div class="slide">
+<h1 id="wasm-извън-браузъра">Wasm извън браузъра</h1>
+<p>Въпреки, че wasm е създаден с идеята да се използва за уеб, намира и други приложения.<br />
+Web assembly като формат притежава някои удобни свойства:</p>
+</div><div class="slide subslide">
+<h1 id="wasm-извън-браузъра">Wasm извън браузъра</h1>
+<p>Въпреки, че wasm е създаден с идеята да се използва за уеб, намира и други приложения.<br />
+Web assembly като формат притежава някои удобни свойства:</p>
+<ul>
+<li>сравнително прост bytecode формат</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="wasm-извън-браузъра">Wasm извън браузъра</h1>
+<p>Въпреки, че wasm е създаден с идеята да се използва за уеб, намира и други приложения.<br />
+Web assembly като формат притежава някои удобни свойства:</p>
+<ul>
+<li>сравнително прост bytecode формат</li>
+<li>поддръжка на компилация до wasm от много езици</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="wasm-извън-браузъра">Wasm извън браузъра</h1>
+<p>Въпреки, че wasm е създаден с идеята да се използва за уеб, намира и други приложения.<br />
+Web assembly като формат притежава някои удобни свойства:</p>
+<ul>
+<li>сравнително прост bytecode формат</li>
+<li>поддръжка на компилация до wasm от много езици</li>
+<li>преносим - може да се изпълнява на всякакви платформи</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="wasm-извън-браузъра">Wasm извън браузъра</h1>
+<p>Въпреки, че wasm е създаден с идеята да се използва за уеб, намира и други приложения.<br />
+Web assembly като формат притежава някои удобни свойства:</p>
+<ul>
+<li>сравнително прост bytecode формат</li>
+<li>поддръжка на компилация до wasm от много езици</li>
+<li>преносим - може да се изпълнява на всякакви платформи</li>
+<li>сигурен - всички инструкции и достъпи до памет се валидират</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="wasm-извън-браузъра">Wasm извън браузъра</h1>
+<p>Въпреки, че wasm е създаден с идеята да се използва за уеб, намира и други приложения.<br />
+Web assembly като формат притежава някои удобни свойства:</p>
+<ul>
+<li>сравнително прост bytecode формат</li>
+<li>поддръжка на компилация до wasm от много езици</li>
+<li>преносим - може да се изпълнява на всякакви платформи</li>
+<li>сигурен - всички инструкции и достъпи до памет се валидират</li>
+<li>sandbox-нат - няма достъп до външния свят</li>
+</ul>
+</div><div class="slide">
+<h1 id="wasm-извън-браузъра">Wasm извън браузъра</h1>
+<p><img src="resources/wasm_docker_tweet.png" alt="wasm_docker_tweet" /></p>
+</div><div class="slide">
+<h1 id="wasmtime">Wasmtime</h1>
+<ul>
+<li>runtime за web assembly и WASI</li>
+<li>като библиотека или като интерпретатор</li>
+<li><a href="https://wasmtime.dev/" target="_blank">https://wasmtime.dev/</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="watt">Watt</h1>
+<ul>
+<li><a href="https://github.com/dtolnay/watt" target="_blank">https://github.com/dtolnay/watt</a></li>
+<li>процедурни макроси, компилирани до wasm</li>
+</ul>
+</div><div class="slide">
+<h1 id="vscode-tree-sitter-plugin">Vscode tree sitter plugin</h1>
+<ul>
+<li><a href="https://marketplace.visualstudio.com/items?itemName=evgeniypeshkov.syntax-highlighter" target="_blank">https://marketplace.visualstudio.com/items?itemName=evgeniypeshkov.syntax-highlighter</a></li>
+<li><a href="https://tree-sitter.github.io/tree-sitter/" target="_blank">tree sitter</a> е генератор на инкрементални парсери за програмни езици</li>
+<li>tree sitter генерира C код по граматика</li>
+<li>plugin-а дистрибутира този C код, компилиран до wasm модул</li>
+</ul>
+</div><div class="slide">
+<h1 id="lunatic">Lunatic</h1>
+<ul>
+<li><a href="https://github.com/lunatic-solutions/lunatic" target="_blank">https://github.com/lunatic-solutions/lunatic</a></li>
+<li>actor framework, използващ wasm модули като актьори</li>
+<li>вдъхновен от Erlang</li>
+<li>в етап на разработка</li>
+</ul>
+</div><div class="slide">
+<h1 id="въпроси">Въпроси</h1>
+</div>
+    </main>
+</body>
+</html>
