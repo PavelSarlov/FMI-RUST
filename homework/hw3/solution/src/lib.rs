@@ -231,17 +231,16 @@ impl Dungeon {
     /// Вижте по-долу за обяснение на грешките, които очакваме.
     ///
     pub fn from_reader<B: BufRead>(reader: B) -> Result<Self, Errors> {
-        let lines: Vec<String> = reader.lines().map(|x| x.unwrap()).collect();
-
-        if lines.clone().len() == 0_usize {
-            return Err(Errors::LineParseError { line_number: 0 });
-        }
-
         let mut dungeon = Dungeon::new();
         let mut reading_state = ReadingState::Rooms;
+        let mut line_number: usize = 0;
 
-        for (i, line) in lines.iter().enumerate() {
-            let line_number = i + 1;
+        for l in reader.lines() {
+            let line = match l {
+                Ok(s) => s,
+                Err(e) => return Err(Errors::IoError(e)),
+            };
+            line_number += 1;
 
             match reading_state {
                 ReadingState::Rooms => {
@@ -270,6 +269,10 @@ impl Dungeon {
                     dungeon.set_link(&parts[0], dir, &parts[2])?;
                 }
             }
+        }
+
+        if line_number == 0_usize {
+            return Err(Errors::LineParseError { line_number: 0 });
         }
 
         Ok(dungeon)
