@@ -24,3 +24,21 @@ pub const ENEMY_SPEED: f32 = 1.;
 pub const ENEMY_ANGLE: f32 = 0.;
 
 pub const SHOT_SPEED: f32 = 6.;
+
+pub const ROOM_LAYOUT_EMPTY: &str = "
+######d######
+#           #
+#           #
+#           #
+d           d
+#           #
+#           #
+#           #
+######d######
+";
+
+pub const ROOM_LAYOUTS_MOB: &[&str] = &[
+"
+
+"
+];

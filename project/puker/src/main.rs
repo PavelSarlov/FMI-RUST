@@ -6,7 +6,7 @@ use ggez::{
     conf::{Conf,WindowMode},
     ContextBuilder,
     filesystem,
-    input,
+    input::{self, keyboard, mouse},
     timer,
 };
 use std::{
@@ -28,7 +28,7 @@ struct MainState {
     screen_width: f32,
     screen_height: f32,
     assets: Assets,
-    player: Actor,
+    player: Player,
     dungeon: Dungeon,
     cur_room: usize,
 }
@@ -40,23 +40,23 @@ impl MainState {
         let assets = Assets::new(ctx)?;
         let screen_width = conf.window_mode.width;
         let screen_height = conf.window_mode.height;
-        let player = Actor {
-            pos: Vec2::ZERO.into(),
-            scale: Vec2::ONE,
-            angle: PLAYER_ANGLE,
-            translation: Vec2::ZERO,
-            forward: Vec2::new(1., 0.),
+        let player = Player {
+            props: ActorProps {
+                pos: Vec2::ZERO.into(),
+                scale: Vec2::ONE,
+                translation: Vec2::ZERO,
+                forward: Vec2::ZERO,
+                bbox: PLAYER_BBOX,
+            },
             speed: PLAYER_SPEED,
             health: PLAYER_HEALTH,
-            tag: ActorTag::PLAYER,
             state: ActorState::BASE,
-            bbox: PLAYER_BBOX,
             shoot_rate: PLAYER_SHOOT_RATE,
             shoot_range: PLAYER_SHOOT_RANGE,
             shoot_timeout: PLAYER_SHOOT_TIMEOUT,
             shots: Vec::new(),
         };
-        let dungeon = Dungeon::generate_dungeon();
+        let dungeon = Dungeon::generate_dungeon((screen_width, screen_height));
         let cur_room = Dungeon::get_start_room_grid_num();
 
         let s = MainState {
@@ -71,17 +71,56 @@ impl MainState {
         Ok(s)
     }
 
-    fn mouse_relative_angle(&self, mouse: Vec2) -> f32 {
-        let ppos = self.player.pos;
+    fn mouse_relative_forward(&self, mouse: Vec2) -> Vec2 {
+        let ppos = self.player.props.pos;
         let m = screen_to_world_space(self.screen_width, self.screen_height, mouse);
 
         let dx = m.x - ppos.0.x;
         let dy = m.y - ppos.0.y;
 
         if f32::abs(dx) > f32::abs(dy) {
-            return f32::signum(dx) * PI / 2.;
+            return Vec2::new(f32::signum(dx), 0.);
         }
-        (f32::signum(dy) * PI - PI) / 2.
+        Vec2::new(0., f32::signum(dy))
+    }
+
+    fn handle_input(&mut self, ctx: &mut Context) {
+        self.player.props.forward = Vec2::ZERO;
+        self.player.props.translation = Vec2::ZERO;
+        self.player.state = ActorState::BASE;
+
+        if keyboard::is_key_pressed(ctx, KeyCode::W) {
+            self.player.props.translation.y += 1.;
+        }
+        if keyboard::is_key_pressed(ctx, KeyCode::S) {
+            self.player.props.translation.y -= 1.;
+        }
+        if keyboard::is_key_pressed(ctx, KeyCode::A) {
+            self.player.props.translation.x -= 1.;
+        }
+        if keyboard::is_key_pressed(ctx, KeyCode::D) {
+            self.player.props.translation.x += 1.;
+        }
+        if keyboard::is_key_pressed(ctx, KeyCode::Up) {
+            self.player.props.forward = Vec2::new(0., 1.);
+            self.player.state = ActorState::SHOOT;
+        }
+        if keyboard::is_key_pressed(ctx, KeyCode::Down) {
+            self.player.props.forward = Vec2::new(0., -1.);
+            self.player.state = ActorState::SHOOT;
+        }
+        if keyboard::is_key_pressed(ctx, KeyCode::Left) {
+            self.player.props.forward = Vec2::new(-1., 0.);
+            self.player.state = ActorState::SHOOT;
+        }
+        if keyboard::is_key_pressed(ctx, KeyCode::Right) {
+            self.player.props.forward = Vec2::new(1., 0.);
+            self.player.state = ActorState::SHOOT;
+        }
+        if mouse::button_pressed(ctx, MouseButton::Left) {
+            self.player.props.forward = self.mouse_relative_forward(Vec2::new(mouse::position(ctx).x, mouse::position(ctx).y));
+            self.player.state = ActorState::SHOOT;
+        }
     }
 }
 
@@ -91,6 +130,10 @@ impl EventHandler for MainState {
 
         while timer::check_update_time(ctx, DESIRED_FPS) {
             let seconds = 1.0 / (DESIRED_FPS as f32);
+
+            self.handle_input(ctx);
+
+            self.dungeon.get_room_mut(self.cur_room)?.update(seconds)?;
 
             self.player.update(seconds)?;
         }
@@ -113,76 +156,31 @@ impl EventHandler for MainState {
 
     fn key_down_event(&mut self, _ctx: &mut Context, keycode: KeyCode, _keymod: input::keyboard::KeyMods, _repeat: bool) {
         match keycode {
-            KeyCode::W => {
-                self.player.translation.y = 1.;
-            },
-            KeyCode::S => {
-                self.player.translation.y = -1.;
-            },
-            KeyCode::A => {
-                self.player.translation.x = -1.;
-            },
-            KeyCode::D => {
-                self.player.translation.x = 1.;
-            },
-            KeyCode::Up => {
-                self.player.angle = 0.;
-                self.player.state = ActorState::SHOOT;
-            },
-            KeyCode::Down => {
-                self.player.angle = PI;
-                self.player.state = ActorState::SHOOT;
-            },
-            KeyCode::Left => {
-                self.player.angle = -PI / 2.;
-                self.player.state = ActorState::SHOOT;
-            },
-            KeyCode::Right => {
-                self.player.angle = PI / 2.;
-                self.player.state = ActorState::SHOOT;
-            },
-            KeyCode::Space => {
-            },
             _ => (),
         }
     }
 
     fn key_up_event(&mut self, _ctx: &mut Context, keycode: KeyCode, _keymod: input::keyboard::KeyMods) {
         match keycode {
-            KeyCode::W | KeyCode::S | KeyCode::A | KeyCode::D => {
-                self.player.translation = Vec2::ZERO;
-            },
-            KeyCode::Up | KeyCode::Down | KeyCode::Left | KeyCode::Right => {
-                self.player.angle = 0.;
-                self.player.state = ActorState::BASE;
-            },
             _ => (),
         }
     }
 
     fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) {
         match button {
-            MouseButton::Left => {
-                self.player.angle = self.mouse_relative_angle(Vec2::new(x, y));
-                self.player.state = ActorState::SHOOT;
-            },
             _ => (),
         }
     }
 
     fn mouse_button_up_event(&mut self, _ctx: &mut Context, button: MouseButton, _x: f32, _y: f32) {
         match button {
-            MouseButton::Left => {
-                self.player.angle = 0.;
-                self.player.state = ActorState::BASE;
-            },
             _ => (),
         }
     }
 
     fn mouse_motion_event(&mut self, _ctx: &mut Context, x: f32, y: f32, _dx: f32, _dy: f32) {
         if input::mouse::button_pressed(_ctx, MouseButton::Left) {
-            self.player.angle = self.mouse_relative_angle(Vec2::new(x, y));
+            self.player.props.forward = self.mouse_relative_forward(Vec2::new(x, y));
         }
     }
 }

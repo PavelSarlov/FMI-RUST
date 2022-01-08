@@ -56,14 +56,18 @@ impl Eq for Direction {}
 
 #[derive(Debug)]
 pub struct Room {
-    pub enemies: Vec<Actor>,
+    pub enemies: Vec<Box<dyn Model>>,
     pub grid_num: usize,
     pub doors: [Option<Door>; 4],
 }
 
 impl Room {
-    pub fn update(&mut self) {
-        todo!()
+    pub fn update(&mut self, _delta_time: f32) -> GameResult {
+        for enemy in self.enemies.iter_mut() {
+            enemy.update(_delta_time)?;
+        }
+
+        Ok(())
     }
     
     pub fn draw(&self, ctx: &mut Context, assets: &Assets, world_coords: (f32, f32)) -> GameResult {
@@ -83,6 +87,10 @@ impl Room {
         //         _ => { graphics::draw(ctx, &assets.door_west, draw_params)?; },
         //     }
         // }
+        //
+        for enemy in self.enemies.iter() {
+            enemy.draw(ctx, assets, world_coords)?;
+        }
 
         Ok(())
     }
@@ -91,24 +99,26 @@ impl Room {
         [sw / image.w, sh / image.h]
     }
 
-    fn generate_room(grid_num: usize) -> Room {
-        let enemies = vec![
-            Actor {
-                pos: Vec2::ONE.into(),
-                scale: Vec2::ONE,
-                angle: ENEMY_ANGLE,
-                translation: Vec2::ZERO,
-                forward: Vec2::new(1., 0.),
+    fn generate_room(grid_num: usize, screen: (f32, f32)) -> Room {
+        let (sw, sh) = screen;
+
+        let enemies: Vec<Box<dyn Model>> = vec![
+            Box::new(EnemyMask {
+                props: ActorProps {
+                    pos: Vec2::new(220., 200.).into(),
+                    scale: Vec2::ONE,
+                    translation: Vec2::ZERO,
+                    forward: Vec2::ZERO,
+                    bbox: ENEMY_BBOX,
+                },
                 speed: ENEMY_SPEED,
                 health: ENEMY_HEALTH,
-                tag: ActorTag::ENEMY,
                 state: ActorState::BASE,
-                bbox: ENEMY_BBOX,
                 shoot_rate: ENEMY_SHOOT_RATE,
                 shoot_range: ENEMY_SHOOT_RANGE,
                 shoot_timeout: ENEMY_SHOOT_TIMEOUT,
                 shots: Vec::new(),
-            }
+            }),
         ];
         let doors = [None; 4];
 
@@ -127,7 +137,7 @@ pub struct Dungeon {
 }
 
 impl Dungeon {
-    pub fn generate_dungeon() -> Self {
+    pub fn generate_dungeon(screen: (f32, f32)) -> Self {
         let level = 1;
         let room_count = thread_rng().gen_range(0..2) + 5 + level * 2;
         let mut grid = [0; GRID_ROWS * GRID_COLS];
@@ -143,7 +153,7 @@ impl Dungeon {
 
             if grid[cur] != 0 { continue; }
 
-            rooms.push(Room::generate_room(cur));
+            rooms.push(Room::generate_room(cur, screen));
             grid[cur] = rooms.len();
 
             q.push_back(cur + 10);
@@ -188,15 +198,15 @@ impl Dungeon {
     }
 
     pub fn get_start_room_grid_num() -> usize { GRID_ROWS * GRID_COLS / 2 }
-
-    pub fn draw(&self, ctx: &mut Context, world_coords: (f32, f32), cur_room: usize) -> GameResult {
-        let mesh = MeshBuilder::new();
-
-        // for 
-
-        Ok(())
-    }
 }
+
+// #[derive(Debug, Copy, Clone)]
+// pub struct Door {
+//     pub pos,
+//     pub bbox
+//     pub is_open: bool,
+//     pub connects_to: usize,
+// }
 
 #[derive(Debug, Copy, Clone)]
 pub struct Door {

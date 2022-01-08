@@ -7,41 +7,71 @@ use ggez::{
 #[derive(Clone,Debug)]
 pub struct Assets {
     pub player_base: Image,
-    pub player_shoot: Image,
+    pub player_shoot_north: Image, 
+    pub player_shoot_south: Image, 
+    pub player_shoot_west: Image, 
+    pub player_shoot_east: Image, 
+
     pub shot_base: Image,
+
     pub enemy_mask_base: Image,
+
     pub room_base: Image,
     pub door_north: Image,
     pub door_south: Image,
     pub door_east: Image,
     pub door_west: Image,
     pub door_base: Image,
+    pub door_open: Image,
+
+    pub floor: Image,
+    pub wall: Image,
 }
 
 impl Assets {
     pub fn new(ctx: &mut Context) -> GameResult<Self> {
         let player_base = Image::new(ctx, "/player_base.png")?;
-        let player_shoot = Image::new(ctx, "/player_shoot.png")?;
+        let player_shoot_north = Image::new(ctx, "/player_shoot_north.png")?;
+        let player_shoot_south = Image::new(ctx, "/player_shoot_south.png")?;
+        let player_shoot_west = Image::new(ctx, "/player_shoot_west.png")?;
+        let player_shoot_east = Image::new(ctx, "/player_shoot_east.png")?;
+
         let shot_base = Image::new(ctx, "/shot_base.png")?;
+
         let enemy_mask_base = Image::new(ctx, "/enemy_mask_base.png")?;
+
         let room_base = Image::new(ctx, "/room_base.png")?;
         let door_north = Image::new(ctx, "/door_north.png")?;
         let door_east = Image::new(ctx, "/door_east.png")?;
         let door_south = Image::new(ctx, "/door_south.png")?;
         let door_west = Image::new(ctx, "/door_west.png")?;
         let door_base = Image::new(ctx, "/door_base.png")?;
+        let door_open = Image::new(ctx, "/door_open.png")?;
+
+        let floor = Image::new(ctx, "/floor.png")?;
+        let wall = Image::new(ctx, "/wall.png")?;
 
         Ok(Self {
             player_base,
-            player_shoot,
+            player_shoot_north,
+            player_shoot_south,
+            player_shoot_west, 
+            player_shoot_east, 
+
             shot_base,
+
             enemy_mask_base,
+
             room_base,
             door_north,
             door_south,
             door_east,
             door_west,
             door_base,
+            door_open,
+
+            floor,
+            wall,
         })
     }
 }
