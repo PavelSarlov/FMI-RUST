@@ -14,15 +14,13 @@ use std::{
 };
 
 pub trait Model: std::fmt::Debug {
-    fn bbox(&self, sw: f32, sh: f32) -> graphics::Rect;
-
     fn update(&mut self, _delta_time: f32) -> GameResult;
 
     fn draw(&self, ctx: &mut Context, assets: &Assets, screen: (f32, f32)) -> GameResult;
 
     fn draw_bbox(&self, ctx: &mut Context, screen: (f32, f32)) -> GameResult {
         let (sw, sh) = screen;
-        let mut bbox = self.bbox(sw, sh);
+        let mut bbox = self.get_bbox(sw, sh);
         let screen_coords = world_to_screen_space(sw, sh, Vec2::new(bbox.x, bbox.y));
         bbox.x = screen_coords.x;
         bbox.y = screen_coords.y;
@@ -33,7 +31,28 @@ pub trait Model: std::fmt::Debug {
         Ok(())
     }
 
-    fn scale_to_screen(&self, sw: f32, sh: f32, image: Rect) -> Vec2;
+    fn scale_to_screen(&self, sw: f32, sh: f32, image: Rect) -> Vec2 {
+        let bbox = self.get_bbox(sw, sh);
+        Vec2::new(bbox.w / image.w, bbox.h / image.h)
+    }
+
+    fn get_bbox(&self, sw: f32, sh: f32) -> graphics::Rect {
+        let width = cell_to_screen_dim(sw, DUNGEON_GRID_COLS) * self.get_scale().x;
+        let height = cell_to_screen_dim(sh, DUNGEON_GRID_ROWS) * self.get_scale().y;
+        Rect::new(self.get_pos().x - width / 2., self.get_pos().y + height / 2., width, height)
+    }
+
+    fn get_pos(&self) -> Vec2;
+
+    fn get_scale(&self) -> Vec2;
+
+    fn get_translation(&self) -> Vec2;
+
+    fn get_forward(&self) -> Vec2;
+}
+
+pub trait Actor {
+    fn health(&self) -> f32; 
 }
 
 pub trait Shooter {
@@ -58,7 +77,6 @@ pub struct ActorProps {
     pub scale: Vec2,
     pub translation: Vec2,
     pub forward: Vec2,
-    pub bbox: f32,
 }
 
 #[derive(Clone, Debug)]
@@ -74,11 +92,11 @@ pub struct Player {
 }
 
 impl Model for Player {
-    fn bbox(&self, sw: f32, sh: f32) -> Rect {
-        let width = sw * self.props.bbox;
-        let height = sh * self.props.bbox;
-        Rect::new(self.props.pos.0.x - width / 2., self.props.pos.0.y + height / 2., width, height)
-    }
+    // fn bbox(&self, sw: f32, sh: f32) -> Rect {
+    //     let width = cell_to_screen_dim(sw, DUNGEON_GRID_COLS) * self.props.bbox;
+    //     let height = cell_to_screen_dim(sh, DUNGEON_GRID_ROWS) * self.props.bbox;
+    //     Rect::new(self.props.pos.0.x - width / 2., self.props.pos.0.y + height / 2., width, height)
+    // }
 
     fn update(&mut self, _delta_time: f32) -> GameResult {
         self.props.pos.0 += self.props.translation * self.speed;
@@ -112,7 +130,7 @@ impl Model for Player {
         let pos: Vec2Wrap = world_to_screen_space(sw, sh, self.props.pos.into()).into();
         let draw_params = DrawParam::default()
             .dest(pos)
-            .scale(self.props.scale * self.scale_to_screen(sw, sh, assets.player_base.dimensions()))
+            .scale(self.scale_to_screen(sw, sh, assets.player_base.dimensions()))
             .offset([0.5, 0.5]);
 
         for shot in self.shots.iter() {
@@ -138,10 +156,17 @@ impl Model for Player {
         Ok(())
     }
 
-    fn scale_to_screen(&self, sw: f32, sh: f32, image: Rect) -> Vec2 {
-        // Vec2::new(sw / image.w * 0.05, sh / image.h * 0.05)
-        Vec2::new(sw * self.props.bbox / image.w, sh * self.props.bbox / image.h)
-    }
+    fn get_pos(&self) -> Vec2 { self.props.pos.into() }
+
+    fn get_scale(&self) -> Vec2 { self.props.scale }
+
+    fn get_translation(&self) -> Vec2 { self.props.translation }
+
+    fn get_forward(&self) -> Vec2 { self.props.forward }
+}
+
+impl Actor for Player {
+    fn health(&self) -> f32 { self.health }
 }
 
 impl Shooter for Player {
@@ -154,8 +179,7 @@ impl Shooter for Player {
                 pos: self.props.pos,
                 forward: shot_dir,
                 translation: shot_dir,
-                bbox: SHOT_BBOX,
-                scale: Vec2::ONE,
+                scale: Vec2::splat(SHOT_SCALE),
             },
             spawn_pos: self.props.pos,
             speed: SHOT_SPEED,
@@ -175,11 +199,11 @@ pub struct Shot {
 }
 
 impl Model for Shot {
-    fn bbox(&self, sw: f32, sh: f32) -> Rect {
-        let width = sw * self.props.bbox;
-        let height = sh * self.props.bbox;
-        Rect::new(self.props.pos.0.x - width / 2., self.props.pos.0.y + height / 2., width, height)
-    }
+    // fn bbox(&self, sw: f32, sh: f32) -> Rect {
+    //     let width = cell_to_screen_dim(sw, DUNGEON_GRID_COLS) * self.props.bbox;
+    //     let height = cell_to_screen_dim(sh, DUNGEON_GRID_ROWS) * self.props.bbox;
+    //     Rect::new(self.props.pos.0.x - width / 2., self.props.pos.0.y + height / 2., width, height)
+    // }
 
     fn update(&mut self, _delta_time: f32) -> GameResult {
         self.props.pos.0 += self.props.forward * self.speed;
@@ -192,19 +216,23 @@ impl Model for Shot {
         let pos: Vec2Wrap = world_to_screen_space(sw, sh, self.props.pos.into()).into();
         let draw_params = DrawParam::default()
             .dest(pos)
-            .scale(self.props.scale * self.scale_to_screen(sw, sh, assets.player_base.dimensions()))
+            .scale(self.scale_to_screen(sw, sh, assets.player_base.dimensions()))
             .offset([0.5, 0.5]);
 
         graphics::draw(ctx, &assets.shot_base, draw_params)?;
+
         self.draw_bbox(ctx, screen)?;
 
         Ok(())
     }
 
-    fn scale_to_screen(&self, sw: f32, sh: f32, image: Rect) -> Vec2 {
-        // Vec2::new(sw / image.w * 0.05, sh / image.h * 0.05)
-        Vec2::new(sw * self.props.bbox / image.w, sh * self.props.bbox / image.h)
-    }
+    fn get_pos(&self) -> Vec2 { self.props.pos.into() }
+
+    fn get_scale(&self) -> Vec2 { self.props.scale }
+
+    fn get_translation(&self) -> Vec2 { self.props.translation }
+
+    fn get_forward(&self) -> Vec2 { self.props.forward }
 }
 
 #[derive(Clone, Debug)]
@@ -220,11 +248,11 @@ pub struct EnemyMask {
 }
 
 impl Model for EnemyMask {
-    fn bbox(&self, sw: f32, sh: f32) -> Rect {
-        let width = sw * self.props.bbox;
-        let height = sh * self.props.bbox;
-        Rect::new(self.props.pos.0.x - width / 2., self.props.pos.0.y + height / 2., width, height)
-    }
+    // fn bbox(&self, sw: f32, sh: f32) -> Rect {
+    //     let width = cell_to_screen_dim(sw, DUNGEON_GRID_COLS) * self.props.bbox;
+    //     let height = cell_to_screen_dim(sh, DUNGEON_GRID_ROWS) * self.props.bbox;
+    //     Rect::new(self.props.pos.0.x - width / 2., self.props.pos.0.y + height / 2., width, height)
+    // }
 
     fn update(&mut self, _delta_time: f32) -> GameResult {
         self.props.pos.0 += self.props.translation * self.speed;
@@ -258,7 +286,7 @@ impl Model for EnemyMask {
         let pos: Vec2Wrap = world_to_screen_space(sw, sh, self.props.pos.into()).into();
         let draw_params = DrawParam::default()
             .dest(pos)
-            .scale(self.props.scale * self.scale_to_screen(sw, sh, assets.player_base.dimensions()))
+            .scale(self.scale_to_screen(sw, sh, assets.player_base.dimensions()))
             .offset([0.5, 0.5]);
 
         match self.state {
@@ -275,10 +303,17 @@ impl Model for EnemyMask {
         Ok(())
     }
 
-    fn scale_to_screen(&self, sw: f32, sh: f32, image: Rect) -> Vec2 {
-        // Vec2::new(sw / image.w * 0.05, sh / image.h * 0.05)
-        Vec2::new(sw * self.props.bbox / image.w, sh * self.props.bbox / image.h)
-    }
+    fn get_pos(&self) -> Vec2 { self.props.pos.into() }
+
+    fn get_scale(&self) -> Vec2 { self.props.scale }
+
+    fn get_translation(&self) -> Vec2 { self.props.translation }
+
+    fn get_forward(&self) -> Vec2 { self.props.forward }
+}
+
+impl Actor for EnemyMask {
+    fn health(&self) -> f32 { self.health }
 }
 
 impl Shooter for EnemyMask {
@@ -291,7 +326,6 @@ impl Shooter for EnemyMask {
                 pos: self.props.pos,
                 forward: shot_dir,
                 translation: shot_dir,
-                bbox: SHOT_BBOX,
                 scale: Vec2::ONE,
             },
             spawn_pos: self.props.pos,

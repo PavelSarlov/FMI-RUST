@@ -6,7 +6,7 @@ use ggez::{
 use crate::{
     assets::*,
     entities::*,
-    utils::Errors,
+    utils::*,
     consts::*,
 };
 use std::{
@@ -54,17 +54,36 @@ impl PartialEq for Direction {
 }
 impl Eq for Direction {}
 
+pub trait ModelActor: Model + Actor {}
+
 #[derive(Debug)]
 pub struct Room {
-    pub enemies: Vec<Box<dyn Model>>,
+    pub width: f32,
+    pub height: f32,
     pub grid_num: usize,
     pub doors: [Option<Door>; 4],
+    pub obstacles: Vec<Box<dyn Model>>,
+    pub enemies: Vec<Box<dyn ModelActor>>,
 }
 
 impl Room {
     pub fn update(&mut self, _delta_time: f32) -> GameResult {
-        for enemy in self.enemies.iter_mut() {
+        let mut dead_enemies = Vec::<usize>::new();
+
+        for (i, enemy) in self.enemies.iter_mut().enumerate() {
             enemy.update(_delta_time)?;
+            if enemy.health() <= 0. { dead_enemies.push(i); }
+        }
+        
+        dead_enemies.into_iter().map(|x| { self.enemies.remove(x) });
+
+        if self.enemies.is_empty() {
+            for door in self.doors.iter_mut() {
+                match door {
+                    Some(d) => d.is_open = true,
+                    _ => ()
+                }
+            }
         }
 
         Ok(())
@@ -77,7 +96,7 @@ impl Room {
             .scale(Room::get_room_scale(sw, sh, assets.room_base.dimensions()))
             .offset([0.5, 0.5]);
         
-        graphics::draw(ctx, &assets.room_base, draw_params)?;
+        graphics::draw(ctx, &assets.floor, draw_params)?;
 
         // for (i, v) in self.doors.iter().enumerate() {
         //     match i {
@@ -99,40 +118,64 @@ impl Room {
         [sw / image.w, sh / image.h]
     }
 
+    fn get_model_pos(sw: f32, sh: f32, rw: f32, rh: f32, index: usize) -> Vec2 {
+        todo!()
+    }
+
     fn generate_room(grid_num: usize, screen: (f32, f32)) -> Room {
         let (sw, sh) = screen;
-
-        let enemies: Vec<Box<dyn Model>> = vec![
-            Box::new(EnemyMask {
-                props: ActorProps {
-                    pos: Vec2::new(220., 200.).into(),
-                    scale: Vec2::ONE,
-                    translation: Vec2::ZERO,
-                    forward: Vec2::ZERO,
-                    bbox: ENEMY_BBOX,
-                },
-                speed: ENEMY_SPEED,
-                health: ENEMY_HEALTH,
-                state: ActorState::BASE,
-                shoot_rate: ENEMY_SHOOT_RATE,
-                shoot_range: ENEMY_SHOOT_RANGE,
-                shoot_timeout: ENEMY_SHOOT_TIMEOUT,
-                shots: Vec::new(),
-            }),
-        ];
+        
+        let width = ROOM_WIDTH;
+        let height = ROOM_HEIGHT;
         let doors = [None; 4];
+        let obstacles: Vec<Box<dyn Model>> = Vec::new(); 
+        let enemies: Vec<Box<dyn ModelActor>> = Vec::new();
+
+        let layout = ROOM_LAYOUT_EMPTY.chars();
+
+//         for (i, c) in layout.enumerate() {
+//             match c {
+//                 '#' => {
+//                     self.obstacles.push(Wall {
+//                         pos: 
+//                     });
+//                 }
+//             }
+//         }
+
+//         let enemies: Vec<Box<dyn Model>> = vec![
+//             Box::new(EnemyMask {
+//                 props: ActorProps {
+//                     pos: Vec2::new(220., 200.).into(),
+//                     scale: Vec2::ONE,
+//                     translation: Vec2::ZERO,
+//                     forward: Vec2::ZERO,
+//                     bbox: ENEMY_BBOX,
+//                 },
+//                 speed: ENEMY_SPEED,
+//                 health: ENEMY_HEALTH,
+//                 state: ActorState::BASE,
+//                 shoot_rate: ENEMY_SHOOT_RATE,
+//                 shoot_range: ENEMY_SHOOT_RANGE,
+//                 shoot_timeout: ENEMY_SHOOT_TIMEOUT,
+//                 shots: Vec::new(),
+//             }),
+//         ];
 
         Room {
-            enemies,
+            width,
+            height,
             grid_num,
             doors,
+            obstacles,
+            enemies,
         }
     }
 }
 
 #[derive(Debug)]
 pub struct Dungeon {
-    grid: [usize; GRID_ROWS * GRID_COLS],
+    grid: [usize; DUNGEON_GRID_ROWS * DUNGEON_GRID_COLS],
     rooms: Vec<Room>,
 }
 
@@ -140,7 +183,7 @@ impl Dungeon {
     pub fn generate_dungeon(screen: (f32, f32)) -> Self {
         let level = 1;
         let room_count = thread_rng().gen_range(0..2) + 5 + level * 2;
-        let mut grid = [0; GRID_ROWS * GRID_COLS];
+        let mut grid = [0; DUNGEON_GRID_ROWS * DUNGEON_GRID_COLS];
         let mut rooms = Vec::new();
 
         let mut q = VecDeque::<usize>::new();
@@ -168,10 +211,10 @@ impl Dungeon {
             let w = r.grid_num - 1;
             let e = r.grid_num + 1;
 
-            if n > 0          && grid[n] != 0 { r.doors[0] = Some(Door { is_open: false, connects_to: grid[n] }); }
-            if s > grid.len() && grid[s] != 0 { r.doors[2] = Some(Door { is_open: false, connects_to: grid[s] }); }
-            if w > 0          && grid[w] != 0 { r.doors[1] = Some(Door { is_open: false, connects_to: grid[w] }); }
-            if e > grid.len() && grid[e] != 0 { r.doors[3] = Some(Door { is_open: false, connects_to: grid[e] }); }
+            // if n > 0          && grid[n] != 0 { r.doors[0] = Some(Door { is_open: false, connects_to: grid[n] }); }
+            // if s > grid.len() && grid[s] != 0 { r.doors[2] = Some(Door { is_open: false, connects_to: grid[s] }); }
+            // if w > 0          && grid[w] != 0 { r.doors[1] = Some(Door { is_open: false, connects_to: grid[w] }); }
+            // if e > grid.len() && grid[e] != 0 { r.doors[3] = Some(Door { is_open: false, connects_to: grid[e] }); }
         }
 
         Dungeon {
@@ -197,19 +240,21 @@ impl Dungeon {
         Ok(self.grid[grid_num] - 1)
     }
 
-    pub fn get_start_room_grid_num() -> usize { GRID_ROWS * GRID_COLS / 2 }
+    pub fn get_start_room_grid_num() -> usize { DUNGEON_GRID_ROWS * DUNGEON_GRID_COLS / 2 }
 }
-
-// #[derive(Debug, Copy, Clone)]
-// pub struct Door {
-//     pub pos,
-//     pub bbox
-//     pub is_open: bool,
-//     pub connects_to: usize,
-// }
 
 #[derive(Debug, Copy, Clone)]
 pub struct Door {
+    pub pos: Vec2Wrap,
+    pub bbox: f32,
+    pub scale: Vec2,
     pub is_open: bool,
     pub connects_to: usize,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct Wall {
+    pub pos: Vec2Wrap,
+    pub bbox: f32,
+    pub scale: Vec2,
 }

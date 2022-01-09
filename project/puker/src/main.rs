@@ -43,10 +43,9 @@ impl MainState {
         let player = Player {
             props: ActorProps {
                 pos: Vec2::ZERO.into(),
-                scale: Vec2::ONE,
+                scale: Vec2::splat(PLAYER_SCALE),
                 translation: Vec2::ZERO,
                 forward: Vec2::ZERO,
-                bbox: PLAYER_BBOX,
             },
             speed: PLAYER_SPEED,
             health: PLAYER_HEALTH,
@@ -166,17 +165,17 @@ impl EventHandler for MainState {
         }
     }
 
-    fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) {
-        match button {
-            _ => (),
-        }
-    }
+    // fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) {
+    //     match button {
+    //         _ => (),
+    //     }
+    // }
 
-    fn mouse_button_up_event(&mut self, _ctx: &mut Context, button: MouseButton, _x: f32, _y: f32) {
-        match button {
-            _ => (),
-        }
-    }
+    // fn mouse_button_up_event(&mut self, _ctx: &mut Context, button: MouseButton, _x: f32, _y: f32) {
+    //     match button {
+    //         _ => (),
+    //     }
+    // }
 
     fn mouse_motion_event(&mut self, _ctx: &mut Context, x: f32, y: f32, _dx: f32, _dy: f32) {
         if input::mouse::button_pressed(_ctx, MouseButton::Left) {

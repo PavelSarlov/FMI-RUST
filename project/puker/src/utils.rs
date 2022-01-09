@@ -86,18 +86,22 @@ impl Into<Vertex> for MyVertex {
     }
 }
 
-pub fn world_to_screen_space(screen_width: f32, screen_height: f32, point: Vec2) -> Vec2 {
+pub fn world_to_screen_space(sw: f32, sh: f32, point: Vec2) -> Vec2 {
     Vec2::new(
-        point.x + screen_width / 2.,
+        point.x + sw / 2.,
         // screen_height - (point.y + screen_height) / 2.
-        -point.y + screen_height / 2.,
+        -point.y + sh / 2.,
     )
 }
 
-pub fn screen_to_world_space(screen_width: f32, screen_height: f32, point: Vec2) -> Vec2 {
+pub fn screen_to_world_space(sw: f32, sh: f32, point: Vec2) -> Vec2 {
     Vec2::new(
-        point.x - screen_width / 2.,
+        point.x - sw / 2.,
         // screen_height + (point.y - screen_height) * 2.
-        -point.y + screen_height / 2.,
+        -point.y + sh / 2.,
     )
+}
+
+pub fn cell_to_screen_dim(screen: f32, cells: usize) -> f32 {
+    screen / (cells as f32)
 }
