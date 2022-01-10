@@ -16,11 +16,6 @@ pub struct Assets {
 
     pub enemy_mask_base: Image,
 
-    pub room_base: Image,
-    pub door_north: Image,
-    pub door_south: Image,
-    pub door_east: Image,
-    pub door_west: Image,
     pub door_base: Image,
     pub door_open: Image,
 
@@ -40,11 +35,6 @@ impl Assets {
 
         let enemy_mask_base = Image::new(ctx, "/enemy_mask_base.png")?;
 
-        let room_base = Image::new(ctx, "/room_base.png")?;
-        let door_north = Image::new(ctx, "/door_north.png")?;
-        let door_east = Image::new(ctx, "/door_east.png")?;
-        let door_south = Image::new(ctx, "/door_south.png")?;
-        let door_west = Image::new(ctx, "/door_west.png")?;
         let door_base = Image::new(ctx, "/door_base.png")?;
         let door_open = Image::new(ctx, "/door_open.png")?;
 
@@ -62,11 +52,6 @@ impl Assets {
 
             enemy_mask_base,
 
-            room_base,
-            door_north,
-            door_south,
-            door_east,
-            door_west,
             door_base,
             door_open,
 

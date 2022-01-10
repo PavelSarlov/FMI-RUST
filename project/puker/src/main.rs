@@ -123,7 +123,8 @@ impl MainState {
         }
     }
 
-    fn handle_collisions(&mut self, seconds: f32) -> GameResult {
+    fn handle_wall_collisions(&mut self, seconds: f32) -> GameResult {
+        let (sw, sh) = (self.screen_width, self.screen_height);
         let (mut cp, mut cn) = (Vec2::ZERO, Vec2::ZERO);
         let mut ct = 0.;
         self.player.color = Color::WHITE;
@@ -132,20 +133,43 @@ impl MainState {
         let mut collisions = Vec::<(usize, f32)>::new();
 
         for (i, obst) in obstacles.iter().enumerate() {
-            if dynamic_rect_vs_rect(self.player.get_bbox(self.screen_width, self.screen_height), self.player.get_velocity(), obst.get_bbox(self.screen_width, self.screen_height), &mut cp, &mut cn, &mut ct, seconds) {
-                // self.player.props.translation += cn * self.player.props.translation;
-                // self.player.color = Color::RED;
+            if dynamic_rect_vs_rect(&self.player.get_bbox(sw, sh), &self.player.get_velocity(seconds), &obst.get_bbox(sw, sh), &mut cp, &mut cn, &mut ct, seconds) {
                 collisions.push((i, ct));
             }
         }
 
         collisions.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
-        for (mut i, mut ct) in collisions.iter_mut() {
-            if dynamic_rect_vs_rect(self.player.get_bbox(self.screen_width, self.screen_height), self.player.get_velocity(), obstacles[i].get_bbox(self.screen_width, self.screen_height), &mut cp, &mut cn, &mut ct, seconds) {
-                self.player.props.translation += cn * self.player.props.translation;
+        for (i, mut ct) in collisions.iter_mut() {
+            if dynamic_rect_vs_rect(&self.player.get_bbox(sw, sh), &self.player.get_velocity(seconds), &obstacles[*i].get_bbox(sw, sh), &mut cp, &mut cn, &mut ct, seconds) {
+                self.player.props.translation += cn * self.player.get_velocity(seconds).abs() * (1. - ct);
             }
         }
+
+        Ok(())
+    }
+
+    fn handle_shot_collisions(&mut self, seconds: f32) -> GameResult {
+        let (sw, sh) = (self.screen_width, self.screen_height);
+        let mut enemies = &mut self.dungeon.get_room_mut(self.cur_room)?.enemies;
+
+        // for shot in self.player.shots.iter() {
+        //     for enemy in enemies {
+        //         if shot.get_bbox(sw, sh).overlaps(&enemy.get_bbox(sw, sh)) {
+        //             println!("boom");
+        //         }
+        //     }
+        // }
+
+        self.player.shots = self.player.shots.clone().into_iter().filter(|s| {
+            for enemy in enemies.into_iter() {
+                if rect_vs_rect(&s.get_bbox(sw, sh), &enemy.get_bbox(sw, sh)) {
+                    enemy.damage(s.damage);
+                    return false;
+                }
+            }
+            true
+        }).collect();
 
         Ok(())
     }
@@ -160,7 +184,9 @@ impl EventHandler for MainState {
 
             self.handle_input(ctx);
 
-            self.handle_collisions(seconds)?;
+            self.handle_wall_collisions(seconds)?;
+
+            self.handle_shot_collisions(seconds)?;
 
             self.dungeon.get_room_mut(self.cur_room)?.update(seconds)?;
 

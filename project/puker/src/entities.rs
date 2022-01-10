@@ -1,5 +1,5 @@
 use ggez::{
-    graphics::{self, DrawParam, Rect, DrawMode, Color, Mesh},
+    graphics::{self, Text, PxScale, DrawParam, Rect, DrawMode, Color, Mesh},
     GameResult,
     Context,
 };
@@ -21,12 +21,16 @@ pub trait Model: std::fmt::Debug {
     fn draw_bbox(&self, ctx: &mut Context, screen: (f32, f32)) -> GameResult {
         let (sw, sh) = screen;
         let mut bbox = self.get_bbox(sw, sh);
+        let mut text = Text::new(format!("{:?}, {:?}", bbox.x, bbox.y));
         let screen_coords = world_to_screen_space(sw, sh, Vec2::new(bbox.x, bbox.y));
         bbox.x = screen_coords.x;
         bbox.y = screen_coords.y;
 
         let mesh = Mesh::new_rectangle(ctx, DrawMode::stroke(2.0), bbox, Color::BLUE)?;
         graphics::draw(ctx, &mesh, DrawParam::default())?;
+
+        text.fragments_mut().iter_mut().map(|x| x.scale = Some(PxScale { x: 0.5, y: 0.5 }));
+        graphics::draw(ctx, &text, DrawParam::default().dest([bbox.x, bbox.y - text.height(ctx)]))?;
 
         Ok(())
     }
@@ -46,7 +50,7 @@ pub trait Model: std::fmt::Debug {
 
     fn get_scale(&self) -> Vec2;
 
-    fn get_velocity(&self) -> Vec2;
+    fn get_velocity(&self, _delta_time: f32) -> Vec2;
 
     fn get_forward(&self) -> Vec2;
 }
@@ -57,12 +61,16 @@ pub trait Stationary: std::fmt::Debug {
     fn draw_bbox(&self, ctx: &mut Context, screen: (f32, f32)) -> GameResult {
         let (sw, sh) = screen;
         let mut bbox = self.get_bbox(sw, sh);
+        let mut text = Text::new(format!("{:?}, {:?}", bbox.x, bbox.y));
         let screen_coords = world_to_screen_space(sw, sh, Vec2::new(bbox.x, bbox.y));
         bbox.x = screen_coords.x;
         bbox.y = screen_coords.y;
 
         let mesh = Mesh::new_rectangle(ctx, DrawMode::stroke(2.0), bbox, Color::BLUE)?;
         graphics::draw(ctx, &mesh, DrawParam::default())?;
+
+        text.fragments_mut().iter_mut().map(|x| x.scale = Some(PxScale { x: 0.5, y: 0.5 }));
+        graphics::draw(ctx, &text, DrawParam::default().dest([bbox.x, bbox.y - text.height(ctx)]))?;
 
         Ok(())
     }
@@ -85,6 +93,8 @@ pub trait Stationary: std::fmt::Debug {
 
 pub trait Actor {
     fn get_health(&self) -> f32; 
+
+    fn damage(&mut self, dmg: f32);
 }
 
 pub trait Shooter {
@@ -125,14 +135,8 @@ pub struct Player {
 }
 
 impl Model for Player {
-    // fn bbox(&self, sw: f32, sh: f32) -> Rect {
-    //     let width = cell_to_screen_dim(sw, DUNGEON_GRID_COLS) * self.props.bbox;
-    //     let height = cell_to_screen_dim(sh, DUNGEON_GRID_ROWS) * self.props.bbox;
-    //     Rect::new(self.props.pos.0.x - width / 2., self.props.pos.0.y + height / 2., width, height)
-    // }
-
     fn update(&mut self, _delta_time: f32) -> GameResult {
-        self.props.pos.0 += self.props.translation * self.speed;
+        self.props.pos.0 += self.get_velocity(_delta_time);
         self.shoot_timeout = f32::max(0., self.shoot_timeout - _delta_time);
 
         let mut shots_gone = VecDeque::<usize>::new();
@@ -194,13 +198,15 @@ impl Model for Player {
 
     fn get_scale(&self) -> Vec2 { self.props.scale }
 
-    fn get_velocity(&self) -> Vec2 { self.props.translation * self.speed }
+    fn get_velocity(&self, delta_time: f32) -> Vec2 { self.props.translation * self.speed * delta_time }
 
     fn get_forward(&self) -> Vec2 { self.props.forward }
 }
 
 impl Actor for Player {
     fn get_health(&self) -> f32 { self.health }
+
+    fn damage(&mut self, dmg: f32) { self.health -= dmg; }
 }
 
 impl Shooter for Player {
@@ -217,6 +223,7 @@ impl Shooter for Player {
             },
             spawn_pos: self.props.pos,
             speed: SHOT_SPEED,
+            damage: PLAYER_DAMAGE,
         };
 
         self.shots.push(shot);
@@ -230,17 +237,12 @@ pub struct Shot {
     pub props: ActorProps,
     pub speed: f32,
     pub spawn_pos: Vec2Wrap,
+    pub damage: f32,
 }
 
 impl Model for Shot {
-    // fn bbox(&self, sw: f32, sh: f32) -> Rect {
-    //     let width = cell_to_screen_dim(sw, DUNGEON_GRID_COLS) * self.props.bbox;
-    //     let height = cell_to_screen_dim(sh, DUNGEON_GRID_ROWS) * self.props.bbox;
-    //     Rect::new(self.props.pos.0.x - width / 2., self.props.pos.0.y + height / 2., width, height)
-    // }
-
     fn update(&mut self, _delta_time: f32) -> GameResult {
-        self.props.pos.0 += self.props.forward * self.speed;
+        self.props.pos.0 += self.get_velocity(_delta_time);
 
         Ok(())
     }
@@ -264,7 +266,7 @@ impl Model for Shot {
 
     fn get_scale(&self) -> Vec2 { self.props.scale }
 
-    fn get_velocity(&self) -> Vec2 { self.props.translation * self.speed }
+    fn get_velocity(&self, _delta_time: f32) -> Vec2 { self.props.translation * self.speed * _delta_time }
 
     fn get_forward(&self) -> Vec2 { self.props.forward }
 }
@@ -279,17 +281,12 @@ pub struct EnemyMask {
     pub shoot_range: f32,
     pub shoot_timeout: f32,
     pub shots: Vec<Shot>,
+    pub color: Color,
 }
 
 impl Model for EnemyMask {
-    // fn bbox(&self, sw: f32, sh: f32) -> Rect {
-    //     let width = cell_to_screen_dim(sw, DUNGEON_GRID_COLS) * self.props.bbox;
-    //     let height = cell_to_screen_dim(sh, DUNGEON_GRID_ROWS) * self.props.bbox;
-    //     Rect::new(self.props.pos.0.x - width / 2., self.props.pos.0.y + height / 2., width, height)
-    // }
-
     fn update(&mut self, _delta_time: f32) -> GameResult {
-        self.props.pos.0 += self.props.translation * self.speed;
+        self.props.pos.0 += self.get_velocity(_delta_time);
         self.shoot_timeout = f32::max(0., self.shoot_timeout - _delta_time);
 
         let mut shots_gone = VecDeque::<usize>::new();
@@ -321,6 +318,7 @@ impl Model for EnemyMask {
         let draw_params = DrawParam::default()
             .dest(pos)
             .scale(self.scale_to_screen(sw, sh, assets.enemy_mask_base.dimensions()))
+            .color(self.color)
             .offset([0.5, 0.5]);
 
         match self.state {
@@ -341,13 +339,15 @@ impl Model for EnemyMask {
 
     fn get_scale(&self) -> Vec2 { self.props.scale }
 
-    fn get_velocity(&self) -> Vec2 { self.props.translation * self.speed }
+    fn get_velocity(&self, _delta_time: f32) -> Vec2 { self.props.translation * self.speed * _delta_time }
 
     fn get_forward(&self) -> Vec2 { self.props.forward }
 }
 
 impl Actor for EnemyMask {
     fn get_health(&self) -> f32 { self.health }
+
+    fn damage(&mut self, dmg: f32) { self.health -= dmg; }
 }
 
 impl Shooter for EnemyMask {
@@ -364,6 +364,7 @@ impl Shooter for EnemyMask {
             },
             spawn_pos: self.props.pos,
             speed: SHOT_SPEED,
+            damage: ENEMY_DAMAGE,
         };
 
         self.shots.push(shot);

@@ -86,37 +86,48 @@ impl Into<Vertex> for MyVertex {
     }
 }
 
+/// Project Cartesian world coordinates to screen coordinates.
+///
 pub fn world_to_screen_space(sw: f32, sh: f32, point: Vec2) -> Vec2 {
     Vec2::new(
         point.x + sw / 2.,
-        // screen_height - (point.y + screen_height) / 2.
         -point.y + sh / 2.,
     )
 }
 
+/// Transform screen coordinates to Cartesian world coordinates.
+///
 pub fn screen_to_world_space(sw: f32, sh: f32, point: Vec2) -> Vec2 {
     Vec2::new(
         point.x - sw / 2.,
-        // screen_height + (point.y - screen_height) * 2.
         -point.y + sh / 2.,
     )
 }
 
-// pub fn point_vs_rect(p: Vec2, r: Rect) -> bool {
-//     p.x >= r.x && p.y >= r.y && p.x < r.x + r.w && p.y < r.y + r.h
-// }
+/// Checks if two rectangles overlap
+///
+pub fn rect_vs_rect(r1: &Rect, r2: &Rect) -> bool {
+    if r1.x == r1.x + r1.w || r1.y == r1.y + r1.h || r2.x == r2.x + r2.w || r2.y == r2.y + r2.h { return false; }
+    
+    if r1.x > r2.x + r2.w || r2.x > r1.x + r1.w { return false; }
+    if r1.y - r1.h > r2.y || r2.y - r2.h > r1.y { return false; }
 
-// pub fn rect_vs_rect(r1: Rect, r2: Rect) -> bool {
-//     r1.x < r2.x + r2.w && r1.x + r1.w > r2.x && r1.y < r2.y + r2.h && r1.y + r1.h > r2.y
-// }
+    true
+}
 
-pub fn ray_vs_rect(ray_origin: Vec2, ray_dir: Vec2, target: Rect, contact_point: &mut Vec2, contact_normal: &mut Vec2, t_hit_near: &mut f32) -> bool {
+/// Detects if a ray is intersecting a given rectangle.
+/// Long live OneLoneCoder and his tutorials.
+///
+pub fn ray_vs_rect(ray_origin: &Vec2, ray_dir: &Vec2, target: &Rect, contact_point: &mut Vec2, contact_normal: &mut Vec2, t_hit_near: &mut f32) -> bool {
     let target_pos = Vec2::new(target.x, target.y);
     let target_size = Vec2::new(target.w, target.h);
     let target_pos2 = Vec2::new(target_pos.x + target_size.x, target_pos.y - target_size.y);
 
-    let mut t_near = (target_pos - ray_origin) / ray_dir;
-    let mut t_far = (target_pos2 - ray_origin) / ray_dir;
+    let mut t_near = (target_pos - *ray_origin) / *ray_dir;
+    let mut t_far = (target_pos2 - *ray_origin) / *ray_dir;
+
+    if t_far.x.is_nan() || t_far.y.is_nan() { return false; }
+    if t_near.x.is_nan() || t_near.y.is_nan() { return false; }
 
     if t_near.x > t_far.x { std::mem::swap(&mut t_near.x, &mut t_far.x)}
     if t_near.y > t_far.y { std::mem::swap(&mut t_near.y, &mut t_far.y)}
@@ -126,7 +137,7 @@ pub fn ray_vs_rect(ray_origin: Vec2, ray_dir: Vec2, target: Rect, contact_point:
 
     if t_hit_far < 0. { return false; }
 
-    *contact_point = ray_origin + *t_hit_near * ray_dir;
+    *contact_point = *ray_origin + *t_hit_near * *ray_dir;
 
     if t_near.x > t_near.y {
         if ray_dir.x < 0. { *contact_normal = Vec2::new(1., 0.); }
@@ -140,7 +151,10 @@ pub fn ray_vs_rect(ray_origin: Vec2, ray_dir: Vec2, target: Rect, contact_point:
     true
 }
 
-pub fn dynamic_rect_vs_rect(source: Rect, source_vel: Vec2, target: Rect, contact_point: &mut Vec2, contact_normal: &mut Vec2, contact_time: &mut f32, elapsed_time: f32) -> bool { 
+/// Detects intersection between moving rectangle and stationary rectangle.
+/// Long live OneLoneCoder and his tutorials.
+///
+pub fn dynamic_rect_vs_rect(source: &Rect, source_vel: &Vec2, target: &Rect, contact_point: &mut Vec2, contact_normal: &mut Vec2, contact_time: &mut f32, elapsed_time: f32) -> bool { 
     let source_pos = Vec2::new(source.x, source.y);
     let source_size = Vec2::new(source.w, source.h);
 
@@ -155,7 +169,7 @@ pub fn dynamic_rect_vs_rect(source: Rect, source_vel: Vec2, target: Rect, contac
 
     let source_ray_origin = Vec2::new(source_pos.x + source_size.x / 2., source_pos.y - source_size.y / 2.);
 
-    if ray_vs_rect(source_ray_origin, source_vel * elapsed_time, expanded_target, contact_point, contact_normal, contact_time) {
+    if ray_vs_rect(&source_ray_origin, source_vel, &expanded_target, contact_point, contact_normal, contact_time) {
         if *contact_time <= 1. { return true; }
     }
 

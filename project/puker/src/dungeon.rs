@@ -1,5 +1,5 @@
 use ggez::{
-    graphics::{self, DrawParam, Rect, MeshBuilder},
+    graphics::{self, DrawParam, Rect, Color},
     GameResult,
     Context
 };
@@ -77,7 +77,9 @@ impl Room {
             if enemy.get_health() <= 0. { dead_enemies.push(i); }
         }
         
-        dead_enemies.into_iter().map(|x| { self.enemies.remove(x) });
+        for dead in dead_enemies {
+            self.enemies.remove(dead);
+        }
 
         if self.enemies.is_empty() {
             for door in self.doors.iter_mut() {
@@ -95,7 +97,7 @@ impl Room {
         let (sw, sh) = world_coords;
         let draw_params = DrawParam::default()
             .dest([sw / 2., sh / 2.])
-            .scale(Room::get_room_scale(sw, sh, assets.room_base.dimensions()))
+            .scale(Room::get_room_scale(sw, sh, assets.floor.dimensions()))
             .offset([0.5, 0.5]);
         
         graphics::draw(ctx, &assets.floor, draw_params)?;
@@ -124,6 +126,8 @@ impl Room {
         [sw / image.w, sh / image.h]
     }
 
+    /// Helper function for determining the models/stationaries positions.
+    ///
     fn get_model_pos(sw: f32, sh: f32, rw: f32, rh: f32, index: usize) -> Vec2 {
         let dims = Vec2::new(sw / rw, sh / rh);
         let coords = Vec2::new((index % (rw as usize)) as f32, (index / (rw as usize)) as f32) * dims;
@@ -139,7 +143,7 @@ impl Room {
         let mut obstacles: Vec<Box<dyn Stationary>> = Vec::new(); 
         let mut enemies: Vec<Box<dyn ModelActor>> = Vec::new();
 
-        let mut layout = ROOM_LAYOUT_EMPTY.trim().split('\n').map(|l| l.trim()).collect::<String>();
+        let mut layout = ROOM_LAYOUTS_MOB[0].trim().split('\n').map(|l| l.trim()).collect::<String>();
 
         for (i, c) in layout.chars().enumerate() {
             match c {
@@ -170,6 +174,7 @@ impl Room {
                             shoot_range: ENEMY_SHOOT_RANGE,
                             shoot_timeout: ENEMY_SHOOT_TIMEOUT,
                             shots: Vec::new(),
+                            color: Color::WHITE,
                         })
                     );
                 },
@@ -226,7 +231,7 @@ impl Dungeon {
             let w = r.grid_num - 1;
             let e = r.grid_num + 1;
 
-            // if n > 0          && grid[n] != 0 { r.doors[0] = Some(Door { is_open: false, connects_to: grid[n] }); }
+            // if n > 0          && grid[n] != 0 { r.doors[0] = Some(Door { pos: is_open: false, connects_to: grid[n] }); }
             // if s > grid.len() && grid[s] != 0 { r.doors[2] = Some(Door { is_open: false, connects_to: grid[s] }); }
             // if w > 0          && grid[w] != 0 { r.doors[1] = Some(Door { is_open: false, connects_to: grid[w] }); }
             // if e > grid.len() && grid[e] != 0 { r.doors[3] = Some(Door { is_open: false, connects_to: grid[e] }); }
