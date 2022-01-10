@@ -1,0 +1,3 @@
+[submodule "puker"]
+	path = puker
+	url = git@github.com:PavelSarlov/puker.git
