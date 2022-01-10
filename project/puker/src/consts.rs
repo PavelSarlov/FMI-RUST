@@ -21,20 +21,22 @@ pub const SHOT_SCALE: f32 = 0.2;
 pub const DUNGEON_GRID_ROWS: usize = 9;
 pub const DUNGEON_GRID_COLS: usize = 8;
 
-pub const WALL_SCALE: f32 = 0.8;
+pub const WALL_SCALE: f32 = 1.;
+pub const WALL_TEST: &str = "#";
+pub const WALL_TEST_ROW: &str = "#######d#######";
 
 pub const ROOM_WIDTH: f32 = 15.;
 pub const ROOM_HEIGHT: f32 = 9.;
 pub const ROOM_LAYOUT_EMPTY: &str = "
-########d########
-#               #
-#               #
-#               #
-d               d
-#               #
-#               #
-#               #
-########d########
+#######d#######
+#             #  
+#             #  
+#             #  
+d             d  
+#             #  
+#             #  
+#             #  
+#######d#######
 ";
 
 pub const ROOM_LAYOUTS_MOB: &[&str] = &[

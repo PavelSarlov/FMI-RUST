@@ -56,13 +56,15 @@ impl Eq for Direction {}
 
 pub trait ModelActor: Model + Actor {}
 
+impl<T: Model + Actor> ModelActor for T {}
+
 #[derive(Debug)]
 pub struct Room {
     pub width: f32,
     pub height: f32,
     pub grid_num: usize,
     pub doors: [Option<Door>; 4],
-    pub obstacles: Vec<Box<dyn Model>>,
+    pub obstacles: Vec<Box<dyn Stationary>>,
     pub enemies: Vec<Box<dyn ModelActor>>,
 }
 
@@ -72,7 +74,7 @@ impl Room {
 
         for (i, enemy) in self.enemies.iter_mut().enumerate() {
             enemy.update(_delta_time)?;
-            if enemy.health() <= 0. { dead_enemies.push(i); }
+            if enemy.get_health() <= 0. { dead_enemies.push(i); }
         }
         
         dead_enemies.into_iter().map(|x| { self.enemies.remove(x) });
@@ -98,6 +100,10 @@ impl Room {
         
         graphics::draw(ctx, &assets.floor, draw_params)?;
 
+        for obst in self.obstacles.iter() {
+            obst.draw(ctx, assets, world_coords)?;
+        }
+
         // for (i, v) in self.doors.iter().enumerate() {
         //     match i {
         //         0 => { graphics::draw(ctx, &assets.door_base, draw_params)?; },
@@ -119,7 +125,9 @@ impl Room {
     }
 
     fn get_model_pos(sw: f32, sh: f32, rw: f32, rh: f32, index: usize) -> Vec2 {
-        todo!()
+        let dims = Vec2::new(sw / rw, sh / rh);
+        let coords = Vec2::new((index % (rw as usize)) as f32, (index / (rw as usize)) as f32) * dims;
+        screen_to_world_space(sw, sh, coords + dims / 2.)
     }
 
     fn generate_room(grid_num: usize, screen: (f32, f32)) -> Room {
@@ -128,39 +136,46 @@ impl Room {
         let width = ROOM_WIDTH;
         let height = ROOM_HEIGHT;
         let doors = [None; 4];
-        let obstacles: Vec<Box<dyn Model>> = Vec::new(); 
-        let enemies: Vec<Box<dyn ModelActor>> = Vec::new();
+        let mut obstacles: Vec<Box<dyn Stationary>> = Vec::new(); 
+        let mut enemies: Vec<Box<dyn ModelActor>> = Vec::new();
 
-        let layout = ROOM_LAYOUT_EMPTY.chars();
+        let mut layout = ROOM_LAYOUT_EMPTY.trim().split('\n').map(|l| l.trim()).collect::<String>();
 
-//         for (i, c) in layout.enumerate() {
-//             match c {
-//                 '#' => {
-//                     self.obstacles.push(Wall {
-//                         pos: 
-//                     });
-//                 }
-//             }
-//         }
-
-//         let enemies: Vec<Box<dyn Model>> = vec![
-//             Box::new(EnemyMask {
-//                 props: ActorProps {
-//                     pos: Vec2::new(220., 200.).into(),
-//                     scale: Vec2::ONE,
-//                     translation: Vec2::ZERO,
-//                     forward: Vec2::ZERO,
-//                     bbox: ENEMY_BBOX,
-//                 },
-//                 speed: ENEMY_SPEED,
-//                 health: ENEMY_HEALTH,
-//                 state: ActorState::BASE,
-//                 shoot_rate: ENEMY_SHOOT_RATE,
-//                 shoot_range: ENEMY_SHOOT_RANGE,
-//                 shoot_timeout: ENEMY_SHOOT_TIMEOUT,
-//                 shots: Vec::new(),
-//             }),
-//         ];
+        for (i, c) in layout.chars().enumerate() {
+            match c {
+                '#' => {
+                    obstacles.push(Box::new(Wall {
+                        pos: Room::get_model_pos(sw, sh, width, height, i).into(),
+                        scale: Vec2::splat(WALL_SCALE),
+                    }));
+                },
+                'd' => {
+                    obstacles.push(Box::new(Wall {
+                        pos: Room::get_model_pos(sw, sh, width, height, i).into(),
+                        scale: Vec2::splat(WALL_SCALE),
+                    }));
+                },
+                'e' => {
+                    enemies.push(Box::new(EnemyMask {
+                            props: ActorProps {
+                                pos: Room::get_model_pos(sw, sh, width, height, i).into(),
+                                scale: Vec2::splat(ENEMY_SCALE),
+                                translation: Vec2::ZERO,
+                                forward: Vec2::ZERO,
+                            },
+                            speed: ENEMY_SPEED,
+                            health: ENEMY_HEALTH,
+                            state: ActorState::BASE,
+                            shoot_rate: ENEMY_SHOOT_RATE,
+                            shoot_range: ENEMY_SHOOT_RANGE,
+                            shoot_timeout: ENEMY_SHOOT_TIMEOUT,
+                            shots: Vec::new(),
+                        })
+                    );
+                },
+                _ => (),
+            }
+        }
 
         Room {
             width,
@@ -246,7 +261,6 @@ impl Dungeon {
 #[derive(Debug, Copy, Clone)]
 pub struct Door {
     pub pos: Vec2Wrap,
-    pub bbox: f32,
     pub scale: Vec2,
     pub is_open: bool,
     pub connects_to: usize,
@@ -255,6 +269,26 @@ pub struct Door {
 #[derive(Debug, Copy, Clone)]
 pub struct Wall {
     pub pos: Vec2Wrap,
-    pub bbox: f32,
     pub scale: Vec2,
+}
+
+impl Stationary for Wall {
+    fn draw(&self, ctx: &mut Context, assets: &Assets, screen: (f32, f32)) -> GameResult {
+        let (sw, sh) = screen;
+        let pos: Vec2Wrap = world_to_screen_space(sw, sh, self.pos.into()).into();
+        let draw_params = DrawParam::default()
+            .dest(pos)
+            .scale(self.scale_to_screen(sw, sh, assets.wall.dimensions()))
+            .offset([0.5, 0.5]);
+
+        graphics::draw(ctx, &assets.wall, draw_params)?;
+
+        self.draw_bbox(ctx, screen)?;
+
+        Ok(())
+    }
+
+    fn get_pos(&self) -> Vec2 { self.pos.0 }
+
+    fn get_scale(&self) -> Vec2 { self.scale }
 }

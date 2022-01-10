@@ -37,8 +37,8 @@ pub trait Model: std::fmt::Debug {
     }
 
     fn get_bbox(&self, sw: f32, sh: f32) -> graphics::Rect {
-        let width = cell_to_screen_dim(sw, DUNGEON_GRID_COLS) * self.get_scale().x;
-        let height = cell_to_screen_dim(sh, DUNGEON_GRID_ROWS) * self.get_scale().y;
+        let width = sw / ROOM_WIDTH * self.get_scale().x;
+        let height = sh / ROOM_HEIGHT * self.get_scale().y;
         Rect::new(self.get_pos().x - width / 2., self.get_pos().y + height / 2., width, height)
     }
 
@@ -46,13 +46,45 @@ pub trait Model: std::fmt::Debug {
 
     fn get_scale(&self) -> Vec2;
 
-    fn get_translation(&self) -> Vec2;
+    fn get_velocity(&self) -> Vec2;
 
     fn get_forward(&self) -> Vec2;
 }
 
+pub trait Stationary: std::fmt::Debug {
+    fn draw(&self, ctx: &mut Context, assets: &Assets, screen: (f32, f32)) -> GameResult;
+
+    fn draw_bbox(&self, ctx: &mut Context, screen: (f32, f32)) -> GameResult {
+        let (sw, sh) = screen;
+        let mut bbox = self.get_bbox(sw, sh);
+        let screen_coords = world_to_screen_space(sw, sh, Vec2::new(bbox.x, bbox.y));
+        bbox.x = screen_coords.x;
+        bbox.y = screen_coords.y;
+
+        let mesh = Mesh::new_rectangle(ctx, DrawMode::stroke(2.0), bbox, Color::BLUE)?;
+        graphics::draw(ctx, &mesh, DrawParam::default())?;
+
+        Ok(())
+    }
+
+    fn scale_to_screen(&self, sw: f32, sh: f32, image: Rect) -> Vec2 {
+        let bbox = self.get_bbox(sw, sh);
+        Vec2::new(bbox.w / image.w, bbox.h / image.h)
+    }
+
+    fn get_bbox(&self, sw: f32, sh: f32) -> graphics::Rect {
+        let width = sw / ROOM_WIDTH * self.get_scale().x;
+        let height = sh / ROOM_HEIGHT * self.get_scale().y;
+        Rect::new(self.get_pos().x - width / 2., self.get_pos().y + height / 2., width, height)
+    }
+
+    fn get_pos(&self) -> Vec2;
+
+    fn get_scale(&self) -> Vec2;
+}
+
 pub trait Actor {
-    fn health(&self) -> f32; 
+    fn get_health(&self) -> f32; 
 }
 
 pub trait Shooter {
@@ -89,6 +121,7 @@ pub struct Player {
     pub shoot_range: f32,
     pub shoot_timeout: f32,
     pub shots: Vec<Shot>,
+    pub color: Color,
 }
 
 impl Model for Player {
@@ -131,7 +164,8 @@ impl Model for Player {
         let draw_params = DrawParam::default()
             .dest(pos)
             .scale(self.scale_to_screen(sw, sh, assets.player_base.dimensions()))
-            .offset([0.5, 0.5]);
+            .offset([0.5, 0.5])
+            .color(self.color);
 
         for shot in self.shots.iter() {
             shot.draw(ctx, assets, screen)?;
@@ -160,13 +194,13 @@ impl Model for Player {
 
     fn get_scale(&self) -> Vec2 { self.props.scale }
 
-    fn get_translation(&self) -> Vec2 { self.props.translation }
+    fn get_velocity(&self) -> Vec2 { self.props.translation * self.speed }
 
     fn get_forward(&self) -> Vec2 { self.props.forward }
 }
 
 impl Actor for Player {
-    fn health(&self) -> f32 { self.health }
+    fn get_health(&self) -> f32 { self.health }
 }
 
 impl Shooter for Player {
@@ -216,7 +250,7 @@ impl Model for Shot {
         let pos: Vec2Wrap = world_to_screen_space(sw, sh, self.props.pos.into()).into();
         let draw_params = DrawParam::default()
             .dest(pos)
-            .scale(self.scale_to_screen(sw, sh, assets.player_base.dimensions()))
+            .scale(self.scale_to_screen(sw, sh, assets.shot_base.dimensions()))
             .offset([0.5, 0.5]);
 
         graphics::draw(ctx, &assets.shot_base, draw_params)?;
@@ -230,7 +264,7 @@ impl Model for Shot {
 
     fn get_scale(&self) -> Vec2 { self.props.scale }
 
-    fn get_translation(&self) -> Vec2 { self.props.translation }
+    fn get_velocity(&self) -> Vec2 { self.props.translation * self.speed }
 
     fn get_forward(&self) -> Vec2 { self.props.forward }
 }
@@ -286,7 +320,7 @@ impl Model for EnemyMask {
         let pos: Vec2Wrap = world_to_screen_space(sw, sh, self.props.pos.into()).into();
         let draw_params = DrawParam::default()
             .dest(pos)
-            .scale(self.scale_to_screen(sw, sh, assets.player_base.dimensions()))
+            .scale(self.scale_to_screen(sw, sh, assets.enemy_mask_base.dimensions()))
             .offset([0.5, 0.5]);
 
         match self.state {
@@ -307,13 +341,13 @@ impl Model for EnemyMask {
 
     fn get_scale(&self) -> Vec2 { self.props.scale }
 
-    fn get_translation(&self) -> Vec2 { self.props.translation }
+    fn get_velocity(&self) -> Vec2 { self.props.translation * self.speed }
 
     fn get_forward(&self) -> Vec2 { self.props.forward }
 }
 
 impl Actor for EnemyMask {
-    fn health(&self) -> f32 { self.health }
+    fn get_health(&self) -> f32 { self.health }
 }
 
 impl Shooter for EnemyMask {
