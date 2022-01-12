@@ -1,0 +1,409 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <title>Server-side Web</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="rust,fmi">
+    <link rel="stylesheet" href="resources/codeblock/codeblock.css">
+<link rel="stylesheet" href="resources/frontend/controls.css">
+<link rel="stylesheet" href="resources/global/global.css">
+<link rel="stylesheet" href="resources/global/metadata.css">
+<link rel="stylesheet" href="resources/highlight/hljs-github.css">
+<link rel="stylesheet" href="resources/highlight/style.css">
+<link rel="stylesheet" href="resources/highlight/tshl-github.css">
+<link rel="stylesheet" href="resources/katex/katex.min.css">
+<link rel="stylesheet" href="resources/rustc/rustc.css">
+<link rel="stylesheet" href="resources/splitview/splitview.css">
+<link rel="stylesheet" href="resources/wrapping-pages/wrapping-pages.css">
+<script type="text/javascript" src="resources/codeblock/codeblock.js"></script>
+<script type="text/javascript" src="resources/frontend/controls.js"></script>
+</head>
+<body>
+    <main>
+        <div class="slide">
+<h1 id="server-side-web">Server-side Web</h1>
+<h3 id="11-януари-2022">11 януари 2022</h3>
+</div><div class="slide">
+<h1 id="административни-неща">Административни неща</h1>
+<ul>
+<li>Домашно 3 приключи</li>
+<li>Предизвикателство 3 в четвъртък (+ scale-ване на точки)</li>
+<li>Пускайте си проектите в <code>#projects</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="за-боба-леба-и-уеба">За боба, 'леба и уеба</h1>
+<ul>
+<li>Rust е "използваем" за уеб: <a href="https://www.arewewebyet.org/" target="_blank">https://www.arewewebyet.org/</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="за-боба-леба-и-уеба">За боба, 'леба и уеба</h1>
+<ul>
+<li>Rust е "използваем" за уеб: <a href="https://www.arewewebyet.org/" target="_blank">https://www.arewewebyet.org/</a></li>
+<li>Фреймуърците са по-скоро "библиотеки". Прости, композируеми. Има какво да се желае от интеграцията между тях.</li>
+</ul>
+</div><div class="slide">
+<h1 id="за-боба-леба-и-уеба">За боба, 'леба и уеба</h1>
+<p>Накратко как работи Интернета:</p>
+</div><div class="slide subslide">
+<h1 id="за-боба-леба-и-уеба">За боба, 'леба и уеба</h1>
+<p>Накратко как работи Интернета:</p>
+<ul>
+<li>Една машина стартира безкраен цикъл, който чака за заявки с определен протокол (HTTP) на определен порт. Стандартния порт е 80 за некриптирани, 443 за криптирани връзки. Но може да се използва който и да е.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="за-боба-леба-и-уеба">За боба, 'леба и уеба</h1>
+<p>Накратко как работи Интернета:</p>
+<ul>
+<li>Една машина стартира безкраен цикъл, който чака за заявки с определен протокол (HTTP) на определен порт. Стандартния порт е 80 за некриптирани, 443 за криптирани връзки. Но може да се използва който и да е.</li>
+<li>Някой си отваря браузъра ("клиент") и търси нашия адрес и порт, който се превежда до IP адрес и порт от някакъв DNS (Domain Name Server).</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="за-боба-леба-и-уеба">За боба, 'леба и уеба</h1>
+<p>Накратко как работи Интернета:</p>
+<ul>
+<li>Една машина стартира безкраен цикъл, който чака за заявки с определен протокол (HTTP) на определен порт. Стандартния порт е 80 за некриптирани, 443 за криптирани връзки. Но може да се използва който и да е.</li>
+<li>Някой си отваря браузъра ("клиент") и търси нашия адрес и порт, който се превежда до IP адрес и порт от някакъв DNS (Domain Name Server).</li>
+<li>Клиента праща определени параметри, базирано на които програмата-сървър решава какъв низ да върне.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="за-боба-леба-и-уеба">За боба, 'леба и уеба</h1>
+<p>Накратко как работи Интернета:</p>
+<ul>
+<li>Една машина стартира безкраен цикъл, който чака за заявки с определен протокол (HTTP) на определен порт. Стандартния порт е 80 за некриптирани, 443 за криптирани връзки. Но може да се използва който и да е.</li>
+<li>Някой си отваря браузъра ("клиент") и търси нашия адрес и порт, който се превежда до IP адрес и порт от някакъв DNS (Domain Name Server).</li>
+<li>Клиента праща определени параметри, базирано на които програмата-сървър решава какъв низ да върне.</li>
+<li>Този низ е във формат HTML, който браузъра знае как да интерпретира като структуриран текст</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="за-боба-леба-и-уеба">За боба, 'леба и уеба</h1>
+<p>Накратко как работи Интернета:</p>
+<ul>
+<li>Една машина стартира безкраен цикъл, който чака за заявки с определен протокол (HTTP) на определен порт. Стандартния порт е 80 за некриптирани, 443 за криптирани връзки. Но може да се използва който и да е.</li>
+<li>Някой си отваря браузъра ("клиент") и търси нашия адрес и порт, който се превежда до IP адрес и порт от някакъв DNS (Domain Name Server).</li>
+<li>Клиента праща определени параметри, базирано на които програмата-сървър решава какъв низ да върне.</li>
+<li>Този низ е във формат HTML, който браузъра знае как да интерпретира като структуриран текст</li>
+<li>Или във формат CSS, който казва на браузъра "тази страница има шарени цветове и закръглени ръбчета"</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="за-боба-леба-и-уеба">За боба, 'леба и уеба</h1>
+<p>Накратко как работи Интернета:</p>
+<ul>
+<li>Една машина стартира безкраен цикъл, който чака за заявки с определен протокол (HTTP) на определен порт. Стандартния порт е 80 за некриптирани, 443 за криптирани връзки. Но може да се използва който и да е.</li>
+<li>Някой си отваря браузъра ("клиент") и търси нашия адрес и порт, който се превежда до IP адрес и порт от някакъв DNS (Domain Name Server).</li>
+<li>Клиента праща определени параметри, базирано на които програмата-сървър решава какъв низ да върне.</li>
+<li>Този низ е във формат HTML, който браузъра знае как да интерпретира като структуриран текст</li>
+<li>Или във формат CSS, който казва на браузъра "тази страница има шарени цветове и закръглени ръбчета"</li>
+<li>Или във формат Javascript, който инструктира браузъра да кара текста да мига и да копае биткойни.</li>
+</ul>
+</div><div class="slide">
+<h1 id="за-боба-леба-и-уеба">За боба, 'леба и уеба</h1>
+<p>Сървъра е просто един цикъл, който чака низова информация в определен формат и връща низова информация в определен формат. Може да го напишем на shellscript, ако искаме (но ще го пишем на Rust).</p>
+<p>Разбира се, в реални условия е доста по-сложно да се докарат всички детайли.</p>
+<p>(Тия обяснения вероятно не са достатъчни за начинаещ, но поне не са нищо. <code>¯\_(ツ)_/¯</code>)</p>
+</div><div class="slide">
+<h1 id="hello-web">Hello Web</h1>
+<h3 id="demo">Demo</h3>
+<p><a href="https://github.com/AndrewRadev/hello-rusty-web" target="_blank">https://github.com/AndrewRadev/hello-rusty-web</a></p>
+</div><div class="slide">
+<h1 id="hello-web">Hello Web</h1>
+<h3 id="demo">Demo</h3>
+<p>Версии:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="tomltoml language-toml hljs"><span class="hljs-section">[dependencies]</span>
+<span class="hljs-attr">actix-rt</span> = <span class="hljs-string">"1.1.1"</span>
+<span class="hljs-attr">actix-web</span> = <span class="hljs-string">"3.3.3"</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Има бета версия на actix-web 4, която <em>не</em> ползва <code>actix-rt</code> а директно <code>tokio</code>. Из документацията (и из качествената книжка <a href="https://www.zero2prod.com/index.html" target="_blank"><code>zero2prod</code></a>) може да намерите употреба на <code>tokio::main</code> и <code>tokio::test</code> вместо <code>actix_rt::main</code> и <code>actix_rt::test</code>.</p>
+</div><div class="slide">
+<h1 id="hello-web">Hello Web</h1>
+<h3 id="demo">Demo</h3>
+<ul>
+<li>Съкратено изграждане на маршрут: <code>web::get()</code> == <code>Route::new().guard(guard::Get())</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="hello-web">Hello Web</h1>
+<h3 id="demo">Demo</h3>
+<ul>
+<li>Съкратено изграждане на маршрут: <code>web::get()</code> == <code>Route::new().guard(guard::Get())</code></li>
+<li>"Route": Комбинация от функция и някакви "guard"-ове, които описват кога се активира</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="hello-web">Hello Web</h1>
+<h3 id="demo">Demo</h3>
+<ul>
+<li>Съкратено изграждане на маршрут: <code>web::get()</code> == <code>Route::new().guard(guard::Get())</code></li>
+<li>"Route": Комбинация от функция и някакви "guard"-ове, които описват кога се активира</li>
+<li>"Resource": Няколко route-а могат да се накачулят на един път, примерно <code>web::resource("/posts")</code> може да му се добавят няколко route-а с различни guard-ове.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="hello-web">Hello Web</h1>
+<h3 id="demo">Demo</h3>
+<ul>
+<li>Съкратено изграждане на маршрут: <code>web::get()</code> == <code>Route::new().guard(guard::Get())</code></li>
+<li>"Route": Комбинация от функция и някакви "guard"-ове, които описват кога се активира</li>
+<li>"Resource": Няколко route-а могат да се накачулят на един път, примерно <code>web::resource("/posts")</code> може да му се добавят няколко route-а с различни guard-ове.</li>
+<li>"Service": Комбинация от път + route.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="hello-web">Hello Web</h1>
+<h3 id="demo">Demo</h3>
+<ul>
+<li>Съкратено изграждане на маршрут: <code>web::get()</code> == <code>Route::new().guard(guard::Get())</code></li>
+<li>"Route": Комбинация от функция и някакви "guard"-ове, които описват кога се активира</li>
+<li>"Resource": Няколко route-а могат да се накачулят на един път, примерно <code>web::resource("/posts")</code> може да му се добавят няколко route-а с различни guard-ове.</li>
+<li>"Service": Комбинация от път + route.</li>
+<li>"Extractor": Тип, който имплементира <code>FromRequest</code> -- може да вадим форми, сесия, параметри от request-а.</li>
+</ul>
+</div><div class="slide">
+<h1 id="actix-web">Actix-web</h1>
+<p>Extractor magic: <a href="https://github.com/actix/actix-web/blob/0a506bf2e9f0d07c505df725a68808c6343f7a4e/src/handler.rs#L179-L206" target="_blank">https://github.com/actix/actix-web/blob/0a506bf2e9f0d07c505df725a68808c6343f7a4e/src/handler.rs#L179-L206</a></p>
+</div><div class="slide">
+<h1 id="spotiferris">Spotiferris</h1>
+<p>Ще разгледаме (началото на) малък проект за хостинг на музика. Stack-а:</p>
+<ul>
+<li>За сървър: <a href="https://actix.rs/" target="_blank">actix-web</a></li>
+<li>За templating: <a href="https://github.com/djc/askama" target="_blank">askama</a></li>
+<li>За заявки към базата: <a href="https://github.com/launchbadge/sqlx" target="_blank">SQLx</a></li>
+</ul>
+<p>Source: <a href="https://github.com/AndrewRadev/rust-spotiferris" target="_blank">https://github.com/AndrewRadev/rust-spotiferris</a></p>
+<p>Стара версия с gotham + diesel: <a href="https://github.com/AndrewRadev/rust-spotiferris/releases/tag/gotham-diesel-askama" target="_blank">https://github.com/AndrewRadev/rust-spotiferris/releases/tag/gotham-diesel-askama</a></p>
+</div><div class="slide">
+<h1 id="database">Database</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code>cargo install sqlx-cli --no-default-features --features rustls,postgres</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Бележка: sqlx като <em>библиотека</em> в dependencies е версия 0.4.2, докато command-line tool-a използва 0.5.x. This is fine.</p>
+</div><div class="slide">
+<h1 id="gotchas">Gotchas</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code>match form.insert(&amp;db) {
+    Ok(id) =&gt; {</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Грешка:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</div>
+                        <pre><code>error[E0308]: mismatched types
+  --&gt; src/handlers.rs:86:13
+   |
+86 |             Ok(id) =&gt; {
+   |             ^^^^^^ expected opaque type, found enum `std::result::Result`
+   |
+  ::: src/models.rs:40:48
+   |
+40 |     pub async fn insert(&amp;self, db: &amp;PgPool) -&gt; Result&lt;i32, sqlx::Error&gt; {
+   |                                                ------------------------ the `Output` of this `async fn`'s expected opaque type
+   |
+   = note: expected opaque type `impl futures::Future`
+                     found enum `std::result::Result&lt;_, _&gt;`</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="gotchas">Gotchas</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code>match form.insert(&amp;db).await {
+    Ok(id) =&gt; {</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>All good!</p>
+</div><div class="slide">
+<h1 id="auto-reload">Auto-reload</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code>cargo install cargo-watch
+cargo watch -x 'run --bin server'</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="testing">Testing</h1>
+<p>:/</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code>cargo test -- --test-threads=1</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Luca Palmieri има друго валидно решение -- база данни с ново име за всеки индивидуален тест. Вариант е.</p>
+<p>Също е вариант да пробвате този crate: <a href="https://crates.io/crates/serial_test" target="_blank">https://crates.io/crates/serial_test</a></p>
+</div><div class="slide">
+<h1 id="spotiferris">Spotiferris</h1>
+<h3 id="проблеми">Проблеми</h3>
+<ul>
+<li>Интеграцията между библиотеките иска работа.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="spotiferris">Spotiferris</h1>
+<h3 id="проблеми">Проблеми</h3>
+<ul>
+<li>Интеграцията между библиотеките иска работа.</li>
+<li>Всичките библиотеки са версия 0.x -- нестабилни са като интерфейс.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="spotiferris">Spotiferris</h1>
+<h3 id="проблеми">Проблеми</h3>
+<ul>
+<li>Интеграцията между библиотеките иска работа.</li>
+<li>Всичките библиотеки са версия 0.x -- нестабилни са като интерфейс.</li>
+<li>Типовата магия може да е трудна за дебъгване.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="spotiferris">Spotiferris</h1>
+<h3 id="проблеми">Проблеми</h3>
+<ul>
+<li>Интеграцията между библиотеките иска работа.</li>
+<li>Всичките библиотеки са версия 0.x -- нестабилни са като интерфейс.</li>
+<li>Типовата магия може да е трудна за дебъгване.</li>
+<li>Тестването е ръбато.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="spotiferris">Spotiferris</h1>
+<h3 id="проблеми">Проблеми</h3>
+<ul>
+<li>Интеграцията между библиотеките иска работа.</li>
+<li>Всичките библиотеки са версия 0.x -- нестабилни са като интерфейс.</li>
+<li>Типовата магия може да е трудна за дебъгване.</li>
+<li>Тестването е ръбато.</li>
+<li>Проекта е далеч от "production-ready"…</li>
+</ul>
+</div><div class="slide">
+<h1 id="ресурси">Ресурси</h1>
+<ul>
+<li>Luca Palmieri има страхотна поредица от blog post-ове, в която задълбава в още доста детайли: <a href="https://www.lpalmieri.com/" target="_blank">https://www.lpalmieri.com/</a>. Компилира ги в книга, <a href="https://www.zero2prod.com/" target="_blank">"Zero to Production"</a>.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="ресурси">Ресурси</h1>
+<ul>
+<li>Luca Palmieri има страхотна поредица от blog post-ове, в която задълбава в още доста детайли: <a href="https://www.lpalmieri.com/" target="_blank">https://www.lpalmieri.com/</a>. Компилира ги в книга, <a href="https://www.zero2prod.com/" target="_blank">"Zero to Production"</a>.</li>
+<li>Actix си има доста добра документация: <a href="https://actix.rs/docs/" target="_blank">https://actix.rs/docs/</a>. Има и <a href="https://github.com/actix/examples" target="_blank">actix-examples</a> с разнообразни интересни неща.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="ресурси">Ресурси</h1>
+<ul>
+<li>Luca Palmieri има страхотна поредица от blog post-ове, в която задълбава в още доста детайли: <a href="https://www.lpalmieri.com/" target="_blank">https://www.lpalmieri.com/</a>. Компилира ги в книга, <a href="https://www.zero2prod.com/" target="_blank">"Zero to Production"</a>.</li>
+<li>Actix си има доста добра документация: <a href="https://actix.rs/docs/" target="_blank">https://actix.rs/docs/</a>. Има и <a href="https://github.com/actix/examples" target="_blank">actix-examples</a> с разнообразни интересни неща.</li>
+<li>Diesel е друг фреймуърк за бази данни. Малко по-battery-included, но със собствените си особености: <a href="http://diesel.rs/" target="_blank">http://diesel.rs/</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="ресурси">Ресурси</h1>
+<ul>
+<li>Luca Palmieri има страхотна поредица от blog post-ове, в която задълбава в още доста детайли: <a href="https://www.lpalmieri.com/" target="_blank">https://www.lpalmieri.com/</a>. Компилира ги в книга, <a href="https://www.zero2prod.com/" target="_blank">"Zero to Production"</a>.</li>
+<li>Actix си има доста добра документация: <a href="https://actix.rs/docs/" target="_blank">https://actix.rs/docs/</a>. Има и <a href="https://github.com/actix/examples" target="_blank">actix-examples</a> с разнообразни интересни неща.</li>
+<li>Diesel е друг фреймуърк за бази данни. Малко по-battery-included, но със собствените си особености: <a href="http://diesel.rs/" target="_blank">http://diesel.rs/</a></li>
+<li>Askama: <a href="https://djc.github.io/askama/askama.html" target="_blank">https://djc.github.io/askama/askama.html</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="проекти">Проекти?</h1>
+<ul>
+<li>Multiplayer snake: <a href="https://youtu.be/Yb-QR3Vm3sk" target="_blank">https://youtu.be/Yb-QR3Vm3sk</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="проекти">Проекти?</h1>
+<ul>
+<li>Multiplayer snake: <a href="https://youtu.be/Yb-QR3Vm3sk" target="_blank">https://youtu.be/Yb-QR3Vm3sk</a></li>
+<li>Кръстословици: <a href="https://youtu.be/9aHfK8EUIzg" target="_blank">https://youtu.be/9aHfK8EUIzg</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="проекти">Проекти?</h1>
+<ul>
+<li>Multiplayer snake: <a href="https://youtu.be/Yb-QR3Vm3sk" target="_blank">https://youtu.be/Yb-QR3Vm3sk</a></li>
+<li>Кръстословици: <a href="https://youtu.be/9aHfK8EUIzg" target="_blank">https://youtu.be/9aHfK8EUIzg</a></li>
+<li>Meme generator, gif search (с upload и текстово описване на гифове)?</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="проекти">Проекти?</h1>
+<ul>
+<li>Multiplayer snake: <a href="https://youtu.be/Yb-QR3Vm3sk" target="_blank">https://youtu.be/Yb-QR3Vm3sk</a></li>
+<li>Кръстословици: <a href="https://youtu.be/9aHfK8EUIzg" target="_blank">https://youtu.be/9aHfK8EUIzg</a></li>
+<li>Meme generator, gif search (с upload и текстово описване на гифове)?</li>
+<li>"Тънък" web проект -- web нещата да са само за интерфейс, с интересна логика отвъд това.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="проекти">Проекти?</h1>
+<ul>
+<li>Multiplayer snake: <a href="https://youtu.be/Yb-QR3Vm3sk" target="_blank">https://youtu.be/Yb-QR3Vm3sk</a></li>
+<li>Кръстословици: <a href="https://youtu.be/9aHfK8EUIzg" target="_blank">https://youtu.be/9aHfK8EUIzg</a></li>
+<li>Meme generator, gif search (с upload и текстово описване на гифове)?</li>
+<li>"Тънък" web проект -- web нещата да са само за интерфейс, с интересна логика отвъд това.</li>
+<li>Или, "истински" web проект с база данни, формички, CRUD интерфейси и т.н.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="проекти">Проекти?</h1>
+<ul>
+<li>Multiplayer snake: <a href="https://youtu.be/Yb-QR3Vm3sk" target="_blank">https://youtu.be/Yb-QR3Vm3sk</a></li>
+<li>Кръстословици: <a href="https://youtu.be/9aHfK8EUIzg" target="_blank">https://youtu.be/9aHfK8EUIzg</a></li>
+<li>Meme generator, gif search (с upload и текстово описване на гифове)?</li>
+<li>"Тънък" web проект -- web нещата да са само за интерфейс, с интересна логика отвъд това.</li>
+<li>Или, "истински" web проект с база данни, формички, CRUD интерфейси и т.н.</li>
+<li>Няма да сме много взискателни откъм production-readiness, webscale, etc. Подкарайте го да върви в development mode и да има тестове и ще сме доволни.</li>
+</ul>
+</div><div class="slide">
+<h1 id="въпроси">Въпроси</h1>
+</div>
+    </main>
+</body>
+</html>
