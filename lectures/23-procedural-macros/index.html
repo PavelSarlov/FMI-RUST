@@ -1,0 +1,538 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <title>Процедурни макроси</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="rust,fmi">
+    <link rel="stylesheet" href="resources/codeblock/codeblock.css">
+<link rel="stylesheet" href="resources/frontend/controls.css">
+<link rel="stylesheet" href="resources/global/global.css">
+<link rel="stylesheet" href="resources/global/metadata.css">
+<link rel="stylesheet" href="resources/highlight/hljs-github.css">
+<link rel="stylesheet" href="resources/highlight/style.css">
+<link rel="stylesheet" href="resources/highlight/tshl-github.css">
+<link rel="stylesheet" href="resources/katex/katex.min.css">
+<link rel="stylesheet" href="resources/rustc/rustc.css">
+<link rel="stylesheet" href="resources/splitview/splitview.css">
+<link rel="stylesheet" href="resources/wrapping-pages/wrapping-pages.css">
+<script type="text/javascript" src="resources/codeblock/codeblock.js"></script>
+<script type="text/javascript" src="resources/frontend/controls.js"></script>
+</head>
+<body>
+    <main>
+        <div class="slide">
+<h1 id="процедурни-макроси">Процедурни макроси</h1>
+<h3 id="13-януари-2022">13 януари 2022</h3>
+</div><div class="slide">
+<h1 id="административни-неща">Административни неща</h1>
+<p>Предизвикателство 3: <a href="https://fmi.rust-lang.bg/announcements/10" target="_blank">https://fmi.rust-lang.bg/announcements/10</a></p>
+</div><div class="slide">
+<h1 id="процедурни-макроси">Процедурни макроси</h1>
+<p>Предоставят ни възможността да пишем синтактични разширения под формата на функции</p>
+</div><div class="slide">
+<h1 id="процедурни-макроси">Процедурни макроси</h1>
+<ul>
+<li>Работят директо с TokenStream - приемат и връщат TokenStream</li>
+<li>Всеки процедурен макрос е отделна Rust библиотека (нормалните макроси си имат собствен синтаксис чрез <code>macro_rules!</code>)</li>
+<li>Не са хигиенични - за разлика от нормалните макроси се повлияват от кода около тях</li>
+</ul>
+</div><div class="slide">
+<h1 id="фази-на-компилация">Фази на компилация</h1>
+<p>За да разберем какво точно правят процедурните макроси, трябва да знаем фазите на компилация</p>
+</div><div class="slide">
+<h1 id="фази-на-компилация">Фази на компилация</h1>
+<p>Всеки код минава през няколко фази при компилация/интерпретация в зависимост от компилатора</p>
+<p>Стандартно първите две са Lexer и Parser</p>
+</div><div class="slide">
+<h1 id="фази-на-компилация">Фази на компилация</h1>
+<h3 id="lexer">Lexer</h3>
+<p>Целта на Lexer-a е да разбие кода, който е под формата на низ или поток от символи на значещи за езика Token-и<br />
+Примери за Token са ключови думи, литерали, оператори, имена на променливи и др.<br />
+Крайният резултат е поток от Token-и</p>
+</div><div class="slide">
+<h1 id="фази-на-компилация">Фази на компилация</h1>
+<h3 id="parser">Parser</h3>
+<p>Parser-ът приема поток от Token-и и им придава значение като крайният резултат е дърво<br />
+Всеки възел от дървото е синтактична конструкция на езика<br />
+Примери за такъв възел са <code>if</code>, block, variable, expression и др.</p>
+</div><div class="slide">
+<h1 id="фази-на-компилация">Фази на компилация</h1>
+<p>Процедурните макроси се вмъкват между лексъра и парсъра и работят с поток от опростени Token-и</p>
+</div><div class="slide">
+<h1 id="процедурни-макроси">Процедурни макроси</h1>
+<h3 id="особености">Особености</h3>
+<ul>
+<li>Макросът споделя ресурсите на компилатора като stdin, stdout, stderr</li>
+<li>Ако макросът panic-не, компилаторът го прихваща и изкарва compiler error</li>
+<li>Това може да се постигне и чрез <code>compile_error!</code></li>
+<li>Ако макросът влезе в безкраен цикъл, целият компилатор зависва</li>
+</ul>
+</div><div class="slide">
+<h1 id="процедурни-макроси">Процедурни макроси</h1>
+<p>За да създадем такъв макрос ни трябва нов проект, в чиито манифест да се съдържа</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</div>
+                        <pre><code class="tomltoml language-toml hljs"><span class="hljs-section">[lib]</span>
+<span class="hljs-attr">proc-macro</span> = <span class="hljs-literal">true</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="процедурни-макроси">Процедурни макроси</h1>
+<h3 id="видове">Видове</h3>
+<ul>
+<li>Function-like macros - <code>sql!(SELECT * FROM posts WHERE id=1)</code></li>
+<li>Derive macros - <code>#[derive(CustomDerive)]</code></li>
+<li>Attribute macros - <code>#[CustomAttribute]</code></li>
+</ul>
+</div><div class="slide">
+<h1 id="function-like-procedural-macros">Function-like procedural macros</h1>
+<p>Изглеждат като нормални макроси, но зад тях стои Rust код вместо синтаксиса на <code>macro_rules!</code><br />
+Не могат да се ползват като statement, expression или pattern, но са позволени на всички останали места</p>
+</div><div class="slide">
+<h1 id="function-like-procedural-macros">Function-like procedural macros</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">/// Macro</span>
+
+<span class="tshl-keyword">extern</span> crate proc_macro<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">use</span> proc_macro<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">TokenStream</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>proc_macro<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">make_answer</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">_item</span>: <span class="tshl-type">TokenStream</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">TokenStream</span> {
+    <span class="tshl-string">&quot;fn answer() -&gt; u32 { 42 }&quot;</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">parse</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">/// Usage</span>
+
+<span class="tshl-keyword">use</span> proc_macro_examples<span class="tshl-punctuation_delimiter">::</span>make_answer<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-function_macro">make_answer</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, answer<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="derive-macros">Derive macros</h1>
+<p>Анотират структури или енумерации, като добавят код към модула или блока на анотирания item без да променят item-a</p>
+</div><div class="slide">
+<h1 id="derive-macros">Derive macros</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">/// Macro</span>
+
+<span class="tshl-keyword">extern</span> crate proc_macro<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">use</span> proc_macro<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">TokenStream</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>proc_macro_derive<span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">AnswerFn</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">derive_answer_fn</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">_item</span>: <span class="tshl-type">TokenStream</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">TokenStream</span> {
+    <span class="tshl-string">&quot;fn answer() -&gt; u32 { 42 }&quot;</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">parse</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">/// Usage</span>
+
+<span class="tshl-keyword">use</span> proc_macro_examples<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">AnswerFn</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>derive<span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">AnswerFn</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">struct</span> <span class="tshl-type">Struct</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+    <span class="tshl-function_macro">assert_eq</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">42</span>, answer<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="derive-macro-helper-attributes">Derive macro helper attributes</h1>
+<p>Може да дефинираме и помощни атрибути, които служат само за ориентация на макроса</p>
+</div><div class="slide">
+<h1 id="derive-macro-helper-attributes">Derive macro helper attributes</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">/// Macro</span>
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>proc_macro_derive<span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">HelperAttr</span>, attributes<span class="tshl-punctuation_bracket">(</span>helper<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">derive_helper_attr</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">_item</span>: <span class="tshl-type">TokenStream</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">TokenStream</span> {
+    <span class="tshl-type">TokenStream</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">/// Usage</span>
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>derive<span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">HelperAttr</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">struct</span> <span class="tshl-type">Struct</span> {
+    <span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>helper<span class="tshl-punctuation_bracket">]</span></span> <span class="tshl-property">field</span>: <span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="attribute-macros">Attribute macros</h1>
+<p>Дефинират произволен атрибут<br />
+За разлика от Derive макросите, заместват кода който анотират<br />
+Също така са по-гъвкави от Derive макросите като могат да анотират повече конструкции например функции</p>
+</div><div class="slide">
+<h1 id="attribute-macros">Attribute macros</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">/// Macro</span>
+
+<span class="tshl-comment">/// Noop with prints</span>
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>proc_macro_attribute<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">show_streams</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">attr</span>: <span class="tshl-type">TokenStream</span>, <span class="tshl-variable_parameter">item</span>: <span class="tshl-type">TokenStream</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">TokenStream</span> {
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;attr: <span class="tshl-escape">\&quot;</span>{}<span class="tshl-escape">\&quot;</span>&quot;</span>, attr.to_string<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;item: <span class="tshl-escape">\&quot;</span>{}<span class="tshl-escape">\&quot;</span>&quot;</span>, item.to_string<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    item
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-comment">/// Usage</span>
+
+<span class="tshl-keyword">use</span> my_macro<span class="tshl-punctuation_delimiter">::</span>show_streams<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-comment">// Example: Basic function</span>
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>show_streams<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">invoke1</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {} <span class="tshl-comment">// attr: &quot;&quot;   item: &quot;fn invoke1() { }&quot;</span>
+
+<span class="tshl-comment">// Example: Attribute with input</span>
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>show_streams<span class="tshl-punctuation_bracket">(</span>bar<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">invoke2</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {} <span class="tshl-comment">// attr: &quot;bar&quot;   item: &quot;fn invoke2() {}&quot;</span>
+
+<span class="tshl-comment">// Example: Multiple tokens in the input</span>
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>show_streams<span class="tshl-punctuation_bracket">(</span>multiple =&gt; tokens<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">invoke3</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {} <span class="tshl-comment">// attr: &quot;multiple =&gt; tokens&quot;   item: &quot;fn invoke3() {}&quot;</span>
+
+<span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>show_streams</span><span class="tshl-punctuation_bracket"></span> { delimiters }<span class="tshl-punctuation_bracket">]</span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">invoke4</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {} <span class="tshl-comment">// attr: &quot;delimiters&quot;   item: &quot;fn invoke4() {}&quot;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="обработка-на-входните-данни">Обработка на входните данни</h1>
+<p><code>TokenStream</code> имплементира <code>IntoIterator</code>, което ни позволява да превърнем потока в итератор</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>proc_macro<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">exmaple</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">input</span>: <span class="tshl-type">TokenStream</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">TokenStream</span> {
+    <span class="tshl-keyword">for</span> token <span class="tshl-keyword">in</span> input<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">into_iter</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+        <span class="tshl-function_macro">println</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;{}&quot;</span>, token<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }
+
+    <span class="tshl-comment">// ...</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="обработка-на-входните-данни">Обработка на входните данни</h1>
+<p>Може да си направим собствен парсър на итератор от <code>TokenTree</code>, но това обикновено е трудоемка и времеемка задача</p>
+<p>Ще видим как може да улесним задачата малко по-късно</p>
+</div><div class="slide">
+<h1 id="обработка-на-изходните-данни">Обработка на изходните данни</h1>
+<p>Дали построяването на изходния поток е по-лесно?</p>
+</div><div class="slide">
+<h1 id="обработка-на-изходните-данни">Обработка на изходните данни</h1>
+<p>Както видяхме в един от предните примери, може да използваме <code>.parse()</code>, тъй като <code>TokenStream</code> имплементира <code>FromStr</code></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>proc_macro<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">exmaple</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">input</span>: <span class="tshl-type">TokenStream</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">TokenStream</span> {
+    <span class="tshl-string">&quot;fn f() {}&quot;</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">parse</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="обработка-на-изходните-данни">Обработка на изходните данни</h1>
+<p>Комбинирайки <code>.parse()</code> с <code>format!()</code>, може да постигнем гъвкаво конструиране на крайния резултат</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>proc_macro<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">exmaple</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">input</span>: <span class="tshl-type">TokenStream</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">TokenStream</span> {
+    <span class="tshl-function_macro">format</span><span class="tshl-function_macro">!</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-string">r#&quot;fn f() {{ println!(&quot;{{}}&quot;, {}); }}&quot;#</span>, <span class="tshl-constant_builtin">42</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">parse</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="обработка-на-изходните-данни">Обработка на изходните данни</h1>
+<p>Недостатъците на подхода с <code>format!</code> са</p>
+<ul>
+<li>special character escaping</li>
+<li>едиторите обикновено не оцветяват кода в низовете, което прави този подход труден за поддръжка</li>
+</ul>
+</div><div class="slide">
+<h1 id="syn-and-quote">syn and quote</h1>
+<p>Освен вградения <code>proc_macro</code> пакет съществуват два, които се използват най-често при работа с процедурни макроси</p>
+<ul>
+<li><a href="https://crates.io/crates/syn" target="_blank">syn</a></li>
+<li><a href="https://crates.io/crates/quote" target="_blank">quote</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="syn-and-quote">syn and quote</h1>
+<p>Освен вградения <code>proc_macro</code> пакет съществуват два, които се използват най-често при работа с процедурни макроси</p>
+<ul>
+<li><a href="https://crates.io/crates/syn" target="_blank">syn</a></li>
+<li><a href="https://crates.io/crates/quote" target="_blank">quote</a></li>
+</ul>
+<p>Базирани са на <a href="https://crates.io/crates/proc-macro2" target="_blank">proc_macro2</a></p>
+</div><div class="slide">
+<h1 id="syn">syn</h1>
+<p><code>syn</code> пакетът предоставя парсър, който превръща TokenStream в синтактично дърво AST (Abstract syntax tree)</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>proc_macro_derive<span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">HelloMacro</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">pub</span> <span class="tshl-keyword">fn</span> <span class="tshl-function">hello_macro_derive</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">input</span>: <span class="tshl-type">TokenStream</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">TokenStream</span> {
+    <span class="tshl-comment">// Construct a representation of Rust code as a syntax tree</span>
+    <span class="tshl-comment">// that we can manipulate</span>
+    <span class="tshl-keyword">let</span> ast: syn<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">DeriveInput</span> = syn<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">parse</span><span class="tshl-punctuation_bracket">(</span>input<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+    <span class="tshl-comment">// Build the trait implementation</span>
+    <span class="tshl-function">impl_hello_macro</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span>ast<span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="ast-abstract-syntax-tree">AST (Abstract syntax tree)</h1>
+<p>Нарича се абстрактно дърво, защото не описва всяка подробност от реалния синтаксис, а само структурата на кода<br />
+Например скобите не присъстват в дървото, те само насочват парсъра</p>
+</div><div class="slide">
+<h1 id="quote">quote</h1>
+<p><code>quote</code> пакетът предоставя начин да превърнем синтактичното дърво обратно в TokenStream, който да върнем на компилатора</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">fn</span> <span class="tshl-function">impl_hello_macro</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-variable_parameter">ast</span>: <span class="tshl-operator">&amp;</span>syn<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">DeriveInput</span><span class="tshl-punctuation_bracket">)</span> -&gt; <span class="tshl-type">TokenStream</span> {
+    <span class="tshl-comment">// Извлича името на структурата която сме анотирали</span>
+    <span class="tshl-keyword">let</span> name = <span class="tshl-operator">&amp;</span>ast<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">ident</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> gen = <span class="tshl-function_macro">quote</span><span class="tshl-function_macro">!</span> {
+        <span class="tshl-keyword">impl</span> <span class="tshl-constructor">HelloMacro</span> <span class="tshl-keyword">for</span> #name {
+            <span class="tshl-keyword">fn</span> hello_macro<span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+                println!<span class="tshl-punctuation_bracket">(</span><span class="tshl-string">&quot;Hello, Macro! My name is {}&quot;</span>, stringify!<span class="tshl-punctuation_bracket">(</span>#name<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_bracket">)</span>;
+            }
+        }
+    }<span class="tshl-punctuation_delimiter">;</span>
+    gen<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">into</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="quote">quote</h1>
+<p><code>#var</code> интерполира стойността на променливи в token-и</p>
+</div><div class="slide">
+<h1 id="библиотеки-с-интересни-процедурни-маркоси">Библиотеки с интересни процедурни маркоси</h1>
+<ul>
+<li><a href="https://crates.io/crates/serde" target="_blank">https://crates.io/crates/serde</a></li>
+<li><a href="https://crates.io/crates/clap" target="_blank">https://crates.io/crates/clap</a></li>
+<li><a href="https://crates.io/crates/rocket" target="_blank">https://crates.io/crates/rocket</a></li>
+<li><a href="https://github.com/colin-kiegel/rust-derive-builder" target="_blank">https://github.com/colin-kiegel/rust-derive-builder</a></li>
+<li><a href="https://crates.io/crates/derive_more" target="_blank">https://crates.io/crates/derive_more</a></li>
+<li><a href="https://crates.io/crates/educe" target="_blank">https://crates.io/crates/educe</a></li>
+<li><a href="https://crates.io/crates/fehler" target="_blank">https://crates.io/crates/fehler</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="ресурси">Ресурси</h1>
+<ul>
+<li><a href="https://doc.rust-lang.org/reference/procedural-macros.html#procedural-macros" target="_blank">https://doc.rust-lang.org/reference/procedural-macros.html#procedural-macros</a></li>
+<li><a href="https://doc.rust-lang.org/stable/book/ch19-06-macros.html#procedural-macros-for-generating-code-from-attributes" target="_blank">https://doc.rust-lang.org/stable/book/ch19-06-macros.html#procedural-macros-for-generating-code-from-attributes</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="въпроси">Въпроси</h1>
+</div>
+    </main>
+</body>
+</html>
