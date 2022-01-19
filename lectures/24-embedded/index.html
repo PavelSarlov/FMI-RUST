@@ -1,0 +1,1000 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <title>Вграден софтуер</title>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="rust,fmi">
+    <link rel="stylesheet" href="resources/codeblock/codeblock.css">
+<link rel="stylesheet" href="resources/frontend/controls.css">
+<link rel="stylesheet" href="resources/global/global.css">
+<link rel="stylesheet" href="resources/global/metadata.css">
+<link rel="stylesheet" href="resources/highlight/hljs-github.css">
+<link rel="stylesheet" href="resources/highlight/style.css">
+<link rel="stylesheet" href="resources/highlight/tshl-github.css">
+<link rel="stylesheet" href="resources/katex/katex.min.css">
+<link rel="stylesheet" href="resources/rustc/rustc.css">
+<link rel="stylesheet" href="resources/splitview/splitview.css">
+<link rel="stylesheet" href="resources/wrapping-pages/wrapping-pages.css">
+<script type="text/javascript" src="resources/codeblock/codeblock.js"></script>
+<script type="text/javascript" src="resources/frontend/controls.js"></script>
+</head>
+<body>
+    <main>
+        <div class="slide">
+<h1 id="вграден-софтуер">Вграден софтуер</h1>
+<h3 id="18-януари-2022">18 януари 2022</h3>
+</div><div class="slide">
+<h1 id="общи-разсъждения-за-embedded-software">Общи разсъждения за embedded software</h1>
+</div><div class="slide subslide">
+<h1 id="общи-разсъждения-за-embedded-software">Общи разсъждения за embedded software</h1>
+<ul>
+<li>Скоростта на изпълнение и размера на паметта са критични фактори за този софтуер. Ако летящия ви дрон блокира за твърде дълго време, правилата на физиката няма да го изчакат.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="общи-разсъждения-за-embedded-software">Общи разсъждения за embedded software</h1>
+<ul>
+<li>Скоростта на изпълнение и размера на паметта са критични фактори за този софтуер. Ако летящия ви дрон блокира за твърде дълго време, правилата на физиката няма да го изчакат.</li>
+<li>Скоростта зависи и от тактовата честота, тя е предварително дефинирана</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="общи-разсъждения-за-embedded-software">Общи разсъждения за embedded software</h1>
+<ul>
+<li>Скоростта на изпълнение и размера на паметта са критични фактори за този софтуер. Ако летящия ви дрон блокира за твърде дълго време, правилата на физиката няма да го изчакат.</li>
+<li>Скоростта зависи и от тактовата честота, тя е предварително дефинирана</li>
+<li>Размера на паметта е пряко свързан с планираната себестойност на продукта</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="общи-разсъждения-за-embedded-software">Общи разсъждения за embedded software</h1>
+<ul>
+<li>Скоростта на изпълнение и размера на паметта са критични фактори за този софтуер. Ако летящия ви дрон блокира за твърде дълго време, правилата на физиката няма да го изчакат.</li>
+<li>Скоростта зависи и от тактовата честота, тя е предварително дефинирана</li>
+<li>Размера на паметта е пряко свързан с планираната себестойност на продукта</li>
+<li>Често се дефинира опционална функционалност и се решава на по-късен етап дали да бъде включена</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="общи-разсъждения-за-embedded-software">Общи разсъждения за embedded software</h1>
+<ul>
+<li>Скоростта на изпълнение и размера на паметта са критични фактори за този софтуер. Ако летящия ви дрон блокира за твърде дълго време, правилата на физиката няма да го изчакат.</li>
+<li>Скоростта зависи и от тактовата честота, тя е предварително дефинирана</li>
+<li>Размера на паметта е пряко свързан с планираната себестойност на продукта</li>
+<li>Често се дефинира опционална функционалност и се решава на по-късен етап дали да бъде включена</li>
+<li>Консумацията на енергия също в много случаи е критичен фактор</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="общи-разсъждения-за-embedded-software">Общи разсъждения за embedded software</h1>
+<ul>
+<li>Скоростта на изпълнение и размера на паметта са критични фактори за този софтуер. Ако летящия ви дрон блокира за твърде дълго време, правилата на физиката няма да го изчакат.</li>
+<li>Скоростта зависи и от тактовата честота, тя е предварително дефинирана</li>
+<li>Размера на паметта е пряко свързан с планираната себестойност на продукта</li>
+<li>Често се дефинира опционална функционалност и се решава на по-късен етап дали да бъде включена</li>
+<li>Консумацията на енергия също в много случаи е критичен фактор</li>
+<li>Често се работи с различни таргет платформи и различни toolchain-ове</li>
+</ul>
+</div><div class="slide">
+<h1 id="възможни-решения-по-дизайна-на-софтуера">Възможни решения по дизайна на софтуера</h1>
+</div><div class="slide subslide">
+<h1 id="възможни-решения-по-дизайна-на-софтуера">Възможни решения по дизайна на софтуера</h1>
+<p>Често се налага да се правят компромиси, например</p>
+</div><div class="slide subslide">
+<h1 id="възможни-решения-по-дизайна-на-софтуера">Възможни решения по дизайна на софтуера</h1>
+<p>Често се налага да се правят компромиси, например</p>
+<ul>
+<li>Дали да се ползват числа с плаваща запетя или някои математически операции да бъдат извъшени с целочислена аритметика за сметка на точността</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="възможни-решения-по-дизайна-на-софтуера">Възможни решения по дизайна на софтуера</h1>
+<p>Често се налага да се правят компромиси, например</p>
+<ul>
+<li>Дали да се ползват числа с плаваща запетя или някои математически операции да бъдат извъшени с целочислена аритметика за сметка на точността</li>
+<li>Дали да се ползва preemptive/non-preemptive OS или да не се ползва OS въобще</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="възможни-решения-по-дизайна-на-софтуера">Възможни решения по дизайна на софтуера</h1>
+<p>Често се налага да се правят компромиси, например</p>
+<ul>
+<li>Дали да се ползват числа с плаваща запетя или някои математически операции да бъдат извъшени с целочислена аритметика за сметка на точността</li>
+<li>Дали да се ползва preemptive/non-preemptive OS или да не се ползва OS въобще<br />
+<img src="resources/parallel_concurrent.svg" alt="" /></li>
+</ul>
+</div><div class="slide">
+<h1 id="embedded-ос-с-rust">Embedded ОС с Rust</h1>
+</div><div class="slide subslide">
+<h1 id="embedded-ос-с-rust">Embedded ОС с Rust</h1>
+<p>Типични ОС с Rust: <a href="https://docs.rs/freertos-rust/latest/freertos_rust/" target="_blank">FreeRTOS</a>, <a href="https://rtic.rs/1.0/book/en/" target="_blank">RTIC</a>, <a href="https://www.zephyrproject.org/embedding-rust-into-zephyr-firmware-using-c-bindgen/" target="_blank">Zephyr</a>, <a href="https://www.drone-os.com/" target="_blank">Drone OS</a>, <a href="https://www.windriver.com/products/vxworks" target="_blank">VxWorks</a></p>
+</div><div class="slide subslide">
+<h1 id="embedded-ос-с-rust">Embedded ОС с Rust</h1>
+<p>Типични ОС с Rust: <a href="https://docs.rs/freertos-rust/latest/freertos_rust/" target="_blank">FreeRTOS</a>, <a href="https://rtic.rs/1.0/book/en/" target="_blank">RTIC</a>, <a href="https://www.zephyrproject.org/embedding-rust-into-zephyr-firmware-using-c-bindgen/" target="_blank">Zephyr</a>, <a href="https://www.drone-os.com/" target="_blank">Drone OS</a>, <a href="https://www.windriver.com/products/vxworks" target="_blank">VxWorks</a></p>
+<p>Preemptive scheduling</p>
+<ul>
+<li>Нишки: процесора спира таск, кара го да си запази състоянието и сменя на друг.</li>
+<li>Методи: Round Robin, Shortest Remaining Time First</li>
+<li>Предимства на preemptive scheduling: flexible, on demand(interrupt), better response time</li>
+<li>Недостатъци: висок overhead, по-трудна за доказване коректност (препълване на стека)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="embedded-ос-с-rust">Embedded ОС с Rust</h1>
+<p>Типични ОС с Rust: <a href="https://docs.rs/freertos-rust/latest/freertos_rust/" target="_blank">FreeRTOS</a>, <a href="https://rtic.rs/1.0/book/en/" target="_blank">RTIC</a>, <a href="https://www.zephyrproject.org/embedding-rust-into-zephyr-firmware-using-c-bindgen/" target="_blank">Zephyr</a>, <a href="https://www.drone-os.com/" target="_blank">Drone OS</a>, <a href="https://www.windriver.com/products/vxworks" target="_blank">VxWorks</a></p>
+<p>Preemptive scheduling</p>
+<ul>
+<li>Нишки: процесора спира таск, кара го да си запази състоянието и сменя на друг.</li>
+<li>Методи: Round Robin, Shortest Remaining Time First</li>
+<li>Предимства на preemptive scheduling: flexible, on demand(interrupt), better response time</li>
+<li>Недостатъци: висок overhead, по-трудна за доказване коректност (препълване на стека)</li>
+</ul>
+<p>Non-preemptive (cooperative) scheduling</p>
+<ul>
+<li>Всеки таск решава кога да предаде контрол на друг.</li>
+<li>Методи: First Come First Serve, Priority, Shorted Job First</li>
+<li>Предимства на non-preemptive scheduling: нисък overhead, по-малко ресурси, по-лесна за доказване коректност</li>
+<li>Недостатъци: Ограничена функционалност</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="embedded-ос-с-rust">Embedded ОС с Rust</h1>
+<p>Типични ОС с Rust: <a href="https://docs.rs/freertos-rust/latest/freertos_rust/" target="_blank">FreeRTOS</a>, <a href="https://rtic.rs/1.0/book/en/" target="_blank">RTIC</a>, <a href="https://www.zephyrproject.org/embedding-rust-into-zephyr-firmware-using-c-bindgen/" target="_blank">Zephyr</a>, <a href="https://www.drone-os.com/" target="_blank">Drone OS</a>, <a href="https://www.windriver.com/products/vxworks" target="_blank">VxWorks</a></p>
+<p>Preemptive scheduling</p>
+<ul>
+<li>Нишки: процесора спира таск, кара го да си запази състоянието и сменя на друг.</li>
+<li>Методи: Round Robin, Shortest Remaining Time First</li>
+<li>Предимства на preemptive scheduling: flexible, on demand(interrupt), better response time</li>
+<li>Недостатъци: висок overhead, по-трудна за доказване коректност (препълване на стека)</li>
+</ul>
+<p>Non-preemptive (cooperative) scheduling</p>
+<ul>
+<li>Всеки таск решава кога да предаде контрол на друг.</li>
+<li>Методи: First Come First Serve, Priority, Shorted Job First</li>
+<li>Предимства на non-preemptive scheduling: нисък overhead, по-малко ресурси, по-лесна за доказване коректност</li>
+<li>Недостатъци: Ограничена функционалност</li>
+</ul>
+<p><a href="https://docs.rs/embedded-hal/0.2.3/embedded_hal/watchdog/index.html" target="_blank">WatchDog</a></p>
+</div><div class="slide">
+<h1 id="алгоритмичен-дизайн">Алгоритмичен дизайн</h1>
+</div><div class="slide subslide">
+<h1 id="алгоритмичен-дизайн">Алгоритмичен дизайн</h1>
+<ul>
+<li>Алгоритмите се разделят между аналоговата, цифровата и софтуерната част при дизайна</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="алгоритмичен-дизайн">Алгоритмичен дизайн</h1>
+<ul>
+<li><p>Алгоритмите се разделят между аналоговата, цифровата и софтуерната част при дизайна</p></li>
+<li><p>На софтуерната част винаги се пада честта да коригира грешките на първите две, както и определена контролна част</p></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="алгоритмичен-дизайн">Алгоритмичен дизайн</h1>
+<ul>
+<li><p>Алгоритмите се разделят между аналоговата, цифровата и софтуерната част при дизайна</p></li>
+<li><p>На софтуерната част винаги се пада честта да коригира грешките на първите две, както и определена контролна част</p></li>
+<li><p>Често се предвижда и fallback сценарий, където софтуера изключва/избягва/имплементира определена функционалност</p></li>
+</ul>
+</div><div class="slide">
+<h1 id="rust-в-embedded">Rust в embedded</h1>
+</div><div class="slide subslide">
+<h1 id="rust-в-embedded">Rust в embedded</h1>
+<ul>
+<li>Това което ще се опитаме да покажем е какви предимства дава Rust пред C/C++<br />
+(тоест higher-level concepts и safety guarantees)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="rust-в-embedded">Rust в embedded</h1>
+<ul>
+<li><p>Това което ще се опитаме да покажем е какви предимства дава Rust пред C/C++<br />
+(тоест higher-level concepts и safety guarantees)</p></li>
+<li><p>Documentation and links:<br />
+<a href="https://docs.rust-embedded.org/book/" target="_blank">Embedded Rust</a><br />
+<a href="https://github.com/rust-embedded/awesome-embedded-rust" target="_blank">Awesome Embedded Rust</a><br />
+<a href="https://docs.rust-embedded.org/embedonomicon/preface.html" target="_blank">Embedonomicon</a><br />
+<a href="https://www.youtube.com/results?search_query=Ferrous+Systems" target="_blank">Ferrous Systems GmbH</a></p></li>
+</ul>
+</div><div class="slide">
+<h1 id="some-comments-on-tools">Some comments on tools</h1>
+</div><div class="slide subslide">
+<h1 id="some-comments-on-tools">Some comments on tools</h1>
+<p>Компилатора използва LLVM</p>
+</div><div class="slide subslide">
+<h1 id="some-comments-on-tools">Some comments on tools</h1>
+<p>Компилатора използва LLVM</p>
+<p>(Дис)асемблер: <code>cargo objdump --bin app ...</code></p>
+<p>Необходимо е да сме инсталирали:<br />
+<code>cargo install cargo-binutils</code><br />
+<code>rustup component add llvm-tools-preview</code></p>
+</div><div class="slide subslide">
+<h1 id="some-comments-on-tools">Some comments on tools</h1>
+<p>Компилатора използва LLVM</p>
+<p>(Дис)асемблер: <code>cargo objdump --bin app ...</code></p>
+<p>Необходимо е да сме инсталирали:<br />
+<code>cargo install cargo-binutils</code><br />
+<code>rustup component add llvm-tools-preview</code></p>
+<p>Емулатор (<a href="https://docs.rust-embedded.org/book/start/qemu.html" target="_blank">QEMU</a>): for Cortex-M3<br />
+<code>qemu-system-arm -cpu cortex-m3 -machine lm3s6965evb ... -kernel hello_world</code><br />
+<a href="https://lib.rs/emulators" target="_blank">Emulator crates</a></p>
+</div><div class="slide subslide">
+<h1 id="some-comments-on-tools">Some comments on tools</h1>
+<p>Компилатора използва LLVM</p>
+<p>(Дис)асемблер: <code>cargo objdump --bin app ...</code></p>
+<p>Необходимо е да сме инсталирали:<br />
+<code>cargo install cargo-binutils</code><br />
+<code>rustup component add llvm-tools-preview</code></p>
+<p>Емулатор (<a href="https://docs.rust-embedded.org/book/start/qemu.html" target="_blank">QEMU</a>): for Cortex-M3<br />
+<code>qemu-system-arm -cpu cortex-m3 -machine lm3s6965evb ... -kernel hello_world</code><br />
+<a href="https://lib.rs/emulators" target="_blank">Emulator crates</a></p>
+<p>OpenOCD е програма на host-a и превежда от GDB TCP/IP remote debug protocol и USB протокола. Допълнително<br />
+комуникира с memory-mapped registers за четене/писане и спиране на CPU-то от debug event.</p>
+</div><div class="slide">
+<h1 id="environment">Environment</h1>
+</div><div class="slide subslide">
+<h1 id="environment">Environment</h1>
+<p><a href="https://doc.rust-lang.org/stable/rustc/platform-support.html#tier-2" target="_blank">Supported platforms</a></p>
+</div><div class="slide subslide">
+<h1 id="environment">Environment</h1>
+<p><a href="https://doc.rust-lang.org/stable/rustc/platform-support.html#tier-2" target="_blank">Supported platforms</a><br />
+A no_std Rust Environment</p>
+</div><div class="slide subslide">
+<h1 id="environment">Environment</h1>
+<p><a href="https://doc.rust-lang.org/stable/rustc/platform-support.html#tier-2" target="_blank">Supported platforms</a><br />
+A no_std Rust Environment</p>
+<ul>
+<li>Hosted Environment</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="environment">Environment</h1>
+<p><a href="https://doc.rust-lang.org/stable/rustc/platform-support.html#tier-2" target="_blank">Supported platforms</a><br />
+A no_std Rust Environment</p>
+<ul>
+<li>Hosted Environment</li>
+<li>Bare Metal Environment <code>#![no_std]</code></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="environment">Environment</h1>
+<p><a href="https://doc.rust-lang.org/stable/rustc/platform-support.html#tier-2" target="_blank">Supported platforms</a><br />
+A no_std Rust Environment</p>
+<ul>
+<li>Hosted Environment</li>
+<li>Bare Metal Environment <code>#![no_std]</code></li>
+<li>При no_std липсват multitasking primitives и не само …</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="environment">Environment</h1>
+<p><a href="https://doc.rust-lang.org/stable/rustc/platform-support.html#tier-2" target="_blank">Supported platforms</a><br />
+A no_std Rust Environment</p>
+<ul>
+<li>Hosted Environment</li>
+<li>Bare Metal Environment <code>#![no_std]</code></li>
+<li>При no_std липсват multitasking primitives и не само …</li>
+<li>Липсва динамична памет. Някои заместители на стандартните структури има в <a href="https://docs.rs/heapless/latest/heapless/" target="_blank">heapless</a> пакета.</li>
+</ul>
+
+                <div class="code-block">
+                    <button type="button" class="btn rustc-copy" data-sha="2027d7438488e4bc0595f7894414ca942a118ce9">Copy</button>
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#!<span class="tshl-punctuation_bracket">[</span>no_std<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> {
+  <span class="tshl-keyword">let</span> a = <span class="tshl-type">Box</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">7</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    <div class="rustc-container">
+                    <pre><div class="rustc hljs"><span style="font-weight:bold;color:rgb(255,85,85)">error[E0433]</span><span style="font-weight:bold">: failed to resolve: use of undeclared type `Box`</span>
+ <span style="font-weight:bold;color:rgb(85,85,255)">--&gt; </span>src/bin/main_2027d7438488e4bc0595f7894414ca942a118ce9.rs:3:11
+  <span style="font-weight:bold;color:rgb(85,85,255)">|</span>
+<span style="font-weight:bold;color:rgb(85,85,255)">3</span> <span style="font-weight:bold;color:rgb(85,85,255)">| </span>  let a = Box::new(7);
+  <span style="font-weight:bold;color:rgb(85,85,255)">| </span>          <span style="font-weight:bold;color:rgb(255,85,85)">^^^</span> <span style="font-weight:bold;color:rgb(255,85,85)">use of undeclared type `Box`</span>
+
+<span style="font-weight:bold">For more information about this error, try `rustc --explain E0433`.</span>
+<span style="font-weight:bold;color:rgb(255,85,85)">error</span><span style="font-weight:bold">:</span> could not compile `rust` due to previous error</div></pre>
+                </div>
+                </div>
+                
+<pre class="rustc-source" data-sha="2027d7438488e4bc0595f7894414ca942a118ce9">#![no_std]
+fn main() {
+  let a = Box::new(7);
+}</pre>
+</div><div class="slide">
+<h1 id="hands-on">Hands on</h1>
+<p><a href="https://braun-embedded.com/workshop/" target="_blank">Based on RustFest 2019</a></p>
+</div><div class="slide subslide">
+<h1 id="hands-on">Hands on</h1>
+<p><a href="https://braun-embedded.com/workshop/" target="_blank">Based on RustFest 2019</a></p>
+<p>Installation on Ubuntu and <a href="https://docs.rust-embedded.org/book/intro/install.html" target="_blank">installation on other platforms</a></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">sudo apt install -y pkg-config libusb-<span class="tshl-constant_builtin">1.0</span>-<span class="tshl-constant_builtin">0</span>-dev libftdi1-dev libudev-dev
+
+cargo install cargo-flash
+
+rustup target add thumbv6m-none-eabi
+
+cargo flash --chip=<span class="tshl-constructor">LPC845M301JBD48</span><span class="tshl-punctuation_delimiter"></span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide subslide">
+<h1 id="hands-on">Hands on</h1>
+<p><a href="https://braun-embedded.com/workshop/" target="_blank">Based on RustFest 2019</a></p>
+<p>Installation on Ubuntu and <a href="https://docs.rust-embedded.org/book/intro/install.html" target="_blank">installation on other platforms</a></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">sudo apt install -y pkg-config libusb-<span class="tshl-constant_builtin">1.0</span>-<span class="tshl-constant_builtin">0</span>-dev libftdi1-dev libudev-dev
+
+cargo install cargo-flash
+
+rustup target add thumbv6m-none-eabi
+
+cargo flash --chip=<span class="tshl-constructor">LPC845M301JBD48</span><span class="tshl-punctuation_delimiter"></span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<blockquote>
+  <blockquote>
+    <p>Error Failed to open the debug probe.</p>
+  </blockquote>
+</blockquote>
+</div><div class="slide subslide">
+<h1 id="hands-on">Hands on</h1>
+<p><a href="https://braun-embedded.com/workshop/" target="_blank">Based on RustFest 2019</a></p>
+<p>Installation on Ubuntu and <a href="https://docs.rust-embedded.org/book/intro/install.html" target="_blank">installation on other platforms</a></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">sudo apt install -y pkg-config libusb-<span class="tshl-constant_builtin">1.0</span>-<span class="tshl-constant_builtin">0</span>-dev libftdi1-dev libudev-dev
+
+cargo install cargo-flash
+
+rustup target add thumbv6m-none-eabi
+
+cargo flash --chip=<span class="tshl-constructor">LPC845M301JBD48</span><span class="tshl-punctuation_delimiter"></span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<blockquote>
+  <blockquote>
+    <p>Error Failed to open the debug probe.<br />
+    <a href="https://github.com/knurling-rs/probe-run" target="_blank">https://github.com/knurling-rs/probe-run</a></p>
+  </blockquote>
+</blockquote>
+</div><div class="slide subslide">
+<h1 id="hands-on">Hands on</h1>
+<p><a href="https://braun-embedded.com/workshop/" target="_blank">Based on RustFest 2019</a></p>
+<p>Installation on Ubuntu and <a href="https://docs.rust-embedded.org/book/intro/install.html" target="_blank">installation on other platforms</a></p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">sudo apt install -y pkg-config libusb-<span class="tshl-constant_builtin">1.0</span>-<span class="tshl-constant_builtin">0</span>-dev libftdi1-dev libudev-dev
+
+cargo install cargo-flash
+
+rustup target add thumbv6m-none-eabi
+
+cargo flash --chip=<span class="tshl-constructor">LPC845M301JBD48</span><span class="tshl-punctuation_delimiter"></span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<blockquote>
+  <blockquote>
+    <p>Error Failed to open the debug probe.<br />
+    <a href="https://github.com/knurling-rs/probe-run" target="_blank">https://github.com/knurling-rs/probe-run</a></p>
+  </blockquote>
+</blockquote>
+</div><div class="slide">
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">sudo apt-get install openocd
+
+sudo cp /usr/lib/udev/rules<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">d</span>/<span class="tshl-constant_builtin">60</span>-openocd<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">rules</span> /etc/udev/rules<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">d</span>/</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Remove  GROUP="plugdev" in /etc/udev/rules.d/60-openocd.rules</p>
+</div><div class="slide subslide">
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">sudo apt-get install openocd
+
+sudo cp /usr/lib/udev/rules<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">d</span>/<span class="tshl-constant_builtin">60</span>-openocd<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">rules</span> /etc/udev/rules<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">d</span>/</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Remove  GROUP="plugdev" in /etc/udev/rules.d/60-openocd.rules</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">sudo udevadm control –reload
+
+sudo udevadm trigger</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="memory">Memory</h1>
+<p>Memory and all limitations are described in <code>*.x</code> files. Example <code>memory.x</code>:</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-type">MEMORY</span>
+{
+<span class="tshl-property">FLASH</span> : <span class="tshl-constructor">ORIGIN</span> = <span class="tshl-constant_builtin">0x00000000</span>, <span class="tshl-constructor">LENGTH</span> = <span class="tshl-constant_builtin">64</span><span class="tshl-constructor">K</span>
+<span class="tshl-constructor">RAM</span>   : <span class="tshl-constructor">ORIGIN</span> = <span class="tshl-constant_builtin">0x10000000</span>, <span class="tshl-constructor">LENGTH</span> = <span class="tshl-constant_builtin">16</span><span class="tshl-constructor">K</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="code">Code:</h1>
+</div><div class="slide subslide">
+<h1 id="code">Code:</h1>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#!<span class="tshl-punctuation_bracket">[</span>no_main<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-attribute">#!<span class="tshl-punctuation_bracket">[</span>no_std<span class="tshl-punctuation_bracket">]</span></span>
+
+<span class="tshl-keyword">extern</span> crate panic_halt<span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">use</span> lpc8xx_hal<span class="tshl-punctuation_delimiter">::</span>{cortex_m_rt<span class="tshl-punctuation_delimiter">::</span>entry, <span class="tshl-constructor">CorePeripherals</span>, delay<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Delay</span>}<span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-keyword">use</span> lpc8xx_hal<span class="tshl-punctuation_delimiter">::</span>embedded_hal<span class="tshl-punctuation_delimiter">::</span>blocking<span class="tshl-punctuation_delimiter">::</span>delay<span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">DelayMs</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Защо трябва да се инсталира специален panic handler с <code>panic_halt</code>? Стандартната паника печата неща на екрана -- на платката, която ползвате, сигурно няма екран, или ако има, не е ясно какво значи "печатане".</p>
+</div><div class="slide">
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>entry<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; ! {
+    <span class="tshl-keyword">let</span> p = lpc8xx_hal<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Peripherals</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">take</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> cp = <span class="tshl-type">CorePeripherals</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">take</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> syscon = p<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">SYSCON</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">split</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> gpio = p<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">GPIO</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">enable</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> syscon<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">handle</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> led = p<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">pins</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">pio1_1</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">into_output_pin</span><span class="tshl-punctuation_bracket">(</span>gpio<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">tokens</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">pio1_1</span>,
+                                                lpc8xx_hal<span class="tshl-punctuation_delimiter">::</span>gpio<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Level</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">High</span>,<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> delay = <span class="tshl-type">Delay</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span>cp<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">SYST</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">loop</span> {
+        delay<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">delay_ms</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2_000u32</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        led<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">set_high</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        delay<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">delay_ms</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2_000u32</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        led<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">set_low</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide subslide">
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-attribute">#<span class="tshl-punctuation_bracket">[</span>entry<span class="tshl-punctuation_bracket">]</span></span>
+<span class="tshl-keyword">fn</span> <span class="tshl-function">main</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span> -&gt; ! {
+    <span class="tshl-keyword">let</span> p = lpc8xx_hal<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Peripherals</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">take</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> cp = <span class="tshl-type">CorePeripherals</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">take</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">unwrap</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> syscon = p<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">SYSCON</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">split</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> gpio = p<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">GPIO</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">enable</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-operator">&amp;</span><span class="tshl-keyword">mut</span> syscon<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">handle</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> led = p<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">pins</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">pio1_1</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">into_output_pin</span><span class="tshl-punctuation_bracket">(</span>gpio<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">tokens</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">pio1_1</span>,
+                                                lpc8xx_hal<span class="tshl-punctuation_delimiter">::</span>gpio<span class="tshl-punctuation_delimiter">::</span><span class="tshl-type">Level</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">High</span>,<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">let</span> <span class="tshl-keyword">mut</span> delay = <span class="tshl-type">Delay</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span>cp<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">SYST</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    <span class="tshl-keyword">loop</span> {
+        delay<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">delay_ms</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2_000u32</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        led<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">set_high</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        delay<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">delay_ms</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">2_000u32</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+        led<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">set_low</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+    }
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+</div>
+                        <pre><code>cargo flash --chip=LPC845M301JBD48</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="few-words--on-panicking">Few words  on panicking</h1>
+</div><div class="slide subslide">
+<h1 id="few-words--on-panicking">Few words  on panicking</h1>
+<ul>
+<li><code>panic-abort</code>: A panic causes the abort instruction to be executed.</li>
+<li><code>panic-halt</code>: A panic causes the program, or the current thread, to halt by entering an infinite loop.</li>
+<li><code>panic-itm</code>: The panicking message is logged using the ITM, an ARM Cortex-M specific peripheral.</li>
+<li><code>panic-semihosting</code>: The panicking message is logged to the host using the semihosting technique.</li>
+</ul>
+</div><div class="slide">
+<h1 id="процес-на-develop-ване-за-embedded">Процес на develop-ване за embedded</h1>
+<p><a href="https://www.youtube.com/watch?v=vLYit_HHPaY" target="_blank">Embedded Rust Ecosystem</a></p>
+</div><div class="slide subslide">
+<h1 id="процес-на-develop-ване-за-embedded">Процес на develop-ване за embedded</h1>
+<p><a href="https://www.youtube.com/watch?v=vLYit_HHPaY" target="_blank">Embedded Rust Ecosystem</a></p>
+<p>Process: Power up the GPIO Peripherals, configure pin as output, set output to high/low</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">unsafe</span> {
+    <span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">GPIOC_START</span> + <span class="tshl-constructor">CHR_OFFSET</span><span class="tshl-punctuation_bracket">)</span> <span class="tshl-operator">as</span> <span class="tshl-operator">*</span><span class="tshl-keyword">mut</span> <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> = <span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">OUTPUT_MODE</span> &lt;&lt; <span class="tshl-constant_builtin">20</span><span class="tshl-punctuation_bracket">)</span> | <span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">PUSH_PULL</span> &lt;&lt; <span class="tshl-constant_builtin">22</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide subslide">
+<h1 id="процес-на-develop-ване-за-embedded">Процес на develop-ване за embedded</h1>
+<p><a href="https://www.youtube.com/watch?v=vLYit_HHPaY" target="_blank">Embedded Rust Ecosystem</a></p>
+<p>Process: Power up the GPIO Peripherals, configure pin as output, set output to high/low</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">unsafe</span> {
+    <span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">GPIOC_START</span> + <span class="tshl-constructor">CHR_OFFSET</span><span class="tshl-punctuation_bracket">)</span> <span class="tshl-operator">as</span> <span class="tshl-operator">*</span><span class="tshl-keyword">mut</span> <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> = <span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">OUTPUT_MODE</span> &lt;&lt; <span class="tshl-constant_builtin">20</span><span class="tshl-punctuation_bracket">)</span> | <span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">PUSH_PULL</span> &lt;&lt; <span class="tshl-constant_builtin">22</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>svd files -&gt; svd2rust generates rust crates =&gt; PAC(Peripherial Access Crates)</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">dp<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">GPIOC</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">crh</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">modify</span><span class="tshl-punctuation_bracket">(</span>|_r, w| {
+        w<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">mode13</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">output</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">cnf13</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">push_pull</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+dp<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">GPIOC</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">odr</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">modify</span><span class="tshl-punctuation_bracket">(</span>|_r, w| {
+        w<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">odr13</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">high</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide subslide">
+<h1 id="процес-на-develop-ване-за-embedded">Процес на develop-ване за embedded</h1>
+<p><a href="https://www.youtube.com/watch?v=vLYit_HHPaY" target="_blank">Embedded Rust Ecosystem</a></p>
+<p>Process: Power up the GPIO Peripherals, configure pin as output, set output to high/low</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">unsafe</span> {
+    <span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">GPIOC_START</span> + <span class="tshl-constructor">CHR_OFFSET</span><span class="tshl-punctuation_bracket">)</span> <span class="tshl-operator">as</span> <span class="tshl-operator">*</span><span class="tshl-keyword">mut</span> <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> = <span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">OUTPUT_MODE</span> &lt;&lt; <span class="tshl-constant_builtin">20</span><span class="tshl-punctuation_bracket">)</span> | <span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">PUSH_PULL</span> &lt;&lt; <span class="tshl-constant_builtin">22</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>svd files -&gt; svd2rust generates rust crates =&gt; PAC(Peripherial Access Crates)</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">dp<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">GPIOC</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">crh</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">modify</span><span class="tshl-punctuation_bracket">(</span>|_r, w| {
+        w<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">mode13</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">output</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">cnf13</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">push_pull</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+dp<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">GPIOC</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">odr</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">modify</span><span class="tshl-punctuation_bracket">(</span>|_r, w| {
+        w<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">odr13</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">high</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Zero cost abstraction (in release mode), mostly safe</p>
+</div><div class="slide subslide">
+<h1 id="процес-на-develop-ване-за-embedded">Процес на develop-ване за embedded</h1>
+<p><a href="https://www.youtube.com/watch?v=vLYit_HHPaY" target="_blank">Embedded Rust Ecosystem</a></p>
+<p>Process: Power up the GPIO Peripherals, configure pin as output, set output to high/low</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">unsafe</span> {
+    <span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">GPIOC_START</span> + <span class="tshl-constructor">CHR_OFFSET</span><span class="tshl-punctuation_bracket">)</span> <span class="tshl-operator">as</span> <span class="tshl-operator">*</span><span class="tshl-keyword">mut</span> <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> = <span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">OUTPUT_MODE</span> &lt;&lt; <span class="tshl-constant_builtin">20</span><span class="tshl-punctuation_bracket">)</span> | <span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">PUSH_PULL</span> &lt;&lt; <span class="tshl-constant_builtin">22</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>svd files -&gt; svd2rust generates rust crates =&gt; PAC(Peripherial Access Crates)</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">dp<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">GPIOC</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">crh</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">modify</span><span class="tshl-punctuation_bracket">(</span>|_r, w| {
+        w<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">mode13</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">output</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">cnf13</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">push_pull</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+dp<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">GPIOC</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">odr</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">modify</span><span class="tshl-punctuation_bracket">(</span>|_r, w| {
+        w<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">odr13</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">high</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Zero cost abstraction (in release mode), mostly safe<br />
+No check for peripheral dependencies and correct initialization</p>
+</div><div class="slide subslide">
+<h1 id="процес-на-develop-ване-за-embedded">Процес на develop-ване за embedded</h1>
+<p><a href="https://www.youtube.com/watch?v=vLYit_HHPaY" target="_blank">Embedded Rust Ecosystem</a></p>
+<p>Process: Power up the GPIO Peripherals, configure pin as output, set output to high/low</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs"><span class="tshl-keyword">unsafe</span> {
+    <span class="tshl-operator">*</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">GPIOC_START</span> + <span class="tshl-constructor">CHR_OFFSET</span><span class="tshl-punctuation_bracket">)</span> <span class="tshl-operator">as</span> <span class="tshl-operator">*</span><span class="tshl-keyword">mut</span> <span class="tshl-type_builtin">u32</span><span class="tshl-punctuation_bracket">)</span> = <span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">OUTPUT_MODE</span> &lt;&lt; <span class="tshl-constant_builtin">20</span><span class="tshl-punctuation_bracket">)</span> | <span class="tshl-punctuation_bracket">(</span><span class="tshl-constructor">PUSH_PULL</span> &lt;&lt; <span class="tshl-constant_builtin">22</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+}</code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>svd files -&gt; svd2rust generates rust crates =&gt; PAC(Peripherial Access Crates)</p>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">dp<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">GPIOC</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">crh</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">modify</span><span class="tshl-punctuation_bracket">(</span>|_r, w| {
+        w<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">mode13</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">output</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">cnf13</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">push_pull</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+dp<span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">GPIOC</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-property">odr</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">modify</span><span class="tshl-punctuation_bracket">(</span>|_r, w| {
+        w<span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">odr13</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">high</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-punctuation_bracket">)</span>
+}<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+<p>Zero cost abstraction (in release mode), mostly safe<br />
+No check for peripheral dependencies and correct initialization</p>
+<p>HALs - higher level interface around PAC</p>
+</div><div class="slide">
+<h1 id="embedded-hal-bsp-crates">Embedded-hal, BSP, Crates</h1>
+<p><a href="https://docs.rust-embedded.org/book/portability/index.html" target="_blank">Embedded-hal</a></p>
+<p>Rust has a common set of traits for building hardware abstraction layers: the embedded-hal crate. Includes GPIO,<br />
+timers, I2C, UART, etc…</p>
+</div><div class="slide subslide">
+<h1 id="embedded-hal-bsp-crates">Embedded-hal, BSP, Crates</h1>
+<p><a href="https://docs.rust-embedded.org/book/portability/index.html" target="_blank">Embedded-hal</a></p>
+<p>Rust has a common set of traits for building hardware abstraction layers: the embedded-hal crate. Includes GPIO,<br />
+timers, I2C, UART, etc…<br />
+BSC: Board Support Crates</p>
+</div><div class="slide subslide">
+<h1 id="embedded-hal-bsp-crates">Embedded-hal, BSP, Crates</h1>
+<p><a href="https://docs.rust-embedded.org/book/portability/index.html" target="_blank">Embedded-hal</a></p>
+<p>Rust has a common set of traits for building hardware abstraction layers: the embedded-hal crate. Includes GPIO,<br />
+timers, I2C, UART, etc…<br />
+BSC: Board Support Crates<br />
+<a href="https://www.youtube.com/watch?v=saNdh0m_qHc&ab_channel=FerrousSystemsGmbH" target="_blank">RTIC</a>: Real Time Interrupt Driven Concurrency (previoiusly known as RTFM)</p>
+</div><div class="slide subslide">
+<h1 id="embedded-hal-bsp-crates">Embedded-hal, BSP, Crates</h1>
+<p><a href="https://docs.rust-embedded.org/book/portability/index.html" target="_blank">Embedded-hal</a></p>
+<p>Rust has a common set of traits for building hardware abstraction layers: the embedded-hal crate. Includes GPIO,<br />
+timers, I2C, UART, etc…<br />
+BSC: Board Support Crates<br />
+<a href="https://www.youtube.com/watch?v=saNdh0m_qHc&ab_channel=FerrousSystemsGmbH" target="_blank">RTIC</a>: Real Time Interrupt Driven Concurrency (previoiusly known as RTFM)<br />
+cortex-x crates: core peripherals, minimal runtime, debugging</p>
+</div><div class="slide subslide">
+<h1 id="embedded-hal-bsp-crates">Embedded-hal, BSP, Crates</h1>
+<p><a href="https://docs.rust-embedded.org/book/portability/index.html" target="_blank">Embedded-hal</a></p>
+<p>Rust has a common set of traits for building hardware abstraction layers: the embedded-hal crate. Includes GPIO,<br />
+timers, I2C, UART, etc…<br />
+BSC: Board Support Crates<br />
+<a href="https://www.youtube.com/watch?v=saNdh0m_qHc&ab_channel=FerrousSystemsGmbH" target="_blank">RTIC</a>: Real Time Interrupt Driven Concurrency (previoiusly known as RTFM)<br />
+cortex-x crates: core peripherals, minimal runtime, debugging</p>
+<p><img src="resources/embedded_hal_bsp_structure.svg" style="width:800px;"/></p>
+</div><div class="slide">
+<h1 id="concurrency">Concurrency</h1>
+</div><div class="slide subslide">
+<h1 id="concurrency">Concurrency</h1>
+<ul>
+<li>често се налага да дефинираме <code>static mut</code> , опирациите към него са <code>unsafe</code>.</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="concurrency">Concurrency</h1>
+<ul>
+<li>често се налага да дефинираме <code>static mut</code> , опирациите към него са <code>unsafe</code>.</li>
+<li>възможни подходи: забрана на прекъсвания при работа с такава променлива или използване на <code>atomics</code></li>
+</ul>
+
+                <div class="code-block">
+                    
+                    <div class="code-container">
+                        <div class="line-numbers hljs"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</div>
+                        <pre><code class="rustrust language-rust hljs">cortex_m<span class="tshl-punctuation_delimiter">::</span>interrupt<span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">free</span><span class="tshl-punctuation_bracket">(</span>|_| {
+    <span class="tshl-keyword">unsafe</span> { <span class="tshl-constructor">COUNTER</span> += <span class="tshl-constant_builtin">1</span> }<span class="tshl-punctuation_delimiter">;</span>
+}<span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+
+<span class="tshl-keyword">static</span> <span class="tshl-constructor">COUNTER</span>: <span class="tshl-type">AtomicUsize</span> = <span class="tshl-type">AtomicUsize</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-function">new</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">0</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span>
+<span class="tshl-comment">//...</span>
+<span class="tshl-constructor">COUNTER</span><span class="tshl-punctuation_delimiter">.</span><span class="tshl-function_method">fetch_add</span><span class="tshl-punctuation_bracket">(</span><span class="tshl-constant_builtin">1</span>, <span class="tshl-type">Ordering</span><span class="tshl-punctuation_delimiter">::</span><span class="tshl-constructor">Relaxed</span><span class="tshl-punctuation_bracket">)</span><span class="tshl-punctuation_delimiter">;</span></code></pre>
+                    </div>
+                    
+                </div>
+                
+</div><div class="slide">
+<h1 id="asyncawait">Async/await</h1>
+</div><div class="slide subslide">
+<h1 id="asyncawait">Async/await</h1>
+<ul>
+<li><a href="https://github.com/ferrous-systems/async-on-embedded" target="_blank">Ferious</a></li>
+<li><a href="https://ferrous-systems.com/blog/async-on-embedded/#multitasking" target="_blank">Blog</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="asyncawait">Async/await</h1>
+<ul>
+<li><a href="https://github.com/ferrous-systems/async-on-embedded" target="_blank">Ferious</a></li>
+<li><a href="https://ferrous-systems.com/blog/async-on-embedded/#multitasking" target="_blank">Blog</a></li>
+<li><a href="https://github.com/embassy-rs/embassy" target="_blank">Embassy Project</a></li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="asyncawait">Async/await</h1>
+<ul>
+<li><a href="https://github.com/ferrous-systems/async-on-embedded" target="_blank">Ferious</a></li>
+<li><a href="https://ferrous-systems.com/blog/async-on-embedded/#multitasking" target="_blank">Blog</a></li>
+<li><a href="https://github.com/embassy-rs/embassy" target="_blank">Embassy Project</a></li>
+<li><a href="https://blog.drogue.io/rust-and-async/" target="_blank">More studies</a></li>
+</ul>
+</div><div class="slide">
+<h1 id="i2c">I2C</h1>
+<p><a href="https://www.infineon.com/dgdl/Infineon-Component_I2C_V3.0-Software+Module+Datasheets-v03_05-EN.pdf?fileId=8ac78c8c7d0d8da4017d0e952b3f1fbe" target="_blank">Definition</a>, Master-Slave, 2 lines, developed by Philips</p>
+<p><img src="https://cdn.sparkfun.com/assets/learn_tutorials/8/2/I2C-Block-Diagram.jpg" alt="I2C diagram" style="width:900px;"/></p>
+</div><div class="slide subslide">
+<h1 id="i2c">I2C</h1>
+<p><a href="https://www.infineon.com/dgdl/Infineon-Component_I2C_V3.0-Software+Module+Datasheets-v03_05-EN.pdf?fileId=8ac78c8c7d0d8da4017d0e952b3f1fbe" target="_blank">Definition</a>, Master-Slave, 2 lines, developed by Philips</p>
+<p><img src="https://cdn.sparkfun.com/assets/learn_tutorials/8/2/I2C-Block-Diagram.jpg" alt="I2C diagram" style="width:900px;"/><br />
+<a href="https://ferrous-systems.com/blog/async-on-embedded/#i2c" target="_blank">Ferrous</a></p>
+</div><div class="slide">
+<h1 id="ползи-от-rust">Ползи от Rust</h1>
+</div><div class="slide subslide">
+<h1 id="ползи-от-rust">Ползи от Rust</h1>
+<ul>
+<li>Изграждане на системи от embedded до cloud на един език</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="ползи-от-rust">Ползи от Rust</h1>
+<ul>
+<li>Изграждане на системи от embedded до cloud на един език</li>
+<li>Safety (typesafe, strong types, correct composition)</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="ползи-от-rust">Ползи от Rust</h1>
+<ul>
+<li>Изграждане на системи от embedded до cloud на един език</li>
+<li>Safety (typesafe, strong types, correct composition)</li>
+<li>Peripherals as state machine</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="ползи-от-rust">Ползи от Rust</h1>
+<ul>
+<li>Изграждане на системи от embedded до cloud на един език</li>
+<li>Safety (typesafe, strong types, correct composition)</li>
+<li>Peripherals as state machine</li>
+<li>Design contracts</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="ползи-от-rust">Ползи от Rust</h1>
+<ul>
+<li>Изграждане на системи от embedded до cloud на един език</li>
+<li>Safety (typesafe, strong types, correct composition)</li>
+<li>Peripherals as state machine</li>
+<li>Design contracts</li>
+<li>Zero cost abstraction</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="ползи-от-rust">Ползи от Rust</h1>
+<ul>
+<li>Изграждане на системи от embedded до cloud на един език</li>
+<li>Safety (typesafe, strong types, correct composition)</li>
+<li>Peripherals as state machine</li>
+<li>Design contracts</li>
+<li>Zero cost abstraction</li>
+<li>Async/Await</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="ползи-от-rust">Ползи от Rust</h1>
+<ul>
+<li>Изграждане на системи от embedded до cloud на един език</li>
+<li>Safety (typesafe, strong types, correct composition)</li>
+<li>Peripherals as state machine</li>
+<li>Design contracts</li>
+<li>Zero cost abstraction</li>
+<li>Async/Await</li>
+<li>Cargo could be universal for different targets</li>
+</ul>
+</div><div class="slide subslide">
+<h1 id="ползи-от-rust">Ползи от Rust</h1>
+<ul>
+<li>Изграждане на системи от embedded до cloud на един език</li>
+<li>Safety (typesafe, strong types, correct composition)</li>
+<li>Peripherals as state machine</li>
+<li>Design contracts</li>
+<li>Zero cost abstraction</li>
+<li>Async/Await</li>
+<li>Cargo could be universal for different targets</li>
+<li>Много analyzer-и на C/C++ струват доста скъпо за да се постигне сравнимо качество</li>
+</ul>
+</div><div class="slide">
+
+</div><div class="slide">
+<h1 id="въпроси">Въпроси</h1>
+</div>
+    </main>
+</body>
+</html>
